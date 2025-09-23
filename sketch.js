@@ -22,30 +22,31 @@
   let lastSpeed = 0;
   let currentWidth = strokeWidth;
 
-  // Resize with devicePixelRatio for crisp lines, avoid Safari RO loops
+  // Simplified resize for Safari compatibility
   function resizeCanvas() {
     const dpr = Math.max(1, window.devicePixelRatio || 1);
     const rect = canvas.getBoundingClientRect();
-    const cssWidth = Math.floor(rect.width || canvas.parentElement.clientWidth || 640);
-    const cssHeight = Math.floor(rect.height || parseFloat(getComputedStyle(canvas).height) || 420);
+    const cssWidth = Math.floor(rect.width);
+    const cssHeight = Math.floor(rect.height);
 
     if (cssWidth === lastCssWidth && cssHeight === lastCssHeight && dpr === lastDpr) {
-      return; // nothing to do
+      return;
     }
 
     lastCssWidth = cssWidth;
     lastCssHeight = cssHeight;
     lastDpr = dpr;
 
-    const pixelWidth = Math.max(1, Math.floor(cssWidth * dpr));
-    const pixelHeight = Math.max(1, Math.floor(cssHeight * dpr));
-
-    if (canvas.width !== pixelWidth) canvas.width = pixelWidth;
-    if (canvas.height !== pixelHeight) canvas.height = pixelHeight;
+    // Set canvas internal size (for drawing)
+    canvas.width = cssWidth * dpr;
+    canvas.height = cssHeight * dpr;
+    
+    // Set CSS size (for display)
     canvas.style.width = cssWidth + 'px';
     canvas.style.height = cssHeight + 'px';
 
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // Scale context for crisp lines
+    ctx.scale(dpr, dpr);
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
   }
@@ -101,46 +102,51 @@
     isDrawing = false;
   }
 
-  // Pointer events
-  canvas.addEventListener('pointerdown', (e) => {
+  // Safari-compatible event handling
+  function handleStart(e) {
     e.preventDefault();
-    canvas.setPointerCapture(e.pointerId);
+    e.stopPropagation();
     const { x, y } = getPos(e);
-    const pressure = typeof e.pressure === 'number' && e.pressure > 0 ? e.pressure : 0.5;
+    const pressure = (e.pressure && e.pressure > 0) ? e.pressure : 0.5;
     startDraw(x, y, pressure, e.timeStamp || performance.now());
-    // draw a dot immediately on press
     drawTo(x + 0.01, y + 0.01, pressure, e.timeStamp || performance.now());
-  });
+  }
 
-  canvas.addEventListener('pointermove', (e) => {
+  function handleMove(e) {
     if (!isDrawing) return;
     e.preventDefault();
+    e.stopPropagation();
     const { x, y } = getPos(e);
-    const pressure = typeof e.pressure === 'number' && e.pressure > 0 ? e.pressure : 0.5;
+    const pressure = (e.pressure && e.pressure > 0) ? e.pressure : 0.5;
     drawTo(x, y, pressure, e.timeStamp || performance.now());
-  });
+  }
 
-  canvas.addEventListener('pointerup', endDraw);
-  canvas.addEventListener('pointercancel', endDraw);
-  canvas.addEventListener('pointerleave', endDraw);
+  function handleEnd(e) {
+    e.preventDefault();
+    endDraw();
+  }
 
-  // End drawing if pointer released anywhere
-  window.addEventListener('pointerup', endDraw);
+  // Primary events (pointer for modern browsers)
+  canvas.addEventListener('pointerdown', handleStart);
+  canvas.addEventListener('pointermove', handleMove);
+  canvas.addEventListener('pointerup', handleEnd);
+  canvas.addEventListener('pointercancel', handleEnd);
+  canvas.addEventListener('pointerleave', handleEnd);
 
-  // Mouse fallbacks (older browsers or if pointer events disabled)
-  canvas.addEventListener('mousedown', (e) => {
-    const { x, y } = getPos(e);
-    startDraw(x, y, 0.5, e.timeStamp || performance.now());
-    drawTo(x + 0.01, y + 0.01, 0.5, e.timeStamp || performance.now());
-  });
-  window.addEventListener('mousemove', (e) => {
-    const { x, y } = getPos(e);
-    drawTo(x, y, 0.5, e.timeStamp || performance.now());
-  });
-  window.addEventListener('mouseup', endDraw);
+  // Mouse fallback (for Safari and older browsers)
+  canvas.addEventListener('mousedown', handleStart);
+  canvas.addEventListener('mousemove', handleMove);
+  canvas.addEventListener('mouseup', handleEnd);
+  canvas.addEventListener('mouseleave', handleEnd);
 
-  // Prevent context menu interfering
+  // Touch fallback
+  canvas.addEventListener('touchstart', handleStart);
+  canvas.addEventListener('touchmove', handleMove);
+  canvas.addEventListener('touchend', handleEnd);
+
+  // Prevent context menu and scrolling
   canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+  canvas.addEventListener('selectstart', (e) => e.preventDefault());
 
   // Controls
   if (colorInput) {
@@ -167,25 +173,18 @@
     });
   }
 
-  // Resize handling (debounced to avoid RO loops in Safari)
-  let roPending = false;
-  const ro = new ResizeObserver(() => {
-    if (roPending) return;
-    roPending = true;
-    requestAnimationFrame(() => {
-      roPending = false;
-      resizeCanvas();
-    });
-  });
-  const observeTarget = canvas.parentElement || document.body;
-  ro.observe(observeTarget);
-  window.addEventListener('orientationchange', () => requestAnimationFrame(resizeCanvas));
-  window.addEventListener('resize', () => requestAnimationFrame(resizeCanvas));
-  // React to DPR changes (Safari on zoom/fullscreen)
-  if (window.matchMedia) {
-    try {
-      window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`).addEventListener('change', resizeCanvas);
-    } catch (_) { /* no-op */ }
+  // Simple resize handling for Safari
+  function handleResize() {
+    setTimeout(resizeCanvas, 100); // Small delay for Safari
+  }
+  
+  window.addEventListener('resize', handleResize);
+  window.addEventListener('orientationchange', handleResize);
+  
+  // Use ResizeObserver if available, fallback to window events
+  if (window.ResizeObserver) {
+    const ro = new ResizeObserver(handleResize);
+    ro.observe(canvas.parentElement);
   }
 
   // Init
