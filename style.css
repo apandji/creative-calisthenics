@@ -1,0 +1,193 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap');
+/* Base variables */
+:root {
+  --bg: #f3f3f3;
+  --text: #1a1a1a;
+  --muted: #525968;
+  --accent: #000000;
+  --border: #e5e7eb;
+  --radius: 12px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b0b0c;
+    --text: #f3f4f6;
+    --muted: #9ca3af;
+    --accent: #38bdf8;
+    --border: #1f2937;
+  }
+}
+
+/* Reset & layout */
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: 'Source Serif 4', ui-serif, Georgia, "Times New Roman", Times, serif;
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--bg);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Content width and rhythm */
+body > * {
+  max-width: 72ch;
+  padding-left: 24px;
+  padding-right: 24px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Header & nav */
+header {
+  position: sticky;
+  top: 0;
+  backdrop-filter: saturate(1.2) blur(8px);
+  background: color-mix(in oklab, var(--bg) 88%, transparent);
+  border-bottom: 1px solid var(--border);
+  z-index: 10;
+}
+
+nav { padding: 12px 0; }
+nav ul {
+  display: flex;
+  gap: 20px;
+  list-style: none;
+  margin: 0;
+  padding: 8px 0;
+}
+nav a {
+  color: var(--text);
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background 160ms ease, color 160ms ease, transform 120ms ease;
+  font-weight: 500;
+  border: 1px solid var(--border);
+}
+nav a:hover {
+  background: color-mix(in oklab, var(--accent) 12%, transparent);
+}
+nav a:active { transform: translateY(1px); }
+
+/* Typography */
+h1 {
+  margin: 32px auto 12px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  font-size: clamp(1.75rem, 2vw + 1rem, 3rem);
+}
+
+p {
+  margin: 0 auto 24px;
+  color: var(--muted);
+  font-size: clamp(1rem, 0.4vw + 0.9rem, 1.125rem);
+}
+
+/* Utilities */
+.container {
+  max-width: 1100px;
+  padding-left: 24px;
+  padding-right: 24px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.section { padding: 32px 0; }
+
+/* Nice focus styles */
+:where(a, button, [tabindex]) {
+  outline: none;
+}
+:where(a, button, [tabindex]):focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 40%, transparent);
+  border-radius: 10px;
+}
+
+
+/* Small screens */
+@media (max-width: 640px) {
+  nav ul { flex-wrap: wrap; gap: 12px; }
+  nav a { padding: 6px 10px; }
+  h1 { margin-top: 24px; }
+}
+
+/* Sketch */
+.sketch { padding-top: 16px; }
+.toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 0;
+}
+.toolbar label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+}
+.toolbar input[type="color"] {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+}
+.toolbar input[type="range"] { width: 140px; }
+.toolbar button {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  border-radius: 10px;
+  cursor: pointer;
+}
+.toolbar button:hover {
+  background: color-mix(in oklab, var(--accent) 8%, transparent);
+}
+.canvas-wrap {
+  margin-top: 8px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f3f3f3;
+}
+
+/* Make the drawing area full-bleed across the viewport */
+.sketch .canvas-wrap {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  border-left: 0;
+  border-right: 0;
+  border-radius: 0;
+}
+
+#canvas { display: block; width: 100%; height: 70vh; touch-action: none; cursor: crosshair; }
+
+@media (max-width: 640px) {
+  .toolbar { flex-wrap: wrap; }
+}
+
+
+
+.prompt {
+  font-style: italic;
+  font-weight: 400;
+  font-size: 32px;
+  color: var(--muted);
+  opacity: 0;
+  filter: blur(12px);
+  animation: promptReveal 5s ease forwards;
+}
+
+@keyframes promptReveal {
+  0% { opacity: 0; filter: blur(12px); }
+  100% { opacity: 1; filter: blur(0); }
+}

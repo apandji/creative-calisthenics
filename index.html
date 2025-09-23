@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>creative calisthenics</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index.html">new prompt</a></li>
+            </ul>
+        </nav>
+    </header>
+<div>
+    <h1>✏️ daily practice one</h1>
+    <p>Refresh and draw based on the prompt. </p>
+</div>
+<hr>
+<div>
+    <h2 class="prompt">prompt here.</h2>
+</div>
+
+    <section id="sketch" class="section">
+        <div class="container sketch">
+            <div class="canvas-wrap">
+                <canvas id="canvas" aria-label="drawing canvas"></canvas>
+            </div>
+            <div class="toolbar" role="toolbar" aria-label="drawing controls">
+                <label>
+                    color
+                    <input id="color" type="color" value="#000000" aria-label="stroke color">
+                </label>
+                <label>
+                    size
+                    <input id="size" type="range" min="1" max="40" value="4" aria-label="brush size">
+                </label>
+                <button id="clear" type="button">clear</button>
+                <button id="save" type="button">save png</button>
+            </div>
+        </div>
+    </section>
+
+    <script src="prompts.js" defer></script>
+    <script src="sketch.js" defer></script>
+
+</body>
+</html>
