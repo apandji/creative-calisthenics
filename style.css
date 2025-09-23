@@ -41,6 +41,8 @@ body > * {
   padding-right: 24px;
   margin-left: auto;
   margin-right: auto;
+  position: relative;
+  z-index: 1;
 }
 
 /* Header & nav */
@@ -159,24 +161,27 @@ p {
   background: #f3f3f3;
 }
 
-/* Make the drawing area full-bleed across the viewport */
+/* Full viewport canvas positioned behind all content */
 .sketch .canvas-wrap {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100vw;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
-  border-left: 0;
-  border-right: 0;
+  height: 100vh;
+  z-index: -1;
+  border: none;
   border-radius: 0;
+  margin: 0;
+  padding: 0;
 }
 
 #canvas { 
   display: block; 
-  width: 100% !important; 
-  height: 70vh !important; 
-  min-height: 400px;
+  width: 100vw !important; 
+  height: 100vh !important; 
   touch-action: none; 
   cursor: crosshair; 
-  background: #f3f3f3;
+  background: transparent;
 }
 
 @media (max-width: 640px) {
