@@ -52,7 +52,7 @@ header {
   margin-right: calc(50% - 50vw);
 }
 
-nav { padding: 12px 0; }
+nav { padding: 12px 12px 12px 12px; }
 nav ul {
   display: flex;
   gap: 20px;
@@ -94,6 +94,7 @@ p {
   max-width: 1100px;
   padding-left: 24px;
   padding-right: 24px;
+  padding-top: 24px;
   margin-left: auto;
   margin-right: auto;
 }
