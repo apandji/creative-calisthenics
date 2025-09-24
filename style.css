@@ -152,8 +152,8 @@ p {
   background: color-mix(in oklab, var(--accent) 8%, transparent);
 }
 .canvas-wrap {
+  position: relative;
   margin-top: 8px;
-  border: 1px dashed var(--border);
   border-radius: 12px;
   overflow: hidden;
   background: #d2d2d2;
@@ -175,8 +175,19 @@ p {
   height: 70vh !important; 
   min-height: 400px;
   touch-action: none; 
-  cursor: crosshair; 
-  background: #d2d2d2;
+  cursor: none; 
+  background: linear-gradient(0deg, #d2d2d2, #f3f3f3)
+}
+
+.brush-cursor {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  transform: translate(-50%, -50%);
+  z-index: 100;
+  transition: width 0.1s ease, height 0.1s ease;
 }
 
 @media (max-width: 640px) {

@@ -8,6 +8,7 @@
   const sizeInput = document.getElementById('size');
   const clearBtn = document.getElementById('clear');
   const saveBtn = document.getElementById('save');
+  const cursor = document.getElementById('cursor');
 
   // State
   let isDrawing = false;
@@ -148,6 +149,29 @@
   canvas.addEventListener('contextmenu', (e) => e.preventDefault());
   canvas.addEventListener('selectstart', (e) => e.preventDefault());
 
+  // Update cursor size based on brush size
+  function updateCursorSize() {
+    if (cursor) {
+      const size = Math.max(8, strokeWidth * 2); // Minimum 8px, scale up from brush size
+      cursor.style.width = size + 'px';
+      cursor.style.height = size + 'px';
+    }
+  }
+
+  // Mouse tracking for cursor
+  function updateCursorPosition(e) {
+    if (!cursor) return;
+    const canvasRect = canvas.getBoundingClientRect();
+    const containerRect = canvas.parentElement.getBoundingClientRect();
+    
+    // Calculate position relative to the canvas container
+    const x = e.clientX - containerRect.left;
+    const y = e.clientY - containerRect.top;
+    
+    cursor.style.left = x + 'px';
+    cursor.style.top = y + 'px';
+  }
+
   // Controls
   if (colorInput) {
     colorInput.addEventListener('input', (e) => {
@@ -157,6 +181,7 @@
   if (sizeInput) {
     sizeInput.addEventListener('input', (e) => {
       strokeWidth = Number(e.target.value);
+      updateCursorSize();
     });
   }
   if (clearBtn) {
@@ -187,8 +212,18 @@
     ro.observe(canvas.parentElement);
   }
 
+  // Mouse tracking events
+  canvas.addEventListener('mousemove', updateCursorPosition);
+  canvas.addEventListener('mouseenter', () => {
+    if (cursor) cursor.style.display = 'block';
+  });
+  canvas.addEventListener('mouseleave', () => {
+    if (cursor) cursor.style.display = 'none';
+  });
+
   // Init
   resizeCanvas();
+  updateCursorSize(); // Set initial cursor size
 
   // Helpers
   function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
