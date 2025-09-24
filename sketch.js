@@ -189,15 +189,6 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     });
   }
-  if (saveBtn) {
-    saveBtn.addEventListener('click', () => {
-      const link = document.createElement('a');
-      link.download = 'sketch.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-    });
-  }
-
   // Simple resize handling for Safari
   function handleResize() {
     setTimeout(resizeCanvas, 100); // Small delay for Safari
