@@ -9,16 +9,6 @@
   --radius: 12px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0b0b0c;
-    --text: #f3f4f6;
-    --muted: #9ca3af;
-    --accent: #38bdf8;
-    --border: #1f2937;
-  }
-}
-
 /* Reset & layout */
 * { box-sizing: border-box; }
 html, body { height: 100%; }
@@ -51,11 +41,15 @@ body > * {
 /* Header & nav */
 header {
   position: sticky;
-  top: 0;
+  top: 20;
   backdrop-filter: saturate(1.2) blur(8px);
   background: color-mix(in oklab, var(--bg) 88%, transparent);
   border-bottom: 1px solid var(--border);
   z-index: 20;
+  /* full-bleed */
+  width: 200vw !important;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
 }
 
 nav { padding: 12px 0; }
@@ -161,7 +155,7 @@ p {
   border: 1px dashed var(--border);
   border-radius: 12px;
   overflow: hidden;
-  background: #f3f3f3;
+  background: #d2d2d2;
 }
 
 /* Make the drawing area full-bleed across the viewport (in-page, not background) */
@@ -181,7 +175,7 @@ p {
   min-height: 400px;
   touch-action: none; 
   cursor: crosshair; 
-  background: #f3f3f3;
+  background: #d2d2d2;
 }
 
 @media (max-width: 640px) {
@@ -193,7 +187,7 @@ p {
 .prompt {
   font-style: italic;
   font-weight: 400;
-  font-size: 32px;
+  font-size: 24px;
   color: var(--muted);
   opacity: 0;
   filter: blur(12px);

@@ -1,10 +1,10 @@
 (function () {
   const prompts = [
-    'draw an elephant with a flower hat.',
-    'sketch a city skyline made of books.',
-    'draw a teacup sailing on an ocean of paint.',
-    'illustrate a bicycle that turns into a bird.',
-    'draw a tiny astronaut exploring a houseplant.'
+    'elephant with a flower hat.',
+    'city skyline made of books.',
+    'teacup sailing on an ocean of paint.',
+    'bicycle that turns into a bird.',
+    'tiny astronaut exploring a houseplant.'
   ];
 
   const target = document.querySelector('.prompt');
