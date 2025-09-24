@@ -8,7 +8,7 @@
 </head>
 <body>
     <header>
-            <button><a href="index.html">refresh</a></button>
+            <button><a href="index.html">new prompt</a></button>
     </header>
     <div>
         <p>✏️ draw for me: <span class="prompt" style="font-size: 20px;">text</span>
@@ -19,18 +19,6 @@
                 <canvas id="canvas" aria-label="drawing canvas"></canvas>
                 <div id="cursor" class="brush-cursor"></div>
             </div>
-            <div class="toolbar" role="toolbar" aria-label="drawing controls">
-                <label>
-                    color
-                    <input id="color" type="color" value="#000000" aria-label="stroke color">
-                </label>
-                <label>
-                    size
-                    <input id="size" type="range" min="1" max="40" value="4" aria-label="brush size">
-                </label>
-                <button id="clear" type="button">clear</button>
-                <button id="save" type="button">save png</button>
-            </div>
         </div>
     </section>
 
@@ -40,6 +28,18 @@
 </body>
 
 <footer>
+    <div class="toolbar" role="toolbar" aria-label="drawing controls">
+        <label>
+            color
+            <input id="color" type="color" value="#000000" aria-label="stroke color">
+        </label>
+        <label>
+            size
+            <input id="size" type="range" min="1" max="40" value="4" aria-label="brush size">
+        </label>
+        <button id="clear" type="button">clear</button>
+        <button id="save" type="button">save png</button>
+    </div>
     <p>Made with ❤️ in St. Louis by @pandjico</p>
     <br>
     <br>
