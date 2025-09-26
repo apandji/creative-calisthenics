@@ -186,7 +186,19 @@
   }
   if (clearBtn) {
     clearBtn.addEventListener('click', () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Show zen-like toast notification
+      if (typeof window.showToast === 'function') {
+        window.showToast('Drawing cleared');
+      }
+      // Slow dissolve animation
+      if (typeof window.dissolveCanvas === 'function') {
+        window.dissolveCanvas();
+        setTimeout(() => {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }, 2000);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
     });
   }
   // Simple resize handling for Safari

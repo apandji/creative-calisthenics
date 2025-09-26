@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery - Creative Calisthenics</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .gallery-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        
+        .gallery-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .drawing-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .drawing-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .drawing-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: #f5f5f5;
+        }
+        
+        .drawing-info {
+            padding: 16px;
+        }
+        
+        .drawing-prompt {
+            font-style: italic;
+            color: var(--muted);
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .drawing-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--muted);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--muted);
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+        
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 16px;
+            text-decoration: none;
+            color: var(--text);
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            z-index: 100;
+        }
+        
+        .back-button:hover {
+            background: color-mix(in oklab, var(--accent) 8%, transparent);
+            transform: translateY(-1px);
+        }
+        
+        .refresh-button {
+            background: var(--accent);
+            color: var(--bg);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+        
+        .refresh-button:hover {
+            background: color-mix(in oklab, var(--accent) 80%, black);
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-button">← Back to Drawing</a>
+    
+    <div class="gallery-container">
+        <div class="gallery-header">
+            <h1>Gallery</h1>
+            <p>See what others have drawn today</p>
+            <button id="refresh" class="refresh-button">Refresh</button>
+        </div>
+        
+        <div id="gallery-content">
+            <div class="loading">Loading drawings...</div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Supabase configuration (same as index.html)
+        const SUPABASE_URL = 'https://rwdllkszmgallbrqbqkk.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3ZGxsa3N6bWdhbGxicnFicWtrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5MjQ1MjYsImV4cCI6MjA3NDUwMDUyNn0.-hGEPB0F7SLL6rd9MHvyoTGsGMqrJDPyIOv5amdld0s';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // Format date for display
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            return date.toLocaleDateString();
+        }
+        
+        // Create drawing card HTML
+        function createDrawingCard(drawing) {
+            return `
+                <div class="drawing-card">
+                    <img src="${drawing.image_data}" alt="Drawing" class="drawing-image" loading="lazy">
+                    <div class="drawing-info">
+                        <div class="drawing-prompt">"${drawing.prompt || 'No prompt'}"</div>
+                        <div class="drawing-meta">
+                            <span>${formatDate(drawing.created_at)}</span>
+                            <span>❤️ ${drawing.likes_count || 0}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Load and display drawings
+        async function loadDrawings() {
+            const galleryContent = document.getElementById('gallery-content');
+            
+            try {
+                galleryContent.innerHTML = '<div class="loading">Loading drawings...</div>';
+                
+                const { data: drawings, error } = await supabase
+                    .from('drawings')
+                    .select('*')
+                    .eq('is_public', true)
+                    .order('created_at', { ascending: false })
+                    .limit(50);
+                
+                if (error) {
+                    console.error('Error loading drawings:', error);
+                    galleryContent.innerHTML = '<div class="empty-state"><h3>Error loading gallery</h3><p>Please try again later.</p></div>';
+                    return;
+                }
+                
+                if (!drawings || drawings.length === 0) {
+                    galleryContent.innerHTML = `
+                        <div class="empty-state">
+                            <h3>No drawings yet</h3>
+                            <p>Be the first to submit a drawing!</p>
+                            <a href="index.html" style="display: inline-block; margin-top: 16px; padding: 8px 16px; background: var(--accent); color: var(--bg); text-decoration: none; border-radius: 8px;">Start Drawing</a>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                const drawingsHTML = drawings.map(createDrawingCard).join('');
+                galleryContent.innerHTML = `<div class="gallery-grid">${drawingsHTML}</div>`;
+                
+            } catch (err) {
+                console.error('Error:', err);
+                galleryContent.innerHTML = '<div class="empty-state"><h3>Error loading gallery</h3><p>Please try again later.</p></div>';
+            }
+        }
+        
+        // Add event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            const refreshBtn = document.getElementById('refresh');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', loadDrawings);
+            }
+            
+            // Load drawings on page load
+            loadDrawings();
+        });
+    </script>
+</body>
+</html>
