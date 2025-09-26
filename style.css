@@ -146,6 +146,25 @@ p {
   nav ul { flex-wrap: wrap; gap: 12px; }
   nav a { padding: 6px 10px; }
   h1 { margin-top: 24px; }
+  
+  /* Reduce header and content spacing on mobile to maximize canvas space */
+  header {
+    padding: 8px 0;
+  }
+  
+  .section {
+    padding: 16px 0;
+  }
+  
+  /* Optimize footer for mobile */
+  footer {
+    padding: 12px 16px;
+  }
+  
+  /* Reduce prompt text size on mobile to save space */
+  .prompt {
+    font-size: 18px;
+  }
 }
 
 /* Sketch */
@@ -207,6 +226,53 @@ p {
   touch-action: none; 
   cursor: none; 
   background: linear-gradient(0deg, #d2d2d2, #f3f3f3)
+}
+
+/* Mobile-specific canvas sizing for better drawing experience */
+@media (max-width: 768px) {
+  #canvas {
+    height: 85vh !important;
+    min-height: 500px;
+  }
+  
+  /* Ensure canvas container takes full width on mobile */
+  .sketch .canvas-wrap {
+    margin-top: 4px; /* Reduce top margin to save space */
+  }
+  
+  /* Optimize body spacing on mobile */
+  body > * {
+    margin-bottom: 8px; /* Reduce spacing between elements */
+  }
+}
+
+/* Extra large mobile screens (tablets in portrait) */
+@media (max-width: 1024px) and (min-width: 769px) {
+  #canvas {
+    height: 80vh !important;
+    min-height: 450px;
+  }
+}
+
+/* Very small mobile screens (older phones) - maximize drawing space */
+@media (max-width: 480px) {
+  #canvas {
+    height: 90vh !important;
+    min-height: 400px;
+  }
+  
+  /* Further reduce spacing on very small screens */
+  .section {
+    padding: 8px 0;
+  }
+  
+  header {
+    padding: 6px 0;
+  }
+  
+  footer {
+    padding: 8px 12px;
+  }
 }
 
 .brush-cursor {
