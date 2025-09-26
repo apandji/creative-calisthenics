@@ -44,7 +44,6 @@ header {
   top: 20;
   backdrop-filter: saturate(1.2) blur(8px);
   background: color-mix(in oklab, var(--bg) 88%, transparent);
-  border-bottom: 1px solid var(--border);
   z-index: 20;
   /* full-bleed */
   width: 200vw !important;
@@ -52,6 +51,19 @@ header {
   margin-right: calc(50% - 50vw);
   text-align: center;
   padding: 12px 0;
+  position: relative;
+}
+
+/* Full-width bottom border for header */
+header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: -50vw;
+  right: -50vw;
+  width: 200vw;
+  height: 1px;
+  background: var(--border);
 }
 
 header button {

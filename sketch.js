@@ -23,7 +23,7 @@
   let lastSpeed = 0;
   let currentWidth = strokeWidth;
 
-  // Simplified resize for Safari compatibility
+  // Simplified resize for Safari compatibility with content preservation
   function resizeCanvas() {
     const dpr = Math.max(1, window.devicePixelRatio || 1);
     const rect = canvas.getBoundingClientRect();
@@ -33,6 +33,10 @@
     if (cssWidth === lastCssWidth && cssHeight === lastCssHeight && dpr === lastDpr) {
       return;
     }
+
+    // Save current canvas content before resizing
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const hasContent = imageData.data.some(pixel => pixel !== 0);
 
     lastCssWidth = cssWidth;
     lastCssHeight = cssHeight;
@@ -50,6 +54,18 @@
     ctx.scale(dpr, dpr);
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
+
+    // Restore canvas content if it existed
+    if (hasContent) {
+      try {
+        // Simply put the image data back - this preserves the exact original content
+        // without any scaling or stretching
+        ctx.putImageData(imageData, 0, 0);
+      } catch (error) {
+        // Fallback: if this fails, log the error
+        console.warn('Canvas content restoration failed:', error);
+      }
+    }
   }
 
   function getPos(evt) {
