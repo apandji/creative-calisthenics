@@ -578,6 +578,64 @@ footer .toolbar {
   background: var(--bg);
   border-top: 1px solid var(--border);
   z-index: 10;
+  gap: 16px;
+  padding: 12px 20px;
+}
+
+/* Remove labels from toolbar */
+footer .toolbar .label {
+  display: none;
+}
+
+/* Style toolbar buttons like gallery button */
+footer .toolbar button {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 160ms ease;
+}
+
+footer .toolbar button:hover {
+  background: color-mix(in oklab, var(--accent) 8%, transparent);
+  border-color: var(--accent);
+}
+
+/* Zen-style range slider */
+footer .toolbar input[type="range"] {
+  width: 120px;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+footer .toolbar input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid var(--bg);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+footer .toolbar input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid var(--bg);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 footer p {
