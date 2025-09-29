@@ -285,17 +285,19 @@ p {
   
   /* Reduce header and content spacing on mobile to maximize canvas space */
   header {
-    padding: 8px 20px;
+    padding: 6px 20px;
+    min-height: auto;
   }
   
   .header-left {
-    flex-direction: column;
+    flex-direction: row;
     gap: 8px;
-    align-items: flex-start;
+    align-items: center;
+    flex-wrap: wrap;
   }
   
   .header-right {
-    align-items: flex-start;
+    align-items: center;
   }
   
   .prompt-controls {
@@ -304,8 +306,19 @@ p {
   }
   
   #prompt-mode {
-    min-width: 140px;
-    font-size: 0.8rem;
+    min-width: 120px;
+    font-size: 0.75rem;
+    padding: 4px 8px;
+  }
+  
+  #new-prompt-btn {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+  }
+  
+  .header-right button {
+    font-size: 0.75rem;
+    padding: 4px 8px;
   }
   
   .section {
