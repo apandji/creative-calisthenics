@@ -18,8 +18,6 @@
                 <option value="freehand">Freehand</option>
             </select>
             <button id="new-prompt-btn">new prompt</button>
-            <button id="clear" type="button" title="Clear drawing">⌫</button>
-            <button id="submit" type="button" title="Submit to gallery">↑</button>
         </div>
         <div class="header-right">
             <button><a href="gallery.html">gallery</a></button>
@@ -36,6 +34,23 @@
             </div>
         </div>
     </section>
+
+    <!-- Mobile Toolbar -->
+    <div id="mobile-toolbar" class="mobile-toolbar">
+        <div class="mobile-toolbar-content">
+            <div class="color-palette">
+                <span class="label">color</span>
+                <div id="zen-colors" class="zen-color-palette"></div>
+            </div>
+            <label>
+                size
+                <input id="size-mobile" type="range" min="1" max="40" value="15" aria-label="brush size">
+            </label>
+            <button id="clear-mobile" type="button" title="Clear drawing">⌫</button>
+            <button id="submit-mobile" type="button" title="Submit to gallery">↑</button>
+        </div>
+        <button id="toolbar-toggle" class="toolbar-toggle" title="Toggle drawing tools">🎨</button>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="watercolor-brush.js" defer></script>
@@ -170,6 +185,46 @@
             if (submitBtn) {
                 submitBtn.addEventListener('click', submitDrawing);
             }
+            
+            // Mobile toolbar toggle functionality
+            const toolbarToggle = document.getElementById('toolbar-toggle');
+            const mobileToolbar = document.getElementById('mobile-toolbar');
+            const clearMobile = document.getElementById('clear-mobile');
+            const submitMobile = document.getElementById('submit-mobile');
+            const sizeMobile = document.getElementById('size-mobile');
+            const sizeDesktop = document.getElementById('size');
+            
+            if (toolbarToggle && mobileToolbar) {
+                toolbarToggle.addEventListener('click', function() {
+                    mobileToolbar.classList.toggle('hidden');
+                });
+            }
+            
+            // Sync mobile and desktop controls
+            if (clearMobile) {
+                clearMobile.addEventListener('click', function() {
+                    const clearDesktop = document.getElementById('clear');
+                    if (clearDesktop) clearDesktop.click();
+                });
+            }
+            
+            if (submitMobile) {
+                submitMobile.addEventListener('click', function() {
+                    const submitDesktop = document.getElementById('submit');
+                    if (submitDesktop) submitDesktop.click();
+                });
+            }
+            
+            if (sizeMobile && sizeDesktop) {
+                sizeMobile.addEventListener('input', function() {
+                    sizeDesktop.value = this.value;
+                    sizeDesktop.dispatchEvent(new Event('input'));
+                });
+                
+                sizeDesktop.addEventListener('input', function() {
+                    sizeMobile.value = this.value;
+                });
+            }
         });
     </script>
 </body>
@@ -186,6 +241,6 @@
             <input id="size" type="range" min="1" max="40" value="15" aria-label="brush size">
         </label>
     </div>
-    <p>Made with ❤️ in St. Louis by @pandjico</p>
+    <p style="font-size: 0.75rem; color: var(--muted);">Made with ❤️ in St. Louis by @pandjico</p>
 </footer>
 </html>
