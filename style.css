@@ -114,6 +114,14 @@ header button a {
   text-decoration: none;
 }
 
+/* Icon buttons styling */
+header button[title] {
+  min-width: 40px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 8px 12px;
+}
+
 /* Header sections */
 .header-left {
   display: flex;
