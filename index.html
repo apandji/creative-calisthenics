@@ -10,11 +10,21 @@
 </head>
 <body>
     <header>
-            <button><a href="index.html">new prompt</a></button>
+        <div class="header-left">
+            <logo class="logo">driftpad</logo>
+            <select id="prompt-mode" aria-label="Select prompt mode">
+                <option value="prompt">Prompt</option>
+                <option value="complete_drawing">Complete the Drawing</option>
+                <option value="freehand">Freehand</option>
+            </select>
+            <button id="new-prompt-btn">new prompt</button>
+        </div>
+        <div class="header-right">
             <button><a href="gallery.html">gallery</a></button>
+        </div>
     </header>
-    <div>
-        <h2>✏️ draw for me: <span class="prompt" style="font-size: 20px;">text</span></h2>
+    <div class="prompt-container">
+        <h2 class="prompt" style="font-size: 20px;">text</h2>
     </div>
     <section id="sketch" class="section">
         <div class="container sketch">
@@ -26,6 +36,9 @@
     </section>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="watercolor-brush.js" defer></script>
+    <script src="fade-timer.js" defer></script>
+    <script src="shape-generator.js"></script>
     <script src="prompts.js" defer></script>
     <script src="sketch.js" defer></script>
     <script src="pull-to-refresh.js" defer></script>
@@ -161,13 +174,13 @@
 
 <footer>
     <div class="toolbar" role="toolbar" aria-label="drawing controls">
-        <label>
-            color
-            <input id="color" type="color" value="#000000" aria-label="stroke color">
-        </label>
+        <div class="color-palette">
+            <span class="label">color</span>
+            <div id="zen-colors" class="zen-color-palette"></div>
+        </div>
         <label>
             size
-            <input id="size" type="range" min="1" max="40" value="4" aria-label="brush size">
+            <input id="size" type="range" min="1" max="40" value="15" aria-label="brush size">
         </label>
         <button id="clear" type="button">clear</button>
         <button id="submit" type="button">submit to gallery</button>

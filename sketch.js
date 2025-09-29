@@ -10,12 +10,19 @@
   const saveBtn = document.getElementById('save');
   const cursor = document.getElementById('cursor');
 
+  // Initialize watercolor brush and fade timer
+  const watercolorBrush = new WatercolorBrush(canvas, ctx);
+  const fadeTimer = new FadeTimer(canvas, ctx);
+  
+  // Connect fade timer to watercolor brush
+  watercolorBrush.setFadeTimer(fadeTimer);
+
   // State
   let isDrawing = false;
   let lastX = 0;
   let lastY = 0;
   let strokeColor = colorInput ? colorInput.value : '#000000';
-  let strokeWidth = sizeInput ? Number(sizeInput.value) : 4; // acts as max width
+  let strokeWidth = sizeInput ? Number(sizeInput.value) : 15; // Default to 37.5% (15/40) for better mobile finger drawing
   let lastCssWidth = 0;
   let lastCssHeight = 0;
   let lastDpr = 1;
@@ -23,7 +30,7 @@
   let lastSpeed = 0;
   let currentWidth = strokeWidth;
 
-  // Simplified resize for Safari compatibility with content preservation
+  // Resize handling that preserves drawing content without any scaling
   function resizeCanvas() {
     const dpr = Math.max(1, window.devicePixelRatio || 1);
     const rect = canvas.getBoundingClientRect();
@@ -34,9 +41,23 @@
       return;
     }
 
-    // Save current canvas content before resizing
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const hasContent = imageData.data.some(pixel => pixel !== 0);
+    console.log('Resizing canvas:', {
+      from: { width: lastCssWidth, height: lastCssHeight },
+      to: { width: cssWidth, height: cssHeight },
+      dpr: dpr
+    });
+
+    // Save current canvas content as a data URL before resizing
+    let savedDataURL = null;
+    const hasContent = canvas.width > 0 && canvas.height > 0;
+    if (hasContent) {
+      try {
+        savedDataURL = canvas.toDataURL('image/png');
+        console.log('Saved canvas content as data URL');
+      } catch (error) {
+        console.warn('Failed to save canvas content:', error);
+      }
+    }
 
     lastCssWidth = cssWidth;
     lastCssHeight = cssHeight;
@@ -56,15 +77,28 @@
     ctx.lineJoin = 'round';
 
     // Restore canvas content if it existed
-    if (hasContent) {
-      try {
-        // Simply put the image data back - this preserves the exact original content
-        // without any scaling or stretching
-        ctx.putImageData(imageData, 0, 0);
-      } catch (error) {
-        // Fallback: if this fails, log the error
-        console.warn('Canvas content restoration failed:', error);
-      }
+    if (savedDataURL) {
+      const img = new Image();
+      img.onload = function() {
+        try {
+          // Save the current transformation matrix
+          ctx.save();
+          
+          // Reset the transformation matrix to avoid scaling
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          
+          // Draw the image at its original size without any scaling
+          ctx.drawImage(img, 0, 0);
+          
+          // Restore the transformation matrix
+          ctx.restore();
+          
+          console.log('Canvas content restored without scaling');
+        } catch (error) {
+          console.warn('Failed to restore canvas content:', error);
+        }
+      };
+      img.src = savedDataURL;
     }
   }
 
@@ -82,6 +116,9 @@
     lastTime = t;
     lastSpeed = 0;
     currentWidth = computeWidth(pressure, 0);
+    
+    // Start watercolor brush stroke
+    watercolorBrush.startStroke(x, y, pressure);
   }
 
   function drawTo(x, y, pressure = 0.5, t = performance.now()) {
@@ -99,17 +136,9 @@
     // Smooth the width for an ink-like feel
     currentWidth = currentWidth * 0.6 + targetWidth * 0.4;
 
-    ctx.strokeStyle = strokeColor;
-    ctx.lineWidth = currentWidth;
-    // Slight opacity variation with pressure for ink wash effect
-    const alpha = 0.7 + 0.3 * clamp(pressure, 0, 1);
-    const prevAlpha = ctx.globalAlpha;
-    ctx.globalAlpha = alpha;
-    ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
-    ctx.lineTo(x, y);
-    ctx.stroke();
-    ctx.globalAlpha = prevAlpha;
+    // Continue watercolor brush stroke
+    watercolorBrush.continueStroke(x, y, pressure);
+    
     lastX = x;
     lastY = y;
     lastTime = t;
@@ -117,6 +146,14 @@
 
   function endDraw() {
     isDrawing = false;
+    
+    // End watercolor brush stroke
+    watercolorBrush.endStroke();
+    
+    // Start fade timer if not already active
+    if (!fadeTimer.isTimerActive()) {
+      fadeTimer.start();
+    }
   }
 
   // Safari-compatible event handling
@@ -192,11 +229,18 @@
   if (colorInput) {
     colorInput.addEventListener('input', (e) => {
       strokeColor = e.target.value;
+      // Update watercolor brush color (convert to zen palette index)
+      const zenColors = watercolorBrush.getZenColors();
+      const colorIndex = zenColors.indexOf(e.target.value);
+      if (colorIndex !== -1) {
+        watercolorBrush.setColor(colorIndex);
+      }
     });
   }
   if (sizeInput) {
     sizeInput.addEventListener('input', (e) => {
       strokeWidth = Number(e.target.value);
+      watercolorBrush.setSize(strokeWidth);
       updateCursorSize();
     });
   }
@@ -206,6 +250,10 @@
       if (typeof window.showToast === 'function') {
         window.showToast('Drawing cleared');
       }
+      // Clear watercolor brush
+      watercolorBrush.clear();
+      // Stop fade timer
+      fadeTimer.stop();
       // Slow dissolve animation
       if (typeof window.dissolveCanvas === 'function') {
         window.dissolveCanvas();
@@ -217,9 +265,11 @@
       }
     });
   }
-  // Simple resize handling for Safari
+  // Improved resize handling with debouncing
+  let resizeTimeout;
   function handleResize() {
-    setTimeout(resizeCanvas, 100); // Small delay for Safari
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(resizeCanvas, 150); // Increased delay for better stability
   }
   
   window.addEventListener('resize', handleResize);
@@ -240,9 +290,47 @@
     if (cursor) cursor.style.display = 'none';
   });
 
+  // Initialize zen color palette
+  function initZenColorPalette() {
+    const zenColorsContainer = document.getElementById('zen-colors');
+    if (!zenColorsContainer) return;
+    
+    const zenColors = watercolorBrush.getZenColors();
+    
+    zenColors.forEach((color, index) => {
+      const colorElement = document.createElement('div');
+      colorElement.className = 'zen-color';
+      colorElement.style.backgroundColor = color;
+      colorElement.setAttribute('data-color', color);
+      colorElement.setAttribute('data-index', index);
+      
+      // Add click handler
+      colorElement.addEventListener('click', () => {
+        // Remove active class from all colors
+        document.querySelectorAll('.zen-color').forEach(el => el.classList.remove('active'));
+        // Add active class to clicked color
+        colorElement.classList.add('active');
+        
+        // Update watercolor brush color
+        watercolorBrush.setColor(index);
+        
+        // Update stroke color for compatibility
+        strokeColor = color;
+      });
+      
+      zenColorsContainer.appendChild(colorElement);
+    });
+    
+    // Set first color as active
+    if (zenColorsContainer.firstChild) {
+      zenColorsContainer.firstChild.classList.add('active');
+    }
+  }
+
   // Init
   resizeCanvas();
   updateCursorSize(); // Set initial cursor size
+  initZenColorPalette(); // Initialize zen color palette
 
   // Helpers
   function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
