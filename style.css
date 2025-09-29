@@ -155,7 +155,6 @@ header button[title] {
   color: var(--text);
   cursor: pointer;
   transition: all 160ms ease;
-  min-width: 160px;
 }
 
 #prompt-mode:hover {
@@ -173,7 +172,6 @@ header button[title] {
   color: var(--bg);
   border: 1px solid var(--accent);
   font-weight: 600;
-  min-width: 120px;
 }
 
 #new-prompt-btn:hover {
