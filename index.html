@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>creative calisthenics</title>
+    <title>driftpad</title>
     <link rel="stylesheet" href="style.css">
         <!-- Umami Analytics -->
         <script defer src="https://cloud.umami.is/script.js" data-website-id="8ae5578c-320f-4d25-860a-f93ed10e541e"></script>
@@ -18,6 +18,8 @@
                 <option value="freehand">Freehand</option>
             </select>
             <button id="new-prompt-btn">new prompt</button>
+            <button id="clear" type="button">clear</button>
+            <button id="submit" type="button">submit to gallery</button>
         </div>
         <div class="header-right">
             <button><a href="gallery.html">gallery</a></button>
@@ -178,12 +180,11 @@
             <span class="label">color</span>
             <div id="zen-colors" class="zen-color-palette"></div>
         </div>
+        <br>
         <label>
             size
             <input id="size" type="range" min="1" max="40" value="15" aria-label="brush size">
         </label>
-        <button id="clear" type="button">clear</button>
-        <button id="submit" type="button">submit to gallery</button>
     </div>
     <p>Made with ❤️ in St. Louis by @pandjico</p>
 </footer>

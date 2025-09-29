@@ -26,14 +26,22 @@ class ShapeGenerator {
     generateShape() {
         const shapeType = this.shapes[Math.floor(Math.random() * this.shapes.length)];
         
-        // Get the visible canvas dimensions (not the internal scaled dimensions)
+        // Get the actual canvas dimensions (accounting for device pixel ratio)
+        const dpr = Math.max(1, window.devicePixelRatio || 1);
         const rect = this.canvas.getBoundingClientRect();
         const visibleWidth = rect.width;
         const visibleHeight = rect.height;
         
-        // Calculate center based on visible dimensions
-        const centerX = visibleWidth / 2;
-        const centerY = visibleHeight / 2;
+        // Calculate center based on actual canvas dimensions (not visible)
+        const centerX = this.canvas.width / 2 / dpr;
+        let centerY = this.canvas.height / 2 / dpr;
+        
+        // Move up 100px on mobile devices only
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+            centerY -= 200;
+        }
+        
         const size = Math.min(visibleWidth, visibleHeight) * 0.3;
 
         console.log('Generating shape:', {
@@ -44,7 +52,8 @@ class ShapeGenerator {
             centerY,
             size,
             canvasWidth: this.canvas.width,
-            canvasHeight: this.canvas.height
+            canvasHeight: this.canvas.height,
+            dpr: dpr
         });
 
         // Get current brush settings from the drawing system
@@ -325,14 +334,22 @@ class ShapeGenerator {
     generateShapeFadeIn() {
         const shapeType = this.shapes[Math.floor(Math.random() * this.shapes.length)];
         
-        // Get the visible canvas dimensions
+        // Get the actual canvas dimensions (accounting for device pixel ratio)
+        const dpr = Math.max(1, window.devicePixelRatio || 1);
         const rect = this.canvas.getBoundingClientRect();
         const visibleWidth = rect.width;
         const visibleHeight = rect.height;
         
-        // Calculate center based on visible dimensions
-        const centerX = visibleWidth / 2;
-        const centerY = visibleHeight / 2;
+        // Calculate center based on actual canvas dimensions (not visible)
+        const centerX = this.canvas.width / 2 / dpr;
+        let centerY = this.canvas.height / 2 / dpr;
+        
+        // Move up 100px on mobile devices only
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+            centerY -= 100;
+        }
+        
         const size = Math.min(visibleWidth, visibleHeight) * 0.3;
 
         console.log('Generating shape with fade-in:', shapeType);

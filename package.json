@@ -17,7 +17,7 @@
   "bugs": {
     "url": "https://github.com/apandji/creative-calisthenics/issues"
   },
-  "homepage": "https://github.com/apandji/creative-calisthenics#readme",
+  "homepage": "https://driftpad.app",
   "dependencies": {
     "@watercolorizer/watercolorizer": "^1.1.2"
   }

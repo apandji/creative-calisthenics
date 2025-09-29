@@ -245,9 +245,15 @@ p {
   nav a { padding: 6px 10px; }
   h1 { margin-top: 24px; }
   
+  /* Add mobile padding to body content */
+  body > * {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+  
   /* Reduce header and content spacing on mobile to maximize canvas space */
   header {
-    padding: 8px 16px;
+    padding: 8px 20px;
   }
   
   .header-left {
