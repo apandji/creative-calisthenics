@@ -20,6 +20,7 @@
             <button id="new-prompt-btn">refresh</button>
         </div>
         <div class="header-right">
+            <button id="feedback-btn">feedback</button>
             <button><a href="gallery.html">gallery</a></button>
         </div>
     </header>
@@ -34,8 +35,6 @@
             </div>
         </div>
     </section>
-
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="watercolor-brush.js" defer></script>
     <script src="fade-timer.js" defer></script>
@@ -44,14 +43,89 @@
     <script src="sketch.js" defer></script>
     <script src="pull-to-refresh.js" defer></script>
     
+    <!-- Simple Feedback Modal -->
+    <div id="feedback-modal" class="feedback-modal" style="display: none;">
+        <div class="feedback-content">
+            <h2>What do you think of driftpad?</h2>
+            <form id="feedback-form" action="https://formspree.io/f/xdkwgkbd" method="POST">
+                <div class="feedback-type">
+                    <label>
+                        <input type="radio" name="feedback_type" value="bug" required>
+                        🐛 Bug report
+                    </label>
+                    <label>
+                        <input type="radio" name="feedback_type" value="feature" required>
+                        💡 Feature request
+                    </label>
+                    <label>
+                        <input type="radio" name="feedback_type" value="general" required>
+                        💬 General feedback
+                    </label>
+                </div>
+                <textarea name="message" placeholder="Tell us what's on your mind..." required></textarea>
+                <input type="email" name="email" placeholder="Your email (optional)">
+                <div class="feedback-actions">
+                    <button type="button" id="close-feedback">Cancel</button>
+                    <button type="submit">Send feedback</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
-        // Supabase configuration
+        // Simple feedback modal functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const feedbackBtn = document.getElementById('feedback-btn');
+            const feedbackModal = document.getElementById('feedback-modal');
+            const closeBtn = document.getElementById('close-feedback');
+            const feedbackForm = document.getElementById('feedback-form');
+            
+            // Open modal
+            feedbackBtn.addEventListener('click', function() {
+                feedbackModal.style.display = 'flex';
+            });
+            
+            // Close modal
+            closeBtn.addEventListener('click', function() {
+                feedbackModal.style.display = 'none';
+            });
+            
+            // Close modal when clicking outside
+            feedbackModal.addEventListener('click', function(e) {
+                if (e.target === feedbackModal) {
+                    feedbackModal.style.display = 'none';
+                }
+            });
+            
+            // Handle form submission
+            feedbackForm.addEventListener('submit', function(e) {
+                // Don't prevent default - let the form submit to Formspree
+                // e.preventDefault();
+                
+                // Debug: Log form data
+                const formData = new FormData(feedbackForm);
+                console.log('Form data:', Object.fromEntries(formData));
+                
+                // Show success message after a short delay
+                setTimeout(() => {
+                    alert('Thank you for your feedback! We\'ll get back to you soon.');
+                    
+                    // Close modal
+                    feedbackModal.style.display = 'none';
+                    
+                    // Reset form
+                    feedbackForm.reset();
+                }, 100);
+            });
+        });
+        
+        // Supabase configuration (for drawings)
         const SUPABASE_URL = 'https://rwdllkszmgallbrqbqkk.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3ZGxsa3N6bWdhbGxicnFicWtrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5MjQ1MjYsImV4cCI6MjA3NDUwMDUyNn0.-hGEPB0F7SLL6rd9MHvyoTGsGMqrJDPyIOv5amdld0s';
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
-        // Generate or get user UUID
+        // Generate or get user UUID (for drawings)
         function getUserUUID() {
             let userUUID = localStorage.getItem('user_uuid');
             if (!userUUID) {
