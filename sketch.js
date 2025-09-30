@@ -246,6 +246,8 @@
   }
   if (clearBtn) {
     clearBtn.addEventListener('click', () => {
+      // Track the clear event
+      umami.track('clear_drawing');
       // Show zen-like toast notification
       if (typeof window.showToast === 'function') {
         window.showToast('Drawing cleared');
