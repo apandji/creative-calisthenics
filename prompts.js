@@ -33,23 +33,54 @@
     // Load prompt from Supabase
     async function loadPrompt(mode = 'prompt') {
       console.log('Loading prompt for mode:', mode);
+      console.log('Supabase client available:', typeof window.supabaseClient !== 'undefined');
+      console.log('Supabase client:', window.supabaseClient);
+      
+      // Check if supabase is available
+      if (typeof window.supabaseClient === 'undefined') {
+        console.error('Supabase client not available, using fallback');
+        const fallback = getFallbackPrompt(mode);
+        console.log('Using fallback prompt:', fallback);
+        return fallback;
+      }
       
       try {
-        const { data, error } = await supabase
+        // First try with active filter
+        let { data, error } = await window.supabaseClient
           .from('prompts')
           .select('content, weight')
           .eq('type', mode)
           .eq('active', true);
+        
+        // If no results and no error, try without active filter (in case active column doesn't exist)
+        if ((!data || data.length === 0) && !error) {
+          console.log('No active prompts found, trying without active filter...');
+          const result = await window.supabaseClient
+            .from('prompts')
+            .select('content, weight')
+            .eq('type', mode);
+          data = result.data;
+          error = result.error;
+        }
 
         if (error) {
-          console.error('Error loading prompt:', error);
+          console.error('Error loading prompt from Supabase:', error);
+          console.error('Error details:', {
+            message: error.message,
+            code: error.code,
+            details: error.details,
+            hint: error.hint
+          });
           // Fallback to default prompts
           const fallback = getFallbackPrompt(mode);
-          console.log('Using fallback prompt:', fallback);
+          console.log('Using fallback prompt due to Supabase error:', fallback);
           return fallback;
         }
 
-        if (data && data.length > 0) {
+        console.log('Supabase response data:', data);
+        console.log('Data length:', data ? data.length : 'null');
+
+        if (data && Array.isArray(data) && data.length > 0) {
           // Use weighted selection for freehand mode, simple random for others
           let selectedPrompt;
           if (mode === 'freehand') {
@@ -196,6 +227,15 @@
       const promptText = await loadPrompt(mode);
       console.log('Setting prompt text to:', promptText);
       target.textContent = promptText;
+      
+      // Add visual indicator if using fallback prompts
+      if (typeof window.supabaseClient === 'undefined') {
+        target.style.color = '#ff6b6b'; // Red color to indicate fallback
+        target.title = 'Using fallback prompts - Supabase not available';
+      } else {
+        target.style.color = ''; // Reset to default color
+        target.title = '';
+      }
       
       // Track user behavior
       updatePromptCount();
