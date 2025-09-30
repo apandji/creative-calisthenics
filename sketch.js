@@ -243,6 +243,17 @@ document.addEventListener('DOMContentLoaded', function() {
       watercolorBrush.setSize(strokeWidth);
       updateCursorSize();
     });
+    
+    // Track brush size change only when user finishes adjusting
+    sizeInput.addEventListener('change', (e) => {
+      strokeWidth = Number(e.target.value);
+      
+      // Track brush size change
+      umami.track('brush_size_changed', { 
+        size: strokeWidth,
+        size_percentage: Math.round((strokeWidth / 40) * 100)
+      });
+    });
   }
   if (clearBtn) {
     clearBtn.addEventListener('click', () => {
@@ -308,6 +319,12 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Add click handler
       colorElement.addEventListener('click', () => {
+        // Track color change
+        umami.track('color_changed', { 
+          color: color, 
+          color_index: index 
+        });
+        
         // Remove active class from all colors
         document.querySelectorAll('.zen-color').forEach(el => el.classList.remove('active'));
         // Add active class to clicked color

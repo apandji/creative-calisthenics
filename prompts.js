@@ -224,11 +224,21 @@
 
     // Event listeners
     modeSelect.addEventListener('change', (e) => {
+      // Track mode selection
+      umami.track('mode_selected', { 
+        mode: e.target.value 
+      });
+      
       console.log('Mode select changed to:', e.target.value);
       updatePrompt(e.target.value);
     });
 
     newPromptBtn.addEventListener('click', () => {
+      // Track prompt refresh
+      umami.track('prompt_refreshed', { 
+        mode: modeSelect.value 
+      });
+      
       console.log('New prompt button clicked, current mode:', modeSelect.value);
       updatePrompt(modeSelect.value);
     });
