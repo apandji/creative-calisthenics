@@ -77,6 +77,11 @@ class WatercolorBrush {
 
   // Add a paint drop at position (Smooth calligraphic style)
   addPaintDrop(x, y, pressure) {
+    // Validate inputs to prevent non-finite values
+    if (!isFinite(x) || !isFinite(y) || !isFinite(pressure) || !isFinite(this.brushSize) || this.brushSize <= 0) {
+      return;
+    }
+    
     // Calligraphy: Very sensitive to pressure
     if (pressure < 0.02) return;
     
@@ -85,11 +90,21 @@ class WatercolorBrush {
     const sizeVariation = 0.3 + pressureMultiplier * 1.4; // Less dramatic size variation
     const opacityVariation = 0.4 + pressureMultiplier * 0.6; // Less dramatic opacity variation
     
+    // Validate calculated values
+    if (!isFinite(pressureMultiplier) || !isFinite(sizeVariation) || !isFinite(opacityVariation) || sizeVariation <= 0) {
+      return;
+    }
+    
+    const calculatedSize = this.brushSize * sizeVariation;
+    if (!isFinite(calculatedSize) || calculatedSize <= 0) {
+      return;
+    }
+    
     const paintDrop = {
       x: x,
       y: y,
       color: this.currentColor,
-      size: this.brushSize * sizeVariation,
+      size: calculatedSize,
       opacity: opacityVariation,
       wetness: this.wetness,
       timestamp: Date.now(),
@@ -116,7 +131,16 @@ class WatercolorBrush {
 
   // Create stroke between two points (Smooth calligraphic style)
   createStroke(x1, y1, x2, y2, pressure) {
+    // Validate inputs to prevent non-finite values
+    if (!isFinite(x1) || !isFinite(y1) || !isFinite(x2) || !isFinite(y2) || !isFinite(pressure)) {
+      return;
+    }
+    
     const distance = Math.hypot(x2 - x1, y2 - y1);
+    if (!isFinite(distance) || distance <= 0) {
+      return;
+    }
+    
     const steps = Math.max(2, Math.floor(distance / 1)); // Very dense for smoothness
     
     for (let i = 0; i <= steps; i++) {
@@ -124,15 +148,30 @@ class WatercolorBrush {
       const x = x1 + (x2 - x1) * t;
       const y = y1 + (y2 - y1) * t;
       
+      // Validate calculated coordinates
+      if (!isFinite(x) || !isFinite(y)) {
+        continue;
+      }
+      
       // Smooth pressure variation with minimal randomness
       const strokeVariation = Math.sin(t * Math.PI) * 0.05; // Reduced variation
       const randomVariation = (Math.random() - 0.5) * 0.1; // Much less randomness
       const variedPressure = Math.max(0.2, Math.min(1, pressure + strokeVariation + randomVariation));
       
+      // Validate pressure
+      if (!isFinite(variedPressure) || variedPressure <= 0) {
+        continue;
+      }
+      
       // Smooth perpendicular offset for brush width
       const brushWidth = this.brushSize * (0.3 + variedPressure * 1.4);
       const perpX = (y2 - y1) / distance * (Math.random() - 0.5) * brushWidth * 0.15; // Reduced offset
       const perpY = (x1 - x2) / distance * (Math.random() - 0.5) * brushWidth * 0.15; // Reduced offset
+      
+      // Validate offset calculations
+      if (!isFinite(perpX) || !isFinite(perpY)) {
+        continue;
+      }
       
       this.addPaintDrop(x + perpX, y + perpY, variedPressure);
     }
@@ -141,6 +180,11 @@ class WatercolorBrush {
   // Render calligraphic ink drop with enhanced brush behavior
   renderCalligraphicInkDrop(paintDrop) {
     const { x, y, color, size, opacity, pressure, pressureMultiplier } = paintDrop;
+    
+    // Validate inputs to prevent non-finite values
+    if (!isFinite(x) || !isFinite(y) || !isFinite(size) || size <= 0) {
+      return;
+    }
     
     this.ctx.save();
     
@@ -152,6 +196,12 @@ class WatercolorBrush {
     const aspectRatio = 0.2 + pressureMultiplier * 0.8; // More dramatic elliptical change
     const brushWidth = size * aspectRatio;
     const brushHeight = size;
+    
+    // Validate calculated values
+    if (!isFinite(brushWidth) || !isFinite(brushHeight) || brushWidth <= 0 || brushHeight <= 0) {
+      this.ctx.restore();
+      return;
+    }
     
     // Create smooth elliptical gradient for calligraphic feel with layering support
     const gradient = this.ctx.createRadialGradient(x, y, 0, x, y, size);
@@ -181,6 +231,11 @@ class WatercolorBrush {
 
   // Add smooth calligraphic texture variation
   addSmoothCalligraphicTexture(x, y, width, height, color, opacity) {
+    // Validate inputs to prevent non-finite values
+    if (!isFinite(x) || !isFinite(y) || !isFinite(width) || !isFinite(height) || width <= 0 || height <= 0) {
+      return;
+    }
+    
     const textureCount = Math.min(1, Math.floor(width / 4)); // Reduced texture
     
     for (let i = 0; i < textureCount; i++) {
@@ -192,6 +247,11 @@ class WatercolorBrush {
       const textureWidth = Math.random() * width * 0.2; // Smaller texture
       const textureHeight = Math.random() * height * 0.2; // Smaller texture
       
+      // Validate calculated values
+      if (!isFinite(textureX) || !isFinite(textureY) || !isFinite(textureWidth) || !isFinite(textureHeight) || textureWidth <= 0 || textureHeight <= 0) {
+        continue;
+      }
+      
       this.ctx.fillStyle = this.hexToRgba(color, opacity);
       this.ctx.beginPath();
       this.ctx.ellipse(textureX, textureY, textureWidth, textureHeight, 0, 0, Math.PI * 2);
@@ -201,6 +261,11 @@ class WatercolorBrush {
 
   // Add calligraphic texture variation (legacy)
   addCalligraphicTexture(x, y, width, height, color, opacity) {
+    // Validate inputs to prevent non-finite values
+    if (!isFinite(x) || !isFinite(y) || !isFinite(width) || !isFinite(height) || width <= 0 || height <= 0) {
+      return;
+    }
+    
     const textureCount = Math.min(2, Math.floor(width / 3));
     
     for (let i = 0; i < textureCount; i++) {
@@ -212,6 +277,11 @@ class WatercolorBrush {
       const textureWidth = Math.random() * width * 0.3;
       const textureHeight = Math.random() * height * 0.3;
       
+      // Validate calculated values
+      if (!isFinite(textureX) || !isFinite(textureY) || !isFinite(textureWidth) || !isFinite(textureHeight) || textureWidth <= 0 || textureHeight <= 0) {
+        continue;
+      }
+      
       this.ctx.fillStyle = this.hexToRgba(color, opacity);
       this.ctx.beginPath();
       this.ctx.ellipse(textureX, textureY, textureWidth, textureHeight, 0, 0, Math.PI * 2);
@@ -221,8 +291,20 @@ class WatercolorBrush {
 
   // Add brush direction indicator for light strokes
   addBrushDirection(x, y, width, height, color, opacity) {
+    // Validate inputs to prevent non-finite values
+    if (!isFinite(x) || !isFinite(y) || !isFinite(width) || !isFinite(height) || width <= 0 || height <= 0) {
+      return;
+    }
+    
     // Create a more calligraphic brush direction indicator
-    const gradient = this.ctx.createRadialGradient(x, y, 0, x, y, height * 0.4);
+    // Validate parameters for createRadialGradient
+    const gradientRadius = height * 0.4;
+    if (!isFinite(x) || !isFinite(y) || !isFinite(gradientRadius) || gradientRadius <= 0) {
+      this.ctx.restore();
+      return;
+    }
+    
+    const gradient = this.ctx.createRadialGradient(x, y, 0, x, y, gradientRadius);
     gradient.addColorStop(0, this.hexToRgba(color, opacity));
     gradient.addColorStop(0.5, this.hexToRgba(color, opacity * 0.6));
     gradient.addColorStop(1, this.hexToRgba(color, 0));
@@ -237,10 +319,21 @@ class WatercolorBrush {
   renderSumiInkDrop(paintDrop) {
     const { x, y, color, size, opacity, pressure } = paintDrop;
     
+    // Validate inputs to prevent non-finite values
+    if (!isFinite(x) || !isFinite(y) || !isFinite(size) || size <= 0) {
+      return;
+    }
+    
     // Sumi ink: Single strong stroke with subtle variation
     this.ctx.save();
     
     // Create ink gradient
+    // Validate parameters for createRadialGradient
+    if (!isFinite(x) || !isFinite(y) || !isFinite(size) || size <= 0) {
+      this.ctx.restore();
+      return;
+    }
+    
     const gradient = this.ctx.createRadialGradient(x, y, 0, x, y, size);
     gradient.addColorStop(0, this.hexToRgba(color, opacity));
     gradient.addColorStop(0.8, this.hexToRgba(color, opacity * 0.8));
@@ -261,6 +354,11 @@ class WatercolorBrush {
 
   // Add ink texture variation
   addInkTexture(x, y, size, color, opacity) {
+    // Validate inputs to prevent non-finite values
+    if (!isFinite(x) || !isFinite(y) || !isFinite(size) || size <= 0) {
+      return;
+    }
+    
     const textureCount = Math.min(2, Math.floor(size / 6));
     
     for (let i = 0; i < textureCount; i++) {
@@ -269,6 +367,11 @@ class WatercolorBrush {
       const textureX = x + Math.cos(angle) * radius;
       const textureY = y + Math.sin(angle) * radius;
       const textureSize = Math.random() * size * 0.2;
+      
+      // Validate calculated values
+      if (!isFinite(textureX) || !isFinite(textureY) || !isFinite(textureSize) || textureSize <= 0) {
+        continue;
+      }
       
       this.ctx.fillStyle = this.hexToRgba(color, opacity);
       this.ctx.beginPath();
@@ -306,6 +409,11 @@ class WatercolorBrush {
 
   // Render a single paint layer
   renderPaintLayer(x, y, color, size, opacity) {
+    // Validate inputs to prevent non-finite values
+    if (!isFinite(x) || !isFinite(y) || !isFinite(size) || size <= 0) {
+      return;
+    }
+    
     // Create gradient for watercolor effect
     const gradient = this.ctx.createRadialGradient(x, y, 0, x, y, size);
     gradient.addColorStop(0, this.hexToRgba(color, opacity));
@@ -321,6 +429,11 @@ class WatercolorBrush {
 
   // Render a strong core for weight
   renderPaintCore(x, y, color, size, opacity) {
+    // Validate inputs to prevent non-finite values
+    if (!isFinite(x) || !isFinite(y) || !isFinite(size) || size <= 0) {
+      return;
+    }
+    
     // Solid core for weight
     this.ctx.fillStyle = this.hexToRgba(color, opacity);
     this.ctx.beginPath();
@@ -328,6 +441,12 @@ class WatercolorBrush {
     this.ctx.fill();
     
     // Add subtle highlight
+    // Validate parameters for createRadialGradient
+    if (!isFinite(x) || !isFinite(y) || !isFinite(size) || size <= 0) {
+      this.ctx.restore();
+      return;
+    }
+    
     const highlightGradient = this.ctx.createRadialGradient(x, y, 0, x, y, size);
     highlightGradient.addColorStop(0, this.hexToRgba('#ffffff', opacity * 0.2));
     highlightGradient.addColorStop(0.5, this.hexToRgba('#ffffff', opacity * 0.1));
@@ -342,6 +461,11 @@ class WatercolorBrush {
   // Render a single paint drop (legacy function for compatibility)
   renderPaintDrop(paintDrop) {
     const { x, y, color, size, opacity, flow } = paintDrop;
+    
+    // Validate inputs to prevent non-finite values
+    if (!isFinite(x) || !isFinite(y) || !isFinite(size) || size <= 0) {
+      return;
+    }
     
     // Create gradient for watercolor effect
     const gradient = this.ctx.createRadialGradient(x, y, 0, x, y, size);
@@ -397,6 +521,11 @@ class WatercolorBrush {
     const blendedOpacity = (drop1.opacity + drop2.opacity) / 2 * strength;
     
     // Create soft blend gradient
+    // Validate parameters for createRadialGradient
+    if (!isFinite(midX) || !isFinite(midY) || !isFinite(blendSize) || blendSize <= 0) {
+      return;
+    }
+    
     const gradient = this.ctx.createRadialGradient(midX, midY, 0, midX, midY, blendSize);
     gradient.addColorStop(0, this.hexToRgba(blendedColor, blendedOpacity));
     gradient.addColorStop(0.5, this.hexToRgba(blendedColor, blendedOpacity * 0.5));
@@ -410,6 +539,11 @@ class WatercolorBrush {
 
   // Add texture variation to paint drops with optimized performance
   addTextureVariation(x, y, size, color, opacity) {
+    // Validate inputs to prevent non-finite values
+    if (!isFinite(x) || !isFinite(y) || !isFinite(size) || size <= 0) {
+      return;
+    }
+    
     // Optimized: Reduce texture count and only add for larger brush sizes
     if (size < 8) return; // Skip texture for small brushes
     
@@ -422,6 +556,11 @@ class WatercolorBrush {
       const textureY = y + Math.sin(angle) * radius;
       const textureSize = Math.random() * size * 0.3; // Smaller texture elements
       const textureOpacity = opacity * (0.2 + Math.random() * 0.3); // Reduced opacity
+      
+      // Validate calculated values
+      if (!isFinite(textureX) || !isFinite(textureY) || !isFinite(textureSize) || textureSize <= 0) {
+        continue;
+      }
       
       // Add texture elements
       this.ctx.fillStyle = this.hexToRgba(color, textureOpacity);

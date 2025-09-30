@@ -32,9 +32,7 @@
 
     // Load prompt from Supabase
     async function loadPrompt(mode = 'prompt') {
-      console.log('Loading prompt for mode:', mode);
-      console.log('Supabase client available:', typeof window.supabaseClient !== 'undefined');
-      console.log('Supabase client:', window.supabaseClient);
+      // Loading prompt for mode
       
       // Check if supabase is available
       if (typeof window.supabaseClient === 'undefined') {
@@ -54,7 +52,6 @@
         
         // If no results and no error, try without active filter (in case active column doesn't exist)
         if ((!data || data.length === 0) && !error) {
-          console.log('No active prompts found, trying without active filter...');
           const result = await window.supabaseClient
             .from('prompts')
             .select('content, weight')
@@ -77,8 +74,7 @@
           return fallback;
         }
 
-        console.log('Supabase response data:', data);
-        console.log('Data length:', data ? data.length : 'null');
+        // Process Supabase response
 
         if (data && Array.isArray(data) && data.length > 0) {
           // Use weighted selection for freehand mode, simple random for others
@@ -89,18 +85,15 @@
             const randomIndex = Math.floor(Math.random() * data.length);
             selectedPrompt = data[randomIndex].content;
           }
-          console.log('Loaded prompt from Supabase:', selectedPrompt);
+          console.log(`✅ Loaded prompt from Supabase (${mode}):`, selectedPrompt);
           return selectedPrompt;
         } else {
-          console.log('No prompts found in Supabase, using fallback');
           const fallback = getFallbackPrompt(mode);
-          console.log('Using fallback prompt:', fallback);
           return fallback;
         }
       } catch (err) {
         console.error('Error:', err);
         const fallback = getFallbackPrompt(mode);
-        console.log('Using fallback prompt after error:', fallback);
         return fallback;
       }
     }
@@ -212,20 +205,16 @@
       if (Array.isArray(fallbackPrompts[mode])) {
         const prompts = fallbackPrompts[mode];
         const selectedPrompt = prompts[Math.floor(Math.random() * prompts.length)];
-        console.log(`Selected ${mode} prompt:`, selectedPrompt);
         return selectedPrompt;
       }
 
       const finalPrompt = fallbackPrompts[mode] || 'draw something creative.';
-      console.log(`Final ${mode} prompt:`, finalPrompt);
       return finalPrompt;
     }
 
     // Update prompt display
     async function updatePrompt(mode) {
-      console.log('updatePrompt called with mode:', mode);
       const promptText = await loadPrompt(mode);
-      console.log('Setting prompt text to:', promptText);
       target.textContent = promptText;
       
       // Add visual indicator if using fallback prompts
@@ -269,7 +258,6 @@
         mode: e.target.value 
       });
       
-      console.log('Mode select changed to:', e.target.value);
       updatePrompt(e.target.value);
     });
 
@@ -279,12 +267,10 @@
         mode: modeSelect.value 
       });
       
-      console.log('New prompt button clicked, current mode:', modeSelect.value);
       updatePrompt(modeSelect.value);
     });
 
     // Load initial prompt
-    console.log('Loading initial prompt for mode:', modeSelect.value);
     updatePrompt(modeSelect.value);
   }
 
