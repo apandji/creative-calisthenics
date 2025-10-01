@@ -102,6 +102,8 @@ header button {
   transition: all 160ms ease;
   display: inline-block;
   text-align: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 header button:hover {
@@ -417,6 +419,8 @@ p {
   padding: 0;
   position: relative;
   flex-shrink: 0;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .color-picker-btn:hover {
@@ -534,6 +538,8 @@ p {
   cursor: pointer;
   transition: all 0.2s ease;
   flex-shrink: 0;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .tool-btn:hover {
@@ -570,6 +576,8 @@ p {
   cursor: pointer;
   transition: all 0.2s ease;
   flex-shrink: 0;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .size-picker-btn:hover {
@@ -654,6 +662,8 @@ p {
   display: flex;
   align-items: center;
   justify-content: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 .toolbar button:hover {
   background: color-mix(in oklab, var(--accent) 8%, transparent);

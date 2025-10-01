@@ -21,7 +21,7 @@
         </div>
         <div class="header-right">
             <button id="feedback-btn">feedback</button>
-            <button><a href="gallery.html">gallery</a></button>
+            <button id="gallery-btn">gallery</button>
         </div>
     </header>
     <div class="prompt-container">
@@ -247,6 +247,14 @@
             const submitBtn = document.getElementById('submit');
             if (submitBtn) {
                 submitBtn.addEventListener('click', submitDrawing);
+            }
+            
+            // Make entire gallery button tappable
+            const galleryBtn = document.getElementById('gallery-btn');
+            if (galleryBtn) {
+                galleryBtn.addEventListener('click', function() {
+                    window.location.href = 'gallery.html';
+                });
             }
             
         });
