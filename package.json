@@ -1,5 +1,5 @@
 {
-  "name": "creative-calisthenics",
+  "name": "driftpad",
   "version": "1.0.0",
   "description": "",
   "main": "prompts.js",
@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/apandji/creative-calisthenics.git"
+    "url": "git+https://github.com/apandji/driftpad.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/apandji/creative-calisthenics/issues"
+    "url": "https://github.com/apandji/driftpad/issues"
   },
   "homepage": "https://driftpad.app",
   "dependencies": {
