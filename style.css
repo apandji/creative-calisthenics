@@ -777,8 +777,8 @@ p {
 
 /* Mobile-specific adjustments */
 @media (max-width: 640px) {
-  /* Prevent scrolling and zooming */
-  body {
+  /* Prevent scrolling and zooming only on main drawing page */
+  body:not(.gallery-page) {
     overflow: hidden;
     position: fixed;
     width: 100%;
