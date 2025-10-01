@@ -267,6 +267,10 @@
                 } else {
                     window.showToast('Drawing submitted to gallery');
                     
+                    // Track drawing submission with feedback collector
+                    if (window.feedbackCollector && data && data[0]) {
+                        window.feedbackCollector.trackDrawingSubmitted(data[0].id);
+                    }
                     
                     // Slow dissolve animation before clearing
                     window.dissolveCanvas();

@@ -4,9 +4,11 @@
 class FeedbackCollector {
   constructor() {
     this.sessionId = this.generateSessionId();
+    this.userUUID = this.getUserUUID();
     this.sessionStartTime = Date.now();
     this.drawingCount = 0;
     this.modeSwitches = 0;
+    this.currentDrawingId = null; // Track current drawing being worked on
     this.sessionData = {
       modes_used: new Set(),
       tools_used: new Set(),
@@ -17,7 +19,19 @@ class FeedbackCollector {
     this.init();
   }
 
+  getUserUUID() {
+    let userUUID = localStorage.getItem('user_uuid');
+    if (!userUUID) {
+      userUUID = crypto.randomUUID();
+      localStorage.setItem('user_uuid', userUUID);
+    }
+    return userUUID;
+  }
+
   init() {
+    // Create session in Supabase
+    this.createSession();
+    
     // Track page visibility changes for session duration
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
@@ -30,7 +44,31 @@ class FeedbackCollector {
       this.trackSessionEnd();
     });
 
-    console.log('FeedbackCollector initialized with session:', this.sessionId);
+    console.log('FeedbackCollector initialized with session:', this.sessionId, 'user:', this.userUUID);
+  }
+
+  // Create session in Supabase
+  async createSession() {
+    try {
+      if (typeof supabase !== 'undefined') {
+        const { data, error } = await supabase
+          .from('user_sessions')
+          .insert([{
+            session_id: this.sessionId,
+            user_uuid: this.userUUID,
+            user_agent: navigator.userAgent,
+            started_at: new Date().toISOString()
+          }]);
+
+        if (error) {
+          console.error('Session creation error:', error);
+        } else {
+          console.log('Session created successfully:', this.sessionId);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to create session:', error);
+    }
   }
 
   generateSessionId() {
@@ -42,9 +80,11 @@ class FeedbackCollector {
     const feedbackData = {
       type: type,
       response: response,
+      session_id: this.sessionId,
+      user_uuid: this.userUUID,
+      drawing_id: this.currentDrawingId, // Link to current drawing if applicable
       metadata: {
         ...metadata,
-        session_id: this.sessionId,
         user_agent: navigator.userAgent,
         timestamp: new Date().toISOString()
       }
@@ -233,10 +273,37 @@ class FeedbackCollector {
     }
   }
 
+  // Track drawing ID when a drawing is submitted
+  trackDrawingSubmitted(drawingId) {
+    this.currentDrawingId = drawingId;
+    console.log('Drawing submitted with ID:', drawingId);
+  }
+
   // Track session end
-  trackSessionEnd() {
+  async trackSessionEnd() {
     const sessionDuration = Math.round((Date.now() - this.sessionStartTime) / 1000);
     this.sessionData.session_duration = sessionDuration;
+
+    // Update session in Supabase
+    try {
+      if (typeof supabase !== 'undefined') {
+        const { error } = await supabase
+          .from('user_sessions')
+          .update({
+            ended_at: new Date().toISOString(),
+            duration_seconds: sessionDuration
+          })
+          .eq('session_id', this.sessionId);
+
+        if (error) {
+          console.error('Session update error:', error);
+        } else {
+          console.log('Session ended successfully:', this.sessionId);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to update session:', error);
+    }
 
     // Show session end survey
     this.showMicroSurvey(
