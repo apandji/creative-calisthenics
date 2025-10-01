@@ -335,15 +335,26 @@
 
     // Event listeners
     modeSelect.addEventListener('change', (e) => {
+      const previousMode = modeSelect.dataset.previousMode || 'prompt';
+      const newMode = e.target.value;
+      
+      // Track mode switch
+      if (window.feedbackCollector) {
+        window.feedbackCollector.trackModeSwitch(previousMode, newMode);
+      }
+      
+      // Store previous mode for next switch
+      modeSelect.dataset.previousMode = newMode;
+      
       // Track mode selection
       umami.track('mode_selected', { 
-        mode: e.target.value 
+        mode: newMode 
       });
       
-      updatePrompt(e.target.value);
+      updatePrompt(newMode);
       
       // Show mode-specific message
-      showModeMessage(e.target.value);
+      showModeMessage(newMode);
     });
 
     newPromptBtn.addEventListener('click', () => {

@@ -225,6 +225,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // End watercolor brush stroke
     watercolorBrush.endStroke();
     
+    // Track drawing completion
+    if (window.feedbackCollector) {
+      const drawingDuration = Date.now() - (drawingStartTime || Date.now());
+      const strokeCount = watercolorBrush.getStrokeCount ? watercolorBrush.getStrokeCount() : 1;
+      window.feedbackCollector.trackDrawingCompleted(currentMode, drawingDuration, strokeCount);
+    }
+    
     // Start fade timer if not already active
     if (!fadeTimer.isTimerActive()) {
       fadeTimer.start();
@@ -540,10 +547,15 @@ document.addEventListener('DOMContentLoaded', function() {
   
   function updateToolDisplay() {
     if (!toolBtn) return;
-    
+
     toolBtn.textContent = currentTool === 'brush' ? '🖌️' : '🧽';
     toolBtn.className = currentTool === 'brush' ? 'tool-btn' : 'tool-btn eraser';
-    
+
+    // Track tool usage
+    if (window.feedbackCollector) {
+      window.feedbackCollector.trackToolUsage(currentTool);
+    }
+
     // Show tool-specific toast message
     const toolMessages = {
       'brush': [
@@ -563,7 +575,7 @@ document.addEventListener('DOMContentLoaded', function() {
         "Make room for possibility"
       ]
     };
-    
+
     const messages = toolMessages[currentTool];
     if (messages && messages.length > 0) {
       // Show toast 60% of the time to avoid overwhelming the user
