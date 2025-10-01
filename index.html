@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>driftpad</title>
     <link rel="stylesheet" href="style.css">
         <!-- Umami Analytics -->
@@ -251,15 +251,25 @@
         });
     </script>
      <div class="toolbar" role="toolbar" aria-label="drawing controls">
-        <div class="color-palette">
-            <span class="label">color</span>
-            <div id="zen-colors" class="zen-color-palette"></div>
+        <div class="color-picker-container">
+            <button id="color-picker-btn" class="color-picker-btn" aria-label="Select color">
+                <div class="current-color" id="current-color"></div>
+            </button>
+            <div id="color-popup" class="color-popup" style="display: none;">
+                <div class="color-popup-content">
+                    <div id="zen-colors" class="zen-color-palette"></div>
+                </div>
+            </div>
         </div>
-        <br>
-        <label>
-            size
-            <input id="size" type="range" min="1" max="40" value="15" aria-label="brush size">
-        </label>
+        <button id="tool-btn" class="tool-btn" aria-label="Select tool">🖌️</button>
+        <div class="size-picker-container">
+            <button id="size-picker-btn" class="size-picker-btn" aria-label="Select size">M</button>
+            <div id="size-popup" class="size-popup" style="display: none;">
+                <div class="size-popup-content">
+                    <div id="size-options" class="size-options"></div>
+                </div>
+            </div>
+        </div>
         <button id="clear" type="button">clear</button>
         <button id="submit" type="button">submit</button>
     </div>

@@ -25,6 +25,10 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  height: 100vh;
+  height: 100dvh; /* Dynamic viewport height for mobile */
+  position: relative;
 }
 
 /* Content width and rhythm */
@@ -340,19 +344,41 @@ p {
 }
 
 /* Sketch */
-.sketch { padding-top: 0; }
+.sketch { 
+  padding-top: 0; 
+  padding-bottom: 80px; /* Space for floating toolbar */
+}
+
+/* Floating Toolbar */
 .toolbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  z-index: 1000;
+  padding: 12px 20px;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   display: flex;
   gap: 12px;
   align-items: center;
-  padding: 8px 0;
+  justify-content: center;
+  flex-wrap: wrap;
+  min-height: 60px;
 }
+
 .toolbar label {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   color: var(--muted);
+  font-size: 0.875rem;
+  white-space: nowrap;
 }
+
 .toolbar input[type="color"] {
   width: 32px;
   height: 32px;
@@ -360,33 +386,98 @@ p {
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--bg);
+  cursor: pointer;
 }
-.toolbar input[type="range"] { width: 140px; }
 
-/* Zen Color Palette */
-.color-palette {
+.toolbar input[type="range"] { 
+  width: 120px; 
+  min-width: 80px;
+}
+
+/* Color Picker Container */
+.color-picker-container {
+  position: relative;
+  display: inline-block;
+}
+
+/* Color Picker Button */
+.color-picker-btn {
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  transition: all 160ms ease;
+  padding: 0;
+  position: relative;
+  flex-shrink: 0;
 }
 
-.color-palette .label {
-  color: var(--muted);
-  font-size: 0.875rem;
+.color-picker-btn:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.color-picker-btn:active {
+  transform: translateY(0);
+}
+
+.current-color {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+  max-width: 24px;
+  max-height: 24px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  transition: all 160ms ease;
+  flex-shrink: 0;
+  display: block;
+  aspect-ratio: 1;
+}
+
+/* Color Popup */
+.color-popup {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 8px;
+  z-index: 1001;
+  animation: fadeInUp 200ms ease;
+  pointer-events: auto;
+}
+
+.color-popup-content {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .zen-color-palette {
   display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  min-width: 60px;
 }
 
 .zen-color {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  border: 2px solid var(--border);
   cursor: pointer;
+  border: 2px solid transparent;
   transition: all 160ms ease;
   position: relative;
 }
@@ -414,15 +505,161 @@ p {
   border-radius: 50%;
   box-shadow: 0 0 0 1px var(--accent);
 }
+
+/* Popup Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Tool Button */
+.tool-btn {
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--border);
+  background: var(--background);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.tool-btn:hover {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.tool-btn:active {
+  transform: scale(0.95);
+}
+
+.tool-btn.eraser {
+  background: var(--error-light);
+  border-color: var(--error);
+}
+
+/* Size Picker */
+.size-picker-container {
+  position: relative;
+  display: inline-block;
+}
+
+.size-picker-btn {
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--border);
+  background: var(--background);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.size-picker-btn:hover {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.size-picker-btn:active {
+  transform: scale(0.95);
+}
+
+.size-popup {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 8px;
+  z-index: 1001;
+  animation: fadeInUp 200ms ease;
+  pointer-events: auto;
+}
+
+.size-popup-content {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.size-options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  min-width: 50px;
+}
+
+.size-option {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  max-width: 32px;
+  max-height: 32px;
+  border: 2px solid var(--border);
+  background: var(--background);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  aspect-ratio: 1;
+  flex-shrink: 0;
+}
+
+.size-option:hover {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.size-option.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
 .toolbar button {
-  padding: 8px 12px;
+  padding: 10px 16px;
   border: 1px solid var(--border);
   background: var(--bg);
-  border-radius: 10px;
+  border-radius: 8px;
   cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 160ms ease;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .toolbar button:hover {
   background: color-mix(in oklab, var(--accent) 8%, transparent);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+.toolbar button:active {
+  transform: translateY(0);
 }
 .canvas-wrap {
   position: relative;
@@ -430,6 +667,9 @@ p {
   border-radius: 12px;
   overflow: hidden;
   background: #d2d2d2;
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
 }
 
 /* Make the drawing area full-bleed across the viewport (in-page, not background) */
@@ -523,18 +763,152 @@ p {
   image-rendering: crisp-edges;
 }
 
+/* Mobile-specific adjustments */
 @media (max-width: 640px) {
-  .toolbar { 
-    flex-wrap: wrap; 
+  /* Prevent scrolling and zooming */
+  body {
+    overflow: hidden;
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: var(--bg);
-    border-top: 1px solid var(--border);
-    z-index: 100;
-    padding: 12px 20px;
-    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* Ensure canvas takes available space */
+  .sketch {
+    height: calc(100vh - 140px); /* Account for header, prompt, and toolbar */
+    height: calc(100dvh - 140px);
+    padding-bottom: 0;
+  }
+  
+  .canvas-wrap {
+    height: 100%;
+    width: 100%;
+  }
+  
+  #canvas {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain;
+  }
+  
+  /* Toolbar adjustments */
+  .toolbar {
+    padding: 8px 16px;
+    gap: 8px;
+    min-height: 56px;
+  }
+  
+  .toolbar label {
+    font-size: 0.8rem;
+  }
+  
+  .toolbar input[type="range"] {
+    width: 100px;
+    min-width: 60px;
+  }
+  
+  .toolbar button {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    min-height: 36px;
+  }
+  
+  /* Hide labels on very small screens */
+  @media (max-width: 480px) {
+    .toolbar .label {
+      display: none;
+    }
+    
+    .toolbar {
+      gap: 6px;
+      padding: 6px 12px;
+    }
+    
+    /* Color picker adjustments for small screens */
+    .color-picker-btn {
+      width: 36px;
+      height: 36px;
+    }
+    
+    .current-color {
+      width: 20px;
+      height: 20px;
+      min-width: 20px;
+      min-height: 20px;
+      max-width: 20px;
+      max-height: 20px;
+    }
+    
+    .color-popup {
+      margin-bottom: 4px;
+    }
+    
+    .color-popup-content {
+      padding: 8px;
+    }
+    
+  .zen-color {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .zen-color-palette {
+    min-width: 50px;
+    gap: 6px;
+  }
+  
+  .tool-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+  
+  .size-picker-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+  
+  .size-options {
+    min-width: 40px;
+    gap: 4px;
+  }
+  
+  .size-option {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    min-height: 24px;
+    max-width: 24px;
+    max-height: 24px;
+    font-size: 10px;
+    aspect-ratio: 1;
+    flex-shrink: 0;
+  }
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .toolbar {
+    padding: 10px 24px;
+    gap: 16px;
+  }
+  
+  .toolbar input[type="range"] {
+    width: 140px;
+  }
+}
+
+/* Large desktop adjustments */
+@media (min-width: 1025px) {
+  .toolbar {
+    padding: 12px 32px;
+    gap: 20px;
+  }
+  
+  .toolbar input[type="range"] {
+    width: 160px;
   }
 }
 

@@ -1,4 +1,29 @@
 document.addEventListener('DOMContentLoaded', function() {
+  // Prevent scrolling and zooming on mobile
+  function preventScroll(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+  }
+  
+  // Add touch event listeners to prevent scrolling
+  document.addEventListener('touchstart', preventScroll, { passive: false });
+  document.addEventListener('touchmove', preventScroll, { passive: false });
+  document.addEventListener('touchend', preventScroll, { passive: false });
+  
+  // Prevent context menu on long press
+  document.addEventListener('contextmenu', preventScroll);
+  
+  // Prevent double-tap zoom
+  let lastTouchEnd = 0;
+  document.addEventListener('touchend', function(e) {
+    const now = (new Date()).getTime();
+    if (now - lastTouchEnd <= 300) {
+      e.preventDefault();
+    }
+    lastTouchEnd = now;
+  }, false);
+  
   const canvas = document.getElementById('canvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
@@ -9,6 +34,17 @@ document.addEventListener('DOMContentLoaded', function() {
   const clearBtn = document.getElementById('clear');
   const saveBtn = document.getElementById('save');
   const cursor = document.getElementById('cursor');
+  
+  // New color picker elements
+  const colorPickerBtn = document.getElementById('color-picker-btn');
+  const currentColorDiv = document.getElementById('current-color');
+  const colorPopup = document.getElementById('color-popup');
+  
+  // New tool and size picker elements
+  const toolBtn = document.getElementById('tool-btn');
+  const sizePickerBtn = document.getElementById('size-picker-btn');
+  const sizePopup = document.getElementById('size-popup');
+  const sizeOptions = document.getElementById('size-options');
 
   // Initialize watercolor brush and fade timer
   const watercolorBrush = new WatercolorBrush(canvas, ctx);
@@ -29,13 +65,29 @@ document.addEventListener('DOMContentLoaded', function() {
   let lastTime = 0;
   let lastSpeed = 0;
   let currentWidth = strokeWidth;
+  
+  // Tool and size state
+  let currentTool = 'brush'; // 'brush' or 'eraser'
+  let currentSize = 'M'; // 'S', 'M', 'L', 'XL'
+  
+  // Size mappings
+  const brushSizes = { S: 2, M: 6, L: 12, XL: 20 };
+  const eraserSizes = { S: 4, M: 12, L: 24, XL: 40 };
 
   // Resize handling that preserves drawing content without any scaling
   function resizeCanvas() {
     const dpr = Math.max(1, window.devicePixelRatio || 1);
     const rect = canvas.getBoundingClientRect();
-    const cssWidth = Math.floor(rect.width);
-    const cssHeight = Math.floor(rect.height);
+    
+    // On mobile, ensure canvas takes full available space
+    let cssWidth = Math.floor(rect.width);
+    let cssHeight = Math.floor(rect.height);
+    
+    // Mobile-specific sizing
+    if (window.innerWidth <= 640) {
+      const availableHeight = window.innerHeight - 140; // Account for header, prompt, and toolbar
+      cssHeight = Math.max(200, Math.floor(availableHeight));
+    }
 
     if (cssWidth === lastCssWidth && cssHeight === lastCssHeight && dpr === lastDpr) {
       return;
@@ -117,8 +169,22 @@ document.addEventListener('DOMContentLoaded', function() {
     lastSpeed = 0;
     currentWidth = computeWidth(pressure, 0);
     
-    // Start watercolor brush stroke
-    watercolorBrush.startStroke(x, y, pressure);
+    // Keep cursor visible during drawing
+    if (cursor) cursor.style.display = 'block';
+    
+    // Start watercolor brush stroke or eraser
+    if (currentTool === 'brush') {
+      watercolorBrush.startStroke(x, y, pressure);
+    } else if (currentTool === 'eraser') {
+      // Start eraser - clear the initial point ultra-smoothly
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.globalAlpha = 1.0; // Full opacity erasing
+      ctx.beginPath();
+      ctx.arc(x, y, currentWidth / 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 1;
+    }
   }
 
   function drawTo(x, y, pressure = 0.5, t = performance.now()) {
@@ -136,8 +202,36 @@ document.addEventListener('DOMContentLoaded', function() {
     // Smooth the width for an ink-like feel
     currentWidth = currentWidth * 0.6 + targetWidth * 0.4;
 
-    // Continue watercolor brush stroke
-    watercolorBrush.continueStroke(x, y, pressure);
+    // Continue watercolor brush stroke or eraser
+    if (currentTool === 'brush') {
+      watercolorBrush.continueStroke(x, y, pressure);
+    } else if (currentTool === 'eraser') {
+      // Ultra-smooth eraser functionality
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.globalAlpha = 1.0; // Full opacity erasing
+      
+      // Create smooth eraser stroke with multiple passes for better coverage
+      ctx.beginPath();
+      ctx.arc(x, y, currentWidth / 2, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Add smooth stroke between points
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      ctx.lineTo(x, y);
+      ctx.lineWidth = currentWidth;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+      
+      // Add extra coverage for smoother erasing
+      ctx.beginPath();
+      ctx.arc((lastX + x) / 2, (lastY + y) / 2, currentWidth / 3, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 1;
+    }
     
     lastX = x;
     lastY = y;
@@ -172,6 +266,10 @@ document.addEventListener('DOMContentLoaded', function() {
     e.stopPropagation();
     const { x, y } = getPos(e);
     const pressure = (e.pressure && e.pressure > 0) ? e.pressure : 0.5;
+    
+    // Update cursor position during drawing
+    updateCursorPosition(e);
+    
     drawTo(x, y, pressure, e.timeStamp || performance.now());
   }
 
@@ -202,10 +300,11 @@ document.addEventListener('DOMContentLoaded', function() {
   canvas.addEventListener('contextmenu', (e) => e.preventDefault());
   canvas.addEventListener('selectstart', (e) => e.preventDefault());
 
-  // Update cursor size based on brush size
+  // Update cursor size based on current tool size
   function updateCursorSize() {
     if (cursor) {
-      const size = Math.max(8, strokeWidth * 2); // Minimum 8px, scale up from brush size
+      // Use the actual stroke width for the cursor size
+      const size = Math.max(8, strokeWidth);
       cursor.style.width = size + 'px';
       cursor.style.height = size + 'px';
     }
@@ -237,24 +336,25 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
-  if (sizeInput) {
-    sizeInput.addEventListener('input', (e) => {
-      strokeWidth = Number(e.target.value);
-      watercolorBrush.setSize(strokeWidth);
-      updateCursorSize();
-    });
-    
-    // Track brush size change only when user finishes adjusting
-    sizeInput.addEventListener('change', (e) => {
-      strokeWidth = Number(e.target.value);
-      
-      // Track brush size change
-      umami.track('brush_size_changed', { 
-        size: strokeWidth,
-        size_percentage: Math.round((strokeWidth / 40) * 100)
-      });
-    });
-  }
+  // Old size input disabled - now using size picker system
+  // if (sizeInput) {
+  //   sizeInput.addEventListener('input', (e) => {
+  //     strokeWidth = Number(e.target.value);
+  //     watercolorBrush.setSize(strokeWidth);
+  //     updateCursorSize();
+  //   });
+  //   
+  //   // Track brush size change only when user finishes adjusting
+  //   sizeInput.addEventListener('change', (e) => {
+  //     strokeWidth = Number(e.target.value);
+  //     
+  //     // Track brush size change
+  //     umami.track('brush_size_changed', { 
+  //       size: strokeWidth,
+  //       size_percentage: Math.round((strokeWidth / 40) * 100)
+  //     });
+  //   });
+  // }
   if (clearBtn) {
     clearBtn.addEventListener('click', () => {
       // Track the clear event
@@ -335,6 +435,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Update stroke color for compatibility
         strokeColor = color;
+        
+        // Dispatch custom event for color picker
+        document.dispatchEvent(new CustomEvent('colorSelected', {
+          detail: { color: color, index: index }
+        }));
       });
       
       zenColorsContainer.appendChild(colorElement);
@@ -346,10 +451,164 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  // Color picker functionality
+  function initColorPicker() {
+    if (!colorPickerBtn || !currentColorDiv || !colorPopup) {
+      return;
+    }
+    
+    // Set initial color
+    const zenColors = watercolorBrush.getZenColors();
+    if (zenColors.length > 0) {
+      currentColorDiv.style.backgroundColor = zenColors[0];
+    }
+    
+    // Toggle popup on button click
+    colorPickerBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const isVisible = colorPopup.style.display === 'block';
+      colorPopup.style.display = isVisible ? 'none' : 'block';
+    });
+    
+    // Close popup when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!colorPickerBtn.contains(e.target) && !colorPopup.contains(e.target)) {
+        colorPopup.style.display = 'none';
+      }
+    });
+    
+    // Update current color when a color is selected
+    document.addEventListener('colorSelected', (e) => {
+      // Track color change
+      umami.track('color_changed', { 
+        color: e.detail.color, 
+        color_index: e.detail.index 
+      });
+      
+      currentColorDiv.style.backgroundColor = e.detail.color;
+      colorPopup.style.display = 'none';
+    });
+  }
+
+  // Tool picker functionality
+  function initToolPicker() {
+    if (!toolBtn) return;
+    
+    // Set initial tool
+    updateToolDisplay();
+    
+    // Toggle tool on click
+    toolBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      currentTool = currentTool === 'brush' ? 'eraser' : 'brush';
+      updateToolDisplay();
+      updateStrokeWidth();
+      
+      // Track tool change
+      umami.track('tool_changed', { 
+        tool: currentTool
+      });
+    });
+  }
+  
+  function updateToolDisplay() {
+    if (!toolBtn) return;
+    
+    toolBtn.textContent = currentTool === 'brush' ? '🖌️' : '🧽';
+    toolBtn.className = currentTool === 'brush' ? 'tool-btn' : 'tool-btn eraser';
+  }
+  
+  function updateStrokeWidth() {
+    const sizes = currentTool === 'brush' ? brushSizes : eraserSizes;
+    strokeWidth = sizes[currentSize];
+    
+    // Update size picker button
+    if (sizePickerBtn) {
+      sizePickerBtn.textContent = currentSize;
+    }
+    
+    // Update the old range input if it exists (for compatibility)
+    if (sizeInput) {
+      sizeInput.value = strokeWidth;
+    }
+    
+    // Update watercolor brush size
+    watercolorBrush.setSize(strokeWidth);
+    
+    // Update cursor size
+    updateCursorSize();
+  }
+
+  // Size picker functionality
+  function initSizePicker() {
+    if (!sizePickerBtn || !sizePopup || !sizeOptions) return;
+    
+    // Create size options
+    const sizes = ['S', 'M', 'L', 'XL'];
+    sizeOptions.innerHTML = '';
+    
+    sizes.forEach(size => {
+      const option = document.createElement('button');
+      option.className = 'size-option';
+      option.textContent = size;
+      option.setAttribute('data-size', size);
+      
+      if (size === currentSize) {
+        option.classList.add('active');
+      }
+      
+      option.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Remove active class from all options
+        document.querySelectorAll('.size-option').forEach(el => el.classList.remove('active'));
+        // Add active class to clicked option
+        option.classList.add('active');
+        
+        currentSize = size;
+        updateStrokeWidth();
+        sizePopup.style.display = 'none';
+        
+        // Track size change
+        umami.track('size_changed', { 
+          size: currentSize,
+          tool: currentTool,
+          actual_size: strokeWidth
+        });
+      });
+      
+      sizeOptions.appendChild(option);
+    });
+    
+    // Toggle popup on button click
+    sizePickerBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const isVisible = sizePopup.style.display === 'block';
+      sizePopup.style.display = isVisible ? 'none' : 'block';
+    });
+    
+    // Close popup when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!sizePickerBtn.contains(e.target) && !sizePopup.contains(e.target)) {
+        sizePopup.style.display = 'none';
+      }
+    });
+  }
+
   // Init
   resizeCanvas();
   updateCursorSize(); // Set initial cursor size
   initZenColorPalette(); // Initialize zen color palette
+  initColorPicker(); // Initialize color picker
+  initToolPicker(); // Initialize tool picker
+  initSizePicker(); // Initialize size picker
 
   // Helpers
   function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
