@@ -1080,83 +1080,38 @@ footer p {
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 16px;
-  padding: 32px;
-  max-width: 500px;
+  padding: 40px;
+  max-width: 400px;
   width: 90%;
   text-align: center;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   animation: fadeIn 0.3s ease-out;
 }
 
-.onboarding-content h2 {
-  margin: 0 0 24px 0;
-  font-size: 28px;
+.onboarding-content p {
+  margin: 0 0 16px 0;
+  font-size: 18px;
   color: var(--text);
+  line-height: 1.6;
   font-weight: 300;
 }
 
-.onboarding-text p {
-  margin: 0 0 20px 0;
-  font-size: 16px;
-  color: var(--muted);
-}
-
-.mode-explanation {
-  margin: 24px 0;
-  text-align: left;
-}
-
-.mode-item {
-  display: flex;
-  align-items: flex-start;
-  margin: 16px 0;
-  padding: 12px;
-  border-radius: 8px;
-  background: color-mix(in oklab, var(--bg) 95%, var(--accent));
-  border: 1px solid var(--border);
-}
-
-.mode-icon {
-  font-size: 24px;
-  margin-right: 16px;
-  margin-top: 2px;
-}
-
-.mode-item div {
-  flex: 1;
-}
-
-.mode-item strong {
-  display: block;
-  font-size: 14px;
-  color: var(--text);
-  margin-bottom: 4px;
-  font-weight: 500;
-}
-
-.mode-item small {
-  font-size: 12px;
-  color: var(--muted);
-  line-height: 1.4;
-}
-
-.onboarding-footer {
-  margin: 24px 0 0 0 !important;
+.onboarding-content p:last-of-type {
+  margin-bottom: 32px;
   font-style: italic;
-  color: var(--accent) !important;
-  font-size: 14px;
+  color: var(--accent);
 }
 
 .onboarding-close {
   background: var(--accent);
   color: var(--bg);
   border: none;
-  padding: 12px 24px;
+  padding: 14px 32px;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   cursor: pointer;
-  margin-top: 20px;
+  margin-top: 8px;
   transition: all 0.2s ease;
 }
 
