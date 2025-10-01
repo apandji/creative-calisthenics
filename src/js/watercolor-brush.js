@@ -600,6 +600,21 @@ class WatercolorBrush {
     this.paintLayers = [];
   }
 
+  // Check if there are any user-created strokes
+  hasUserStrokes() {
+    return this.paintLayers.length > 0;
+  }
+
+  // Get all user stroke data for redrawing
+  getUserStrokes() {
+    return this.paintLayers.slice(); // Return a copy
+  }
+
+  // Clear only user strokes (for eraser functionality)
+  clearUserStrokes() {
+    this.paintLayers = [];
+  }
+
   // Get current zen colors for UI
   getZenColors() {
     return this.zenColors;

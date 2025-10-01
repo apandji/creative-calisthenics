@@ -36,12 +36,12 @@
         </div>
     </section>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="watercolor-brush.js" defer></script>
-    <script src="fade-timer.js" defer></script>
-    <script src="shape-generator.js"></script>
-    <script src="prompts.js" defer></script>
-    <script src="sketch.js" defer></script>
-    <script src="pull-to-refresh.js" defer></script>
+    <script src="js/watercolor-brush.js" defer></script>
+    <script src="js/fade-timer.js" defer></script>
+    <script src="js/shape-generator.js"></script>
+    <script src="js/prompts.js" defer></script>
+    <script src="js/sketch.js" defer></script>
+    <script src="js/pull-to-refresh.js" defer></script>
     
     <!-- Simple Feedback Modal -->
     <div id="feedback-modal" class="feedback-modal" style="display: none;">
@@ -138,7 +138,17 @@
             return userUUID;
         }
         
-        // Show zen-like toast notification
+        // Cursor tracking for toast positioning
+        let cursorX = window.innerWidth / 2;
+        let cursorY = window.innerHeight / 2;
+        
+        // Track cursor movement
+        document.addEventListener('mousemove', (e) => {
+            cursorX = e.clientX;
+            cursorY = e.clientY;
+        });
+        
+        // Show zen-like toast notification with floating animation
         window.showToast = function(message) {
             // Remove any existing toasts
             const existingToast = document.querySelector('.toast');
@@ -151,8 +161,35 @@
             toast.textContent = message;
             document.body.appendChild(toast);
             
+            // Apply cursor-responsive positioning
+            const updateToastPosition = () => {
+                const centerX = window.innerWidth / 2;
+                const centerY = 20; // Base position from top
+                
+                // Calculate offset based on cursor position
+                const cursorOffsetX = (cursorX - centerX) * 0.1; // Subtle influence
+                const cursorOffsetY = Math.max(0, (cursorY - centerY) * 0.05); // Gentle vertical drift
+                
+                // Apply the offset with smooth animation
+                const finalX = centerX + cursorOffsetX;
+                const finalY = centerY + cursorOffsetY;
+                
+                toast.style.left = finalX + 'px';
+                toast.style.top = finalY + 'px';
+                toast.style.transform = `translateX(-50%) translateY(${Math.sin(Date.now() * 0.002) * 2}px) rotate(${Math.sin(Date.now() * 0.001) * 0.5}deg)`;
+                
+                // Update shadow based on cursor proximity
+                const distance = Math.sqrt(Math.pow(cursorX - finalX, 2) + Math.pow(cursorY - finalY, 2));
+                const shadowIntensity = Math.max(0.1, 0.3 - (distance / 1000));
+                toast.style.boxShadow = `0 4px 20px rgba(0, 0, 0, ${shadowIntensity}), 0 0 ${Math.sin(Date.now() * 0.003) * 10 + 15}px rgba(0, 0, 0, 0.1)`;
+            };
+            
+            // Update position continuously while toast is visible
+            const positionInterval = setInterval(updateToastPosition, 50);
+            
             // Auto-remove after 3 seconds
             setTimeout(() => {
+                clearInterval(positionInterval);
                 toast.classList.add('fade-out');
                 setTimeout(() => toast.remove(), 600);
             }, 3000);

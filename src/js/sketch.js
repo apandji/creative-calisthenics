@@ -80,11 +80,6 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
 
-    console.log('Resizing canvas:', {
-      from: { width: lastCssWidth, height: lastCssHeight },
-      to: { width: cssWidth, height: cssHeight },
-      dpr: dpr
-    });
 
     // Save current canvas content as a data URL before resizing
     let savedDataURL = null;
@@ -92,7 +87,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (hasContent) {
       try {
         savedDataURL = canvas.toDataURL('image/png');
-        console.log('Saved canvas content as data URL');
       } catch (error) {
         console.warn('Failed to save canvas content:', error);
       }
@@ -102,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
     lastCssHeight = cssHeight;
     lastDpr = dpr;
 
-    // Set canvas internal size (for drawing)
+    // Set canvas size
     canvas.width = cssWidth * dpr;
     canvas.height = cssHeight * dpr;
     
@@ -163,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (currentTool === 'brush') {
       watercolorBrush.startStroke(x, y, pressure);
     } else if (currentTool === 'eraser') {
-      // Start eraser - clear the initial point ultra-smoothly
+      // Eraser only affects foreground canvas (user drawings)
       ctx.globalCompositeOperation = 'destination-out';
       ctx.globalAlpha = 1.0; // Full opacity erasing
       ctx.beginPath();
@@ -193,7 +187,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (currentTool === 'brush') {
       watercolorBrush.continueStroke(x, y, pressure);
     } else if (currentTool === 'eraser') {
-      // Ultra-smooth eraser functionality
+      // Ultra-smooth eraser functionality (only affects foreground canvas)
       ctx.globalCompositeOperation = 'destination-out';
       ctx.globalAlpha = 1.0; // Full opacity erasing
       
@@ -344,6 +338,48 @@ document.addEventListener('DOMContentLoaded', function() {
   // }
   if (clearBtn) {
     clearBtn.addEventListener('click', () => {
+      // Check if we're in Complete Drawing mode
+      const modeSelect = document.getElementById('prompt-mode');
+      const currentMode = modeSelect ? modeSelect.value : 'prompt';
+      
+      if (currentMode === 'complete_drawing') {
+        // Check if there are user-created strokes
+        const hasStrokes = watercolorBrush.hasUserStrokes();
+        console.log('Complete Drawing mode - hasUserStrokes:', hasStrokes);
+        
+        if (hasStrokes) {
+          // User has drawn something - clear user drawings but preserve generated shape
+          if (typeof window.showToast === 'function') {
+            window.showToast('Your drawings cleared - shape preserved');
+          }
+          
+          // Clear watercolor brush (user drawings)
+          watercolorBrush.clear();
+          
+          // Stop fade timer
+          fadeTimer.stop();
+          
+          // Clear only foreground canvas (user drawings)
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          // Background canvas (generated shape) remains untouched
+        } else {
+          // No user drawings - show nudging message
+          const nudgingMessages = [
+            "Make your mark",
+            "Try something new", 
+            "Drift and add your mark"
+          ];
+          const randomMessage = nudgingMessages[Math.floor(Math.random() * nudgingMessages.length)];
+          
+          if (typeof window.showToast === 'function') {
+            window.showToast(randomMessage);
+          }
+        }
+        
+        return;
+      }
+      
+      // For other modes, clear everything normally
       // Track the clear event
       umami.track('clear_drawing');
       // Show zen-like toast notification
@@ -507,6 +543,38 @@ document.addEventListener('DOMContentLoaded', function() {
     
     toolBtn.textContent = currentTool === 'brush' ? '🖌️' : '🧽';
     toolBtn.className = currentTool === 'brush' ? 'tool-btn' : 'tool-btn eraser';
+    
+    // Show tool-specific toast message
+    const toolMessages = {
+      'brush': [
+        "Brush ready - paint with intention",
+        "Create with purpose",
+        "Let your creativity flow",
+        "Paint your thoughts",
+        "Express yourself",
+        "Make your mark"
+      ],
+      'eraser': [
+        "Eraser ready - clear with purpose",
+        "Make space for new ideas",
+        "Clear the canvas of doubt",
+        "Erase and begin again",
+        "Start fresh",
+        "Make room for possibility"
+      ]
+    };
+    
+    const messages = toolMessages[currentTool];
+    if (messages && messages.length > 0) {
+      // Show toast 60% of the time to avoid overwhelming the user
+      if (Math.random() < 0.6) {
+        const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+        // Show toast after a short delay
+        setTimeout(() => {
+          window.showToast(randomMessage);
+        }, 300);
+      }
+    }
   }
   
   function updateStrokeWidth() {
@@ -589,6 +657,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // Make resizeCanvas globally accessible
+  window.resizeCanvas = resizeCanvas;
+  
   // Init
   resizeCanvas();
   updateCursorSize(); // Set initial cursor size
@@ -596,6 +667,7 @@ document.addEventListener('DOMContentLoaded', function() {
   initColorPicker(); // Initialize color picker
   initToolPicker(); // Initialize tool picker
   initSizePicker(); // Initialize size picker
+
 
   // Helpers
   function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }

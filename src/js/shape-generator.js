@@ -18,6 +18,7 @@ class ShapeGenerator {
             'zigzag',
             'caret'
         ];
+        this.generatedShapeImageData = null; // Store the generated shape
     }
 
     /**
@@ -321,11 +322,24 @@ class ShapeGenerator {
      * Generate a shape with fade-in animation
      */
     generateShapeWithFade() {
+        console.log('ShapeGenerator.generateShapeWithFade called');
+        console.log('Canvas dimensions:', this.canvas.width, 'x', this.canvas.height);
+        console.log('Canvas element:', this.canvas);
+        
         // Clear canvas first
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
         // Generate the shape with fade-in effect
         this.generateShapeFadeIn();
+    }
+
+    /**
+     * Redraw the generated shape (for eraser functionality)
+     */
+    redrawGeneratedShape() {
+        if (this.generatedShapeImageData) {
+            this.ctx.putImageData(this.generatedShapeImageData, 0, 0);
+        }
     }
 
     /**
@@ -399,6 +413,9 @@ class ShapeGenerator {
                 clearInterval(fadeInInterval);
                 this.ctx.globalAlpha = 1;
                 this.ctx.restore();
+                
+                // Store the generated shape data for redrawing
+                this.generatedShapeImageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
             }
         }, 50); // ~20fps for smooth animation
     }
