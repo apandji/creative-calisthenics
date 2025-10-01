@@ -17,7 +17,6 @@ Driftpad is a web-based drawing application that encourages mindful creativity t
 ### 🎨 Advanced Drawing Engine
 - **Watercolor Brush System**: Pressure-sensitive drawing with natural ink effects
 - **Zen Color Palette**: 5 carefully selected grayscale tones
-- **Smart Fade Timer**: Drawings gradually disappear, teaching impermanence
 - **Mobile-Optimized**: Touch-friendly interface for phones and tablets
 
 ### 🧠 Mindfulness Integration
@@ -47,7 +46,6 @@ Visit **[driftpad.app](https://driftpad.app)** to start drawing!
 Driftpad embodies a zen approach to digital creativity:
 
 - **Process over Product**: Focus on the act of drawing, not the result
-- **Impermanence**: Learn to let go as drawings fade
 - **Mindful Breaks**: Take time to breathe and reflect
 - **Community**: Share creativity without ego
 
