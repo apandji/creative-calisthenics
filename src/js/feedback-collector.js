@@ -3,17 +3,14 @@
 
 class FeedbackCollector {
   constructor() {
-    this.sessionId = this.generateSessionId();
     this.userUUID = this.getUserUUID();
-    this.sessionStartTime = Date.now();
     this.drawingCount = 0;
     this.modeSwitches = 0;
     this.currentDrawingId = null; // Track current drawing being worked on
     this.sessionData = {
       modes_used: new Set(),
       tools_used: new Set(),
-      drawings_completed: 0,
-      session_duration: 0
+      drawings_completed: 0
     };
     
     this.init();
@@ -29,58 +26,15 @@ class FeedbackCollector {
   }
 
   init() {
-    // Create session in Supabase
-    this.createSession();
-    
-    // Track page visibility changes for session duration
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        this.trackSessionEnd();
-      }
-    });
-
-    // Track before page unload
-    window.addEventListener('beforeunload', () => {
-      this.trackSessionEnd();
-    });
-
-    console.log('FeedbackCollector initialized with session:', this.sessionId, 'user:', this.userUUID);
+    console.log('FeedbackCollector initialized for user:', this.userUUID);
   }
 
-  // Create session in Supabase
-  async createSession() {
-    try {
-      if (typeof supabase !== 'undefined') {
-        const { data, error } = await supabase
-          .from('user_sessions')
-          .insert([{
-            session_id: this.sessionId,
-            user_uuid: this.userUUID,
-            user_agent: navigator.userAgent,
-            started_at: new Date().toISOString()
-          }]);
-
-        if (error) {
-          console.error('Session creation error:', error);
-        } else {
-          console.log('Session created successfully:', this.sessionId);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to create session:', error);
-    }
-  }
-
-  generateSessionId() {
-    return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-  }
 
   // Submit feedback to Supabase
   async submitFeedback(type, response, metadata = {}) {
     const feedbackData = {
       type: type,
       response: response,
-      session_id: this.sessionId,
       user_uuid: this.userUUID,
       drawing_id: this.currentDrawingId, // Link to current drawing if applicable
       metadata: {
@@ -279,57 +233,6 @@ class FeedbackCollector {
     console.log('Drawing submitted with ID:', drawingId);
   }
 
-  // Track session end
-  async trackSessionEnd() {
-    const sessionDuration = Math.round((Date.now() - this.sessionStartTime) / 1000);
-    this.sessionData.session_duration = sessionDuration;
-
-    // Update session in Supabase
-    try {
-      if (typeof supabase !== 'undefined') {
-        const { error } = await supabase
-          .from('user_sessions')
-          .update({
-            ended_at: new Date().toISOString(),
-            duration_seconds: sessionDuration
-          })
-          .eq('session_id', this.sessionId);
-
-        if (error) {
-          console.error('Session update error:', error);
-        } else {
-          console.log('Session ended successfully:', this.sessionId);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to update session:', error);
-    }
-
-    // Show session end survey
-    this.showMicroSurvey(
-      "One word to describe your drift?",
-      ["Peaceful", "Creative", "Focused", "Relaxing", "Inspiring", "Other"],
-      "session_end_mood",
-      this.sessionData
-    );
-
-    // Submit session data
-    this.submitFeedback('session_end', 'session_completed', {
-      ...this.sessionData,
-      modes_used: Array.from(this.sessionData.modes_used),
-      tools_used: Array.from(this.sessionData.tools_used),
-      session_duration: sessionDuration
-    });
-
-    if (typeof umami !== 'undefined') {
-      umami.track('session_ended', {
-        duration: sessionDuration,
-        drawings: this.drawingCount,
-        mode_switches: this.modeSwitches,
-        modes_used: Array.from(this.sessionData.modes_used)
-      });
-    }
-  }
 
   // Get feedback data from localStorage (for debugging)
   getLocalFeedback() {
