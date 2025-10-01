@@ -82,12 +82,20 @@ class FeedbackCollector {
 
   // Micro-survey system - now using toasts
   showMicroSurvey(question, options, type, metadata = {}) {
-    // Only show surveys 30% of the time to avoid overwhelming users
-    if (Math.random() > 0.3) return;
+    console.log(`showMicroSurvey called: ${question}`);
+    
+    // Only show surveys 80% of the time for testing (was 30%)
+    const shouldShow = Math.random() <= 0.8;
+    console.log(`Should show survey: ${shouldShow}`);
+    
+    if (!shouldShow) return;
 
     // Show the question as a toast
     if (typeof window.showToast === 'function') {
+      console.log('Showing toast:', question);
       window.showToast(question);
+    } else {
+      console.log('showToast function not available');
     }
     
     // Simulate a response after a short delay
@@ -121,8 +129,11 @@ class FeedbackCollector {
     this.sessionData.drawings_completed++;
     this.sessionData.modes_used.add(mode);
 
+    console.log(`Drawing completed! Count: ${this.drawingCount}, Mode: ${mode}`);
+
     // Show micro-survey after first drawing
     if (this.drawingCount === 1) {
+      console.log('Triggering first drawing survey...');
       setTimeout(() => {
         this.showMicroSurvey(
           "How did that feel?",
