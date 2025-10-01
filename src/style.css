@@ -1102,6 +1102,14 @@ footer p {
   color: var(--accent);
 }
 
+.caption {
+  font-size: 12px !important;
+  color: var(--muted) !important;
+  font-style: normal !important;
+  margin: 16px 0 8px 0 !important;
+  opacity: 0.7;
+}
+
 .onboarding-close {
   background: var(--accent);
   color: var(--bg);
