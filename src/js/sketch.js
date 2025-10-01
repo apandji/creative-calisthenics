@@ -711,15 +711,34 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Close on backdrop click
-    onboardingModal.addEventListener('click', (e) => {
-      if (e.target === onboardingModal) {
-        onboardingModal.style.display = 'none';
-        localStorage.setItem('driftpad-onboarding-seen', 'true');
-        if (typeof umami !== 'undefined') {
-          umami.track('onboarding_completed');
-        }
-      }
-    });
+          onboardingModal.addEventListener('click', (e) => {
+            if (e.target === onboardingModal) {
+              onboardingModal.style.display = 'none';
+              localStorage.setItem('driftpad-onboarding-seen', 'true');
+              if (typeof umami !== 'undefined') {
+                umami.track('onboarding_completed');
+              }
+            }
+          });
+
+          // Handle feedback button click
+          const feedbackButton = document.getElementById('feedback-button');
+          if (feedbackButton) {
+            feedbackButton.addEventListener('click', (e) => {
+              e.preventDefault();
+              // Close onboarding modal
+              onboardingModal.style.display = 'none';
+              localStorage.setItem('driftpad-onboarding-seen', 'true');
+              // Open feedback modal directly
+              const feedbackModal = document.getElementById('feedback-modal');
+              if (feedbackModal) {
+                feedbackModal.style.display = 'flex';
+              }
+              if (typeof umami !== 'undefined') {
+                umami.track('onboarding_feedback_clicked');
+              }
+            });
+          }
   }
 
   // Make resizeCanvas globally accessible

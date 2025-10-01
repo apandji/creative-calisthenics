@@ -98,6 +98,33 @@
                 }
             });
             
+            // Make openFeedbackModal globally accessible
+            window.openFeedbackModal = function() {
+                feedbackModal.style.display = 'flex';
+            };
+            
+            // Test: Add click handler for feedback button in onboarding modal
+            setTimeout(() => {
+                const onboardingFeedbackBtn = document.getElementById('feedback-button');
+                if (onboardingFeedbackBtn) {
+                    console.log('Found onboarding feedback button, adding click handler');
+                    onboardingFeedbackBtn.addEventListener('click', function(e) {
+                        console.log('Onboarding feedback button clicked!');
+                        e.preventDefault();
+                        // Close onboarding modal
+                        const onboardingModal = document.getElementById('onboarding-modal');
+                        if (onboardingModal) {
+                            onboardingModal.style.display = 'none';
+                            localStorage.setItem('driftpad-onboarding-seen', 'true');
+                        }
+                        // Open feedback modal
+                        feedbackModal.style.display = 'flex';
+                    });
+                } else {
+                    console.log('Onboarding feedback button not found');
+                }
+            }, 1000);
+            
             // Handle form submission
             feedbackForm.addEventListener('submit', function(e) {
                 // Don't prevent default - let the form submit to Formspree
@@ -331,8 +358,18 @@
             <p>Draw on driftpad, and <br>find your inner peace.</p>
             <p>Respond to a prompt, complete a picture or freely doodle.</p>
             <p>No timelines, no deadlines.<br>Let your mind drift.</p>
-            <p class="caption">Made with ❤️ in St. Louis by @pandjico</p>
             <button id="onboarding-close" class="onboarding-close">Begin</button>
+            <hr class="modal-divider">
+            <p class="support-text">If driftpad brings you joy, consider supporting its journey and keeping this space peaceful and free.</p>
+            <div class="modal-buttons">
+                <a href="https://www.buymeacoffee.com/pandjico" target="_blank" rel="noopener noreferrer" class="coffee-button-modal">
+                    <span>☕</span> Support
+                </a>
+                <button id="feedback-button" class="feedback-button-modal">
+                    💬 Feedback
+                </button>
+            </div>
+            <p class="caption">Made with ❤️ in St. Louis by @pandjico</p>
         </div>
     </div>
 </body>
