@@ -1,32 +1,19 @@
 document.addEventListener('DOMContentLoaded', function() {
-  // Prevent scrolling and zooming on mobile
-  function preventScroll(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    return false;
-  }
-  
-  // Add touch event listeners to prevent scrolling
-  document.addEventListener('touchstart', preventScroll, { passive: false });
-  document.addEventListener('touchmove', preventScroll, { passive: false });
-  document.addEventListener('touchend', preventScroll, { passive: false });
-  
-  // Prevent context menu on long press
-  document.addEventListener('contextmenu', preventScroll);
-  
-  // Prevent double-tap zoom
-  let lastTouchEnd = 0;
-  document.addEventListener('touchend', function(e) {
-    const now = (new Date()).getTime();
-    if (now - lastTouchEnd <= 300) {
-      e.preventDefault();
-    }
-    lastTouchEnd = now;
-  }, false);
+  // Prevent scrolling and zooming only within the canvas (scoped below)
   
   const canvas = document.getElementById('canvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
+  
+  // Prevent double-tap zoom ONLY on the canvas, not the whole document
+  let lastCanvasTouchEnd = 0;
+  canvas.addEventListener('touchend', function(e) {
+    const now = Date.now();
+    if (now - lastCanvasTouchEnd <= 300) {
+      e.preventDefault();
+    }
+    lastCanvasTouchEnd = now;
+  }, { passive: false });
 
   // Elements
   const colorInput = document.getElementById('color');
