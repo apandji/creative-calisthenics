@@ -11,7 +11,7 @@
 <body>
     <header>
         <div class="header-left">
-            <logo class="logo">driftpad</logo>
+            <logo class="logo" id="logo">driftpad</logo>
             <select id="prompt-mode" aria-label="Select prompt mode">
                 <option value="prompt">Prompt</option>
                 <option value="complete_drawing">Complete Drawing</option>
@@ -318,6 +318,41 @@
         </div>
         <button id="clear" type="button">clear</button>
         <button id="submit" type="button">submit</button>
+    </div>
+
+    <!-- Onboarding Modal -->
+    <div id="onboarding-modal" class="onboarding-modal" style="display: none;">
+        <div class="onboarding-content">
+            <h2>Welcome to Driftpad 🌊</h2>
+            <div class="onboarding-text">
+                <p>Three ways to drift:</p>
+                <div class="mode-explanation">
+                    <div class="mode-item">
+                        <span class="mode-icon">🎨</span>
+                        <div>
+                            <strong>NORMAL</strong><br>
+                            <small>Start with a prompt, let your creativity flow</small>
+                        </div>
+                    </div>
+                    <div class="mode-item">
+                        <span class="mode-icon">✏️</span>
+                        <div>
+                            <strong>COMPLETE</strong><br>
+                            <small>Finish what's begun, collaborate with the canvas</small>
+                        </div>
+                    </div>
+                    <div class="mode-item">
+                        <span class="mode-icon">🌊</span>
+                        <div>
+                            <strong>DRIFT</strong><br>
+                            <small>Breathe and let go, each stroke is a moment</small>
+                        </div>
+                    </div>
+                </div>
+                <p class="onboarding-footer">Tap anywhere to begin your first drift...</p>
+            </div>
+            <button id="onboarding-close" class="onboarding-close">Got it</button>
+        </div>
     </div>
 </body>
 <footer>

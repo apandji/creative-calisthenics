@@ -657,6 +657,59 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // Initialize onboarding modal
+  function initOnboarding() {
+    const logo = document.getElementById('logo');
+    const onboardingModal = document.getElementById('onboarding-modal');
+    const onboardingClose = document.getElementById('onboarding-close');
+    
+    if (!logo || !onboardingModal || !onboardingClose) return;
+    
+    // Check if user has seen onboarding before
+    const hasSeenOnboarding = localStorage.getItem('driftpad-onboarding-seen');
+    
+    // Show onboarding on first visit
+    if (!hasSeenOnboarding) {
+      setTimeout(() => {
+        onboardingModal.style.display = 'flex';
+        // Track onboarding view
+        if (typeof umami !== 'undefined') {
+          umami.track('onboarding_viewed');
+        }
+      }, 1000); // Small delay to let page load
+    }
+    
+    // Logo click to show onboarding
+    logo.addEventListener('click', () => {
+      onboardingModal.style.display = 'flex';
+      // Track logo click
+      if (typeof umami !== 'undefined') {
+        umami.track('onboarding_manual_open');
+      }
+    });
+    
+    // Close onboarding
+    onboardingClose.addEventListener('click', () => {
+      onboardingModal.style.display = 'none';
+      localStorage.setItem('driftpad-onboarding-seen', 'true');
+      // Track onboarding completion
+      if (typeof umami !== 'undefined') {
+        umami.track('onboarding_completed');
+      }
+    });
+    
+    // Close on backdrop click
+    onboardingModal.addEventListener('click', (e) => {
+      if (e.target === onboardingModal) {
+        onboardingModal.style.display = 'none';
+        localStorage.setItem('driftpad-onboarding-seen', 'true');
+        if (typeof umami !== 'undefined') {
+          umami.track('onboarding_completed');
+        }
+      }
+    });
+  }
+
   // Make resizeCanvas globally accessible
   window.resizeCanvas = resizeCanvas;
   
@@ -667,6 +720,7 @@ document.addEventListener('DOMContentLoaded', function() {
   initColorPicker(); // Initialize color picker
   initToolPicker(); // Initialize tool picker
   initSizePicker(); // Initialize size picker
+  initOnboarding(); // Initialize onboarding modal
 
 
   // Helpers
