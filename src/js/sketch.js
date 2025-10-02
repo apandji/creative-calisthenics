@@ -137,8 +137,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function getPos(evt) {
     const containerRect = canvas.parentElement.getBoundingClientRect();
+    const canvasRect = canvas.getBoundingClientRect();
     const x = (evt.clientX ?? (evt.touches && evt.touches[0].clientX)) - containerRect.left;
     const y = (evt.clientY ?? (evt.touches && evt.touches[0].clientY)) - containerRect.top;
+    
+    // Debug logging
+    console.log('Touch event:', {
+      clientX: evt.clientX ?? (evt.touches && evt.touches[0].clientX),
+      clientY: evt.clientY ?? (evt.touches && evt.touches[0].clientY),
+      containerRect: { left: containerRect.left, top: containerRect.top },
+      canvasRect: { left: canvasRect.left, top: canvasRect.top },
+      calculated: { x, y }
+    });
+    
     return { x, y };
   }
 
@@ -307,6 +318,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Calculate position relative to the canvas container
     const x = e.clientX - containerRect.left;
     const y = e.clientY - containerRect.top;
+    
+    // Debug logging
+    console.log('Cursor position:', {
+      clientX: e.clientX,
+      clientY: e.clientY,
+      containerRect: { left: containerRect.left, top: containerRect.top },
+      calculated: { x, y }
+    });
     
     cursor.style.left = x + 'px';
     cursor.style.top = y + 'px';
