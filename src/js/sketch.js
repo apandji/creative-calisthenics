@@ -136,28 +136,17 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function getPos(evt) {
-    const containerRect = canvas.parentElement.getBoundingClientRect();
     const canvasRect = canvas.getBoundingClientRect();
     
-    // Calculate position relative to the container (same as cursor)
-    const containerX = (evt.clientX ?? (evt.touches && evt.touches[0].clientX)) - containerRect.left;
-    const containerY = (evt.clientY ?? (evt.touches && evt.touches[0].clientY)) - containerRect.top;
-    
-    // Convert to canvas coordinates by subtracting the canvas offset within container
-    const canvasOffsetX = canvasRect.left - containerRect.left;
-    const canvasOffsetY = canvasRect.top - containerRect.top;
-    
-    const x = containerX - canvasOffsetX;
-    const y = containerY - canvasOffsetY;
+    // Calculate position relative to the canvas directly
+    const x = (evt.clientX ?? (evt.touches && evt.touches[0].clientX)) - canvasRect.left;
+    const y = (evt.clientY ?? (evt.touches && evt.touches[0].clientY)) - canvasRect.top;
     
     // Debug logging
     console.log('Touch event:', {
       clientX: evt.clientX ?? (evt.touches && evt.touches[0].clientX),
       clientY: evt.clientY ?? (evt.touches && evt.touches[0].clientY),
-      containerRect: { left: containerRect.left, top: containerRect.top },
       canvasRect: { left: canvasRect.left, top: canvasRect.top },
-      containerCoords: { x: containerX, y: containerY },
-      canvasOffset: { x: canvasOffsetX, y: canvasOffsetY },
       finalCoords: { x, y }
     });
     
@@ -326,20 +315,30 @@ document.addEventListener('DOMContentLoaded', function() {
     const canvasRect = canvas.getBoundingClientRect();
     const containerRect = canvas.parentElement.getBoundingClientRect();
     
-    // Calculate position relative to the canvas container
-    const x = e.clientX - containerRect.left;
-    const y = e.clientY - containerRect.top;
+    // Calculate position relative to the canvas (same as drawing)
+    const x = e.clientX - canvasRect.left;
+    const y = e.clientY - canvasRect.top;
+    
+    // Convert to container coordinates for cursor positioning
+    const containerOffsetX = canvasRect.left - containerRect.left;
+    const containerOffsetY = canvasRect.top - containerRect.top;
+    
+    const cursorX = x + containerOffsetX;
+    const cursorY = y + containerOffsetY;
     
     // Debug logging
     console.log('Cursor position:', {
       clientX: e.clientX,
       clientY: e.clientY,
+      canvasRect: { left: canvasRect.left, top: canvasRect.top },
       containerRect: { left: containerRect.left, top: containerRect.top },
-      calculated: { x, y }
+      canvasCoords: { x, y },
+      containerOffset: { x: containerOffsetX, y: containerOffsetY },
+      finalCursor: { x: cursorX, y: cursorY }
     });
     
-    cursor.style.left = x + 'px';
-    cursor.style.top = y + 'px';
+    cursor.style.left = cursorX + 'px';
+    cursor.style.top = cursorY + 'px';
   }
 
   // Controls
