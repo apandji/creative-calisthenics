@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>driftpad</title>
+    <link rel="stylesheet" href="style.css">
+        <!-- Umami Analytics -->
+        <script defer src="https://cloud.umami.is/script.js" data-website-id="8ae5578c-320f-4d25-860a-f93ed10e541e"></script>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <logo class="logo" id="logo">driftpad</logo>
+            <select id="prompt-mode" aria-label="Select prompt mode">
+                <option value="prompt">Prompt</option>
+                <option value="complete_drawing">Complete Drawing</option>
+                <option value="freehand">Freehand</option>
+            </select>
+            <button id="new-prompt-btn">refresh</button>
+        </div>
+        <div class="header-right">
+            <button id="feedback-btn">feedback</button>
+            <button id="gallery-btn">gallery</button>
+        </div>
+    </header>
+    <div class="prompt-container">
+        <h2 class="prompt" style="font-size: 20px;">text</h2>
+    </div>
+    <section id="sketch" class="section">
+        <div class="container sketch">
+            <div class="canvas-wrap">
+                <canvas id="canvas" aria-label="drawing canvas"></canvas>
+                <div id="cursor" class="brush-cursor"></div>
+            </div>
+        </div>
+    </section>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/watercolor-brush.js" defer></script>
+    <script src="js/fade-timer.js" defer></script>
+    <script src="js/shape-generator.js"></script>
+    <script src="js/prompts.js" defer></script>
+    <script src="js/sketch.js" defer></script>
+    <script src="js/pull-to-refresh.js" defer></script>
+    <script src="js/feedback-collector.js" defer></script>
+    
+    <!-- Simple Feedback Modal -->
+    <div id="feedback-modal" class="feedback-modal" style="display: none;">
+        <div class="feedback-content">
+            <h2>What do you think of driftpad?</h2>
+            <form id="feedback-form" action="https://formspree.io/f/xdkwgkbd" method="POST">
+                <div class="feedback-type">
+                    <label>
+                        <input type="radio" name="feedback_type" value="bug" required>
+                        🐛 Bug report
+                    </label>
+                    <label>
+                        <input type="radio" name="feedback_type" value="feature" required>
+                        💡 Feature request
+                    </label>
+                    <label>
+                        <input type="radio" name="feedback_type" value="general" required>
+                        💬 General feedback
+                    </label>
+                </div>
+                <textarea name="message" placeholder="Tell us what's on your mind..." required></textarea>
+                <input type="email" name="email" placeholder="Your email (optional)">
+                <div class="feedback-actions">
+                    <button type="button" id="close-feedback">Cancel</button>
+                    <button type="submit">Send feedback</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Simple feedback modal functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const feedbackBtn = document.getElementById('feedback-btn');
+            const feedbackModal = document.getElementById('feedback-modal');
+            const closeBtn = document.getElementById('close-feedback');
+            const feedbackForm = document.getElementById('feedback-form');
+            
+            // Open modal
+            feedbackBtn.addEventListener('click', function() {
+                feedbackModal.style.display = 'flex';
+            });
+            
+            // Close modal
+            closeBtn.addEventListener('click', function() {
+                feedbackModal.style.display = 'none';
+            });
+            
+            // Close modal when clicking outside
+            feedbackModal.addEventListener('click', function(e) {
+                if (e.target === feedbackModal) {
+                    feedbackModal.style.display = 'none';
+                }
+            });
+            
+            // Make openFeedbackModal globally accessible
+            window.openFeedbackModal = function() {
+                feedbackModal.style.display = 'flex';
+            };
+            
+            // Test: Add click handler for feedback button in onboarding modal
+            setTimeout(() => {
+                const onboardingFeedbackBtn = document.getElementById('feedback-button');
+                if (onboardingFeedbackBtn) {
+                    console.log('Found onboarding feedback button, adding click handler');
+                    onboardingFeedbackBtn.addEventListener('click', function(e) {
+                        console.log('Onboarding feedback button clicked!');
+                        e.preventDefault();
+                        // Close onboarding modal
+                        const onboardingModal = document.getElementById('onboarding-modal');
+                        if (onboardingModal) {
+                            onboardingModal.style.display = 'none';
+                            localStorage.setItem('driftpad-onboarding-seen', 'true');
+                        }
+                        // Open feedback modal
+                        feedbackModal.style.display = 'flex';
+                    });
+                } else {
+                    console.log('Onboarding feedback button not found');
+                }
+            }, 1000);
+            
+            // Handle form submission
+            feedbackForm.addEventListener('submit', function(e) {
+                // Don't prevent default - let the form submit to Formspree
+                // e.preventDefault();
+                
+                // Debug: Log form data
+                const formData = new FormData(feedbackForm);
+                console.log('Form data:', Object.fromEntries(formData));
+                
+                // Show success message after a short delay
+                setTimeout(() => {
+                    alert('Thank you for your feedback! We\'ll get back to you soon.');
+                    
+                    // Close modal
+                    feedbackModal.style.display = 'none';
+                    
+                    // Reset form
+                    feedbackForm.reset();
+                }, 100);
+            });
+        });
+        
+        // Supabase configuration (for drawings)
+        const SUPABASE_URL = 'https://rwdllkszmgallbrqbqkk.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3ZGxsa3N6bWdhbGxicnFicWtrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5MjQ1MjYsImV4cCI6MjA3NDUwMDUyNn0.-hGEPB0F7SLL6rd9MHvyoTGsGMqrJDPyIOv5amdld0s';
+        
+        // Initialize Supabase client and make it globally available
+        window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabase = window.supabaseClient;
+        
+        
+        // Generate or get user UUID (for drawings)
+        function getUserUUID() {
+            let userUUID = localStorage.getItem('user_uuid');
+            if (!userUUID) {
+                userUUID = crypto.randomUUID();
+                localStorage.setItem('user_uuid', userUUID);
+            }
+            return userUUID;
+        }
+        
+        // Cursor tracking for toast positioning
+        let cursorX = window.innerWidth / 2;
+        let cursorY = window.innerHeight / 2;
+        
+        // Track cursor movement
+        document.addEventListener('mousemove', (e) => {
+            cursorX = e.clientX;
+            cursorY = e.clientY;
+        });
+        
+        // Show zen-like toast notification with floating animation
+        window.showToast = function(message) {
+            // Remove any existing toasts
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+            
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            // Apply cursor-responsive positioning
+            const updateToastPosition = () => {
+                const centerX = window.innerWidth / 2;
+                const centerY = 20; // Base position from top
+                
+                // Calculate offset based on cursor position
+                const cursorOffsetX = (cursorX - centerX) * 0.1; // Subtle influence
+                const cursorOffsetY = Math.max(0, (cursorY - centerY) * 0.05); // Gentle vertical drift
+                
+                // Apply the offset with smooth animation
+                const finalX = centerX + cursorOffsetX;
+                const finalY = centerY + cursorOffsetY;
+                
+                toast.style.left = finalX + 'px';
+                toast.style.top = finalY + 'px';
+                toast.style.transform = `translateX(-50%) translateY(${Math.sin(Date.now() * 0.002) * 2}px) rotate(${Math.sin(Date.now() * 0.001) * 0.5}deg)`;
+                
+                // Update shadow based on cursor proximity
+                const distance = Math.sqrt(Math.pow(cursorX - finalX, 2) + Math.pow(cursorY - finalY, 2));
+                const shadowIntensity = Math.max(0.1, 0.3 - (distance / 1000));
+                toast.style.boxShadow = `0 4px 20px rgba(0, 0, 0, ${shadowIntensity}), 0 0 ${Math.sin(Date.now() * 0.003) * 10 + 15}px rgba(0, 0, 0, 0.1)`;
+            };
+            
+            // Update position continuously while toast is visible
+            const positionInterval = setInterval(updateToastPosition, 50);
+            
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                clearInterval(positionInterval);
+                toast.classList.add('fade-out');
+                setTimeout(() => toast.remove(), 600);
+            }, 3000);
+        }
+        
+        // Slow dissolve animation for canvas
+        window.dissolveCanvas = function() {
+            const canvas = document.getElementById('canvas');
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                const originalComposite = ctx.globalCompositeOperation;
+                
+                // Create a smooth fade-to-gradient effect that matches canvas background
+                let opacity = 1;
+                const fadeInterval = setInterval(() => {
+                    opacity -= 0.02; // Fade out over 2 seconds
+                    
+                    if (opacity <= 0) {
+                        clearInterval(fadeInterval);
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.globalCompositeOperation = originalComposite;
+                    } else {
+                        // Create a gradient overlay that matches the canvas background
+                        ctx.globalCompositeOperation = 'source-over';
+                        
+                        // Create gradient from #d2d2d2 to #f3f3f3 (matching canvas background)
+                        const gradient = ctx.createLinearGradient(0, canvas.height, 0, 0);
+                        gradient.addColorStop(0, `rgba(210, 210, 210, ${1 - opacity})`); // #d2d2d2
+                        gradient.addColorStop(1, `rgba(243, 243, 243, ${1 - opacity})`); // #f3f3f3
+                        
+                        ctx.fillStyle = gradient;
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    }
+                }, 40); // ~25fps for smooth animation
+            }
+        }
+        
+        // Submit drawing to gallery
+        window.submitDrawing = async function() {
+            const canvas = document.getElementById('canvas');
+            const prompt = document.querySelector('.prompt').textContent;
+            
+            if (!canvas) {
+                alert('No canvas found');
+                return;
+            }
+            
+            // Check if canvas has any content
+            const ctx = canvas.getContext('2d');
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const hasContent = imageData.data.some(pixel => pixel !== 0);
+            
+            if (!hasContent) {
+                window.showToast('Please draw something before submitting');
+                return;
+            }
+            
+            try {
+                const imageData = canvas.toDataURL('image/png');
+                const userUUID = getUserUUID();
+                
+                const { data, error } = await supabase
+                    .from('drawings')
+                    .insert({
+                        user_uuid: userUUID,
+                        image_data: imageData,
+                        prompt: prompt,
+                        is_public: true
+                    });
+                
+                if (error) {
+                    console.error('Error submitting drawing:', error);
+                    window.showToast('Failed to submit drawing. Please try again.');
+                } else {
+                    window.showToast('Drawing submitted to gallery');
+                    
+                    // Track drawing submission with feedback collector
+                    if (window.feedbackCollector && data && data[0]) {
+                        window.feedbackCollector.trackDrawingSubmitted(data[0].id);
+                    }
+                    
+                    // Slow dissolve animation before clearing
+                    window.dissolveCanvas();
+                    setTimeout(() => {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    }, 2000);
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                window.showToast('Failed to submit drawing. Please try again.');
+            }
+        };
+        
+        // Add submit button event listener
+        document.addEventListener('DOMContentLoaded', function() {
+            const submitBtn = document.getElementById('submit');
+            if (submitBtn) {
+                submitBtn.addEventListener('click', submitDrawing);
+            }
+            
+            // Make entire gallery button tappable
+            const galleryBtn = document.getElementById('gallery-btn');
+            if (galleryBtn) {
+                galleryBtn.addEventListener('click', function() {
+                    window.location.href = 'gallery.html';
+                });
+            }
+            
+        });
+    </script>
+     <div class="toolbar" role="toolbar" aria-label="drawing controls">
+        <div class="color-picker-container">
+            <button id="color-picker-btn" class="color-picker-btn" aria-label="Select color">
+                <div class="current-color" id="current-color"></div>
+            </button>
+            <div id="color-popup" class="color-popup" style="display: none;">
+                <div class="color-popup-content">
+                    <div id="zen-colors" class="zen-color-palette"></div>
+                </div>
+            </div>
+        </div>
+        <button id="tool-btn" class="tool-btn" aria-label="Select tool">🖌️</button>
+        <div class="size-picker-container">
+            <button id="size-picker-btn" class="size-picker-btn" aria-label="Select size">M</button>
+            <div id="size-popup" class="size-popup" style="display: none;">
+                <div class="size-popup-content">
+                    <div id="size-options" class="size-options"></div>
+                </div>
+            </div>
+        </div>
+        <button id="clear" type="button">clear</button>
+        <button id="submit" type="button">submit</button>
+    </div>
+
+    <!-- Onboarding Modal -->
+    <div id="onboarding-modal" class="onboarding-modal" style="display: none;">
+        <div class="onboarding-content" style="animation: fadeIn 0.6s ease-out, modalFloat 3s ease-in-out infinite;">
+            <p>Draw on driftpad, and <br>find your inner peace.</p>
+            <p>Respond to a prompt, complete a picture or freely doodle.</p>
+            <p>No timelines, no deadlines.<br>Let your mind drift.</p>
+            <button id="onboarding-close" class="onboarding-close">Begin</button>
+            <hr class="modal-divider">
+            <p class="support-text">If driftpad brings you joy, consider supporting its journey and keeping this space peaceful and free.</p>
+            <div class="modal-buttons">
+                <a href="https://www.buymeacoffee.com/pandjico" target="_blank" rel="noopener noreferrer" class="coffee-button-modal">
+                    <span>☕</span> Support
+                </a>
+                <button id="feedback-button" class="feedback-button-modal">
+                    💬 Feedback
+                </button>
+            </div>
+            <p class="caption">Made with ❤️ in St. Louis by @pandjico</p>
+        </div>
+    </div>
+</body>
+<footer>
+</footer>
+</html>

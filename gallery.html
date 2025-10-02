@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery - Creative Calisthenics</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="8ae5578c-320f-4d25-860a-f93ed10e541e"></script>
+    <style>
+        .gallery-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        
+        .gallery-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .drawing-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .drawing-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .drawing-image {
+            width: 100%;
+            height: 250px;
+            object-fit: contain;
+            object-position: center;
+            background: #f5f5f5;
+        }
+        
+        .drawing-info {
+            padding: 16px;
+        }
+        
+        .drawing-prompt {
+            font-style: italic;
+            color: var(--muted);
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .drawing-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--muted);
+        }
+        
+        .loading-more {
+            text-align: center;
+            padding: 20px;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            border-top-color: var(--accent);
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--muted);
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+        
+        .drawing-card {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .drawing-image {
+            transition: opacity 0.3s ease;
+        }
+        
+        .drawing-image.loading {
+            opacity: 0.7;
+        }
+        
+        /* Skeleton loading styles */
+        .skeleton-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        .skeleton-image {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        
+        .skeleton-content {
+            padding: 16px;
+        }
+        
+        .skeleton-line {
+            height: 12px;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+        
+        .skeleton-line.short {
+            width: 60%;
+        }
+        
+        .skeleton-line.medium {
+            width: 80%;
+        }
+        
+        .skeleton-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+        }
+        
+        .skeleton-meta .skeleton-line {
+            width: 40px;
+            height: 10px;
+            margin-bottom: 0;
+        }
+        
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+            100% {
+                background-position: 200% 0;
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.8;
+            }
+        }
+        
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 16px;
+            text-decoration: none;
+            color: var(--text);
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            z-index: 100;
+        }
+        
+        .back-button:hover {
+            background: color-mix(in oklab, var(--accent) 8%, transparent);
+            transform: translateY(-1px);
+        }
+        
+        .refresh-button {
+            background: var(--accent);
+            color: var(--bg);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+        
+        .refresh-button:hover {
+            background: color-mix(in oklab, var(--accent) 80%, black);
+        }
+        
+        /* Mobile responsive styles */
+        @media (max-width: 768px) {
+            .gallery-container {
+                padding: 16px;
+            }
+            
+            .gallery-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .drawing-image {
+                height: 300px;
+            }
+            
+            .back-button {
+                top: 10px;
+                left: 10px;
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .gallery-container {
+                padding: 12px;
+            }
+            
+            .drawing-image {
+                height: 350px;
+            }
+            
+            .gallery-header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .gallery-header p {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body class="gallery-page">
+    <a href="index.html" class="back-button">← Back to Drawing</a>
+    
+    <div class="gallery-container">
+        <div class="gallery-header">
+            <h1>Gallery</h1>
+            <p>See what others have drawn today</p>
+            <button id="refresh" class="refresh-button">Refresh</button>
+        </div>
+        
+        <div id="gallery-content">
+            <div class="loading">Loading drawings...</div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Supabase configuration (same as index.html)
+        const SUPABASE_URL = 'https://rwdllkszmgallbrqbqkk.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3ZGxsa3N6bWdhbGxicnFicWtrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5MjQ1MjYsImV4cCI6MjA3NDUwMDUyNn0.-hGEPB0F7SLL6rd9MHvyoTGsGMqrJDPyIOv5amdld0s';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // Pagination state
+        let currentPage = 0;
+        let isLoading = false;
+        let hasMoreData = true;
+        const ITEMS_PER_PAGE = 10;
+        
+        // Format date for display
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            return date.toLocaleDateString();
+        }
+        
+        // Create skeleton card HTML
+        function createSkeletonCard(index = 0) {
+            return `
+                <div class="skeleton-card" style="animation-delay: ${index * 0.1}s">
+                    <div class="skeleton-image"></div>
+                    <div class="skeleton-content">
+                        <div class="skeleton-line medium"></div>
+                        <div class="skeleton-line short"></div>
+                        <div class="skeleton-meta">
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Create drawing card HTML
+        function createDrawingCard(drawing, index = 0) {
+            return `
+                <div class="drawing-card" style="animation-delay: ${index * 0.1}s">
+                    <img 
+                        src="${drawing.image_data}" 
+                        alt="Drawing" 
+                        class="drawing-image loading" 
+                        loading="lazy"
+                        onload="this.classList.remove('loading')"
+                        onerror="this.classList.remove('loading'); this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjI1MCIgdmlld0JveD0iMCAwIDMwMCAyNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjUwIiBmaWxsPSIjRjVGNUY1Ii8+CjxwYXRoIGQ9Ik0xNTAgMTAwTDE3NSAxMjVMMTUwIDE1MEwxMjUgMTI1TDE1MCAxMDBaIiBmaWxsPSIjQ0NDIi8+Cjx0ZXh0IHg9IjE1MCIgeT0iMTgwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTk5IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiPkltYWdlIGVycm9yPC90ZXh0Pgo8L3N2Zz4K'"
+                    >
+                    <div class="drawing-info">
+                        <div class="drawing-prompt">"${drawing.prompt || 'No prompt'}"</div>
+                        <div class="drawing-meta">
+                            <span>${formatDate(drawing.created_at)}</span>
+                            <span>❤️ ${drawing.likes_count || 0}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Load drawings with pagination
+        async function loadDrawings(reset = false) {
+            if (isLoading) return;
+            
+            const galleryContent = document.getElementById('gallery-content');
+            
+            if (reset) {
+                currentPage = 0;
+                hasMoreData = true;
+                // Show skeleton cards for initial loading
+                const skeletonCards = Array.from({length: ITEMS_PER_PAGE}, (_, index) => 
+                    createSkeletonCard(index)
+                ).join('');
+                galleryContent.innerHTML = `<div class="gallery-grid">${skeletonCards}</div>`;
+            }
+            
+            if (!hasMoreData) return;
+            
+            isLoading = true;
+            
+            try {
+                const { data: drawings, error } = await supabase
+                    .from('drawings')
+                    .select('*')
+                    .eq('is_public', true)
+                    .order('created_at', { ascending: false })
+                    .range(currentPage * ITEMS_PER_PAGE, (currentPage + 1) * ITEMS_PER_PAGE - 1);
+                
+                if (error) {
+                    console.error('Error loading drawings:', error);
+                    if (reset) {
+                        galleryContent.innerHTML = '<div class="empty-state"><h3>Error loading gallery</h3><p>Please try again later.</p></div>';
+                    }
+                    return;
+                }
+                
+                if (!drawings || drawings.length === 0) {
+                    if (reset) {
+                        galleryContent.innerHTML = `
+                            <div class="empty-state">
+                                <h3>No drawings yet</h3>
+                                <p>Be the first to submit a drawing!</p>
+                                <a href="index.html" style="display: inline-block; margin-top: 16px; padding: 8px 16px; background: var(--accent); color: var(--bg); text-decoration: none; border-radius: 8px;">Start Drawing</a>
+                            </div>
+                        `;
+                    }
+                    hasMoreData = false;
+                    return;
+                }
+                
+                // Check if we got fewer items than requested (end of data)
+                if (drawings.length < ITEMS_PER_PAGE) {
+                    hasMoreData = false;
+                }
+                
+                const drawingsHTML = drawings.map((drawing, index) => 
+                    createDrawingCard(drawing, (currentPage * ITEMS_PER_PAGE) + index)
+                ).join('');
+                
+                if (reset) {
+                    galleryContent.innerHTML = `<div class="gallery-grid">${drawingsHTML}</div>`;
+                } else {
+                    const galleryGrid = galleryContent.querySelector('.gallery-grid');
+                    if (galleryGrid) {
+                        galleryGrid.insertAdjacentHTML('beforeend', drawingsHTML);
+                    }
+                }
+                
+                currentPage++;
+                
+            } catch (err) {
+                console.error('Error:', err);
+                if (reset) {
+                    galleryContent.innerHTML = '<div class="empty-state"><h3>Error loading gallery</h3><p>Please try again later.</p></div>';
+                }
+            } finally {
+                isLoading = false;
+            }
+        }
+        
+        // Load more drawings when scrolling near bottom
+        function handleScroll() {
+            if (isLoading || !hasMoreData) return;
+            
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const windowHeight = window.innerHeight;
+            const documentHeight = document.documentElement.scrollHeight;
+            
+            // Calculate how much content is left to scroll
+            const remainingScroll = documentHeight - (scrollTop + windowHeight);
+            
+            // Trigger loading when there's less than 1.5 viewport heights remaining
+            // This is much more aggressive and responsive
+            const triggerDistance = windowHeight * 1.5;
+            
+            if (remainingScroll <= triggerDistance) {
+                loadMoreDrawings();
+            }
+        }
+        
+        // Load more drawings and show skeleton cards
+        async function loadMoreDrawings() {
+            if (isLoading || !hasMoreData) return;
+            
+            const galleryContent = document.getElementById('gallery-content');
+            const galleryGrid = galleryContent.querySelector('.gallery-grid');
+            
+            if (!galleryGrid) return;
+            
+            // Add skeleton cards to show loading state
+            const skeletonCards = Array.from({length: ITEMS_PER_PAGE}, (_, index) => 
+                createSkeletonCard(index)
+            ).join('');
+            galleryGrid.insertAdjacentHTML('beforeend', skeletonCards);
+            
+            await loadDrawings(false);
+            
+            // Remove skeleton cards after real content loads
+            const skeletonCardsElements = galleryGrid.querySelectorAll('.skeleton-card');
+            skeletonCardsElements.forEach(card => {
+                if (card.parentNode) {
+                    card.parentNode.removeChild(card);
+                }
+            });
+        }
+        
+        // Debounced scroll handler - reduced delay for more responsive loading
+        let scrollTimeout;
+        function debouncedScrollHandler() {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(handleScroll, 50);
+        }
+        
+        // Add event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            const refreshBtn = document.getElementById('refresh');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', () => loadDrawings(true));
+            }
+            
+            // Add scroll listener for infinite loading
+            window.addEventListener('scroll', debouncedScrollHandler, { passive: true });
+            
+            // Load drawings on page load
+            loadDrawings(true);
+        });
+    </script>
+</body>
+</html>

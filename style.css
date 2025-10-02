@@ -1,0 +1,1513 @@
+@import url('https://fonts.googleapis.com/css2?family=Averia+Sans+Libre:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap');
+
+
+
+/* Base variables */
+:root {
+  --bg: #f3f3f3;
+  --text: #1a1a1a;
+  --muted: #525968;
+  --accent: #000000;
+  --border: #cdcdcd;
+  --radius: 12px;
+}
+
+/* Reset & layout */
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: "Averia Sans Libre", sans-serif;
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--bg);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  height: 100vh;
+  height: 100dvh; /* Dynamic viewport height for mobile */
+  position: relative;
+}
+
+/* Content width and rhythm */
+body > * {
+  max-width: 72ch;
+  padding-left: 24px;
+  padding-right: 24px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  z-index: 10;
+  background: var(--bg);
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+/* Header & nav */
+header {
+  position: sticky;
+  top: 20;
+  backdrop-filter: saturate(1.2) blur(8px);
+  background: color-mix(in oklab, var(--bg) 88%, transparent);
+  z-index: 20;
+  /* Override content width constraints */
+  max-width: none !important;
+  padding-left: 20 !important;
+  padding-right: 20 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  border-radius: 0 !important;
+  margin-bottom: 0 !important;
+  /* full-bleed */
+  width: 100vw !important;
+  padding: 12px 24px;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Styling for the logo */
+.logo {
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.logo:hover {
+  color: var(--accent);
+}
+
+
+
+/* Full-width bottom border for header */
+header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--border);
+}
+
+header button {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 160ms ease;
+  display: inline-block;
+  text-align: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+header button:hover {
+  background: color-mix(in oklab, var(--accent) 8%, transparent);
+  transform: translateY(-1px);
+}
+
+header button:active {
+  transform: translateY(0);
+}
+
+header button a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Icon buttons styling */
+header button[title] {
+  min-width: 40px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 8px 12px;
+}
+
+/* Header sections */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Prompt controls - keeping for backward compatibility */
+.prompt-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+#prompt-mode {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 160ms ease;
+}
+
+#prompt-mode:hover {
+  background: color-mix(in oklab, var(--accent) 4%, transparent);
+  border-color: color-mix(in oklab, var(--accent) 20%, var(--border));
+}
+
+#prompt-mode:focus {
+  outline: 2px solid color-mix(in oklab, var(--accent) 20%, transparent);
+  outline-offset: 2px;
+}
+
+#new-prompt-btn {
+  background: var(--accent);
+  color: var(--bg);
+  border: 1px solid var(--accent);
+  font-weight: 600;
+}
+
+#new-prompt-btn:hover {
+  background: color-mix(in oklab, var(--accent) 85%, transparent);
+  transform: translateY(-1px);
+}
+
+nav { padding: 12px 12px 12px 12px; }
+nav ul {
+  display: flex;
+  gap: 20px;
+  list-style: none;
+  margin: 0;
+  padding: 8px 0;
+}
+nav a {
+  color: var(--text);
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background 160ms ease, color 160ms ease, transform 120ms ease;
+  font-weight: 500;
+  border: 1px solid var(--border);
+}
+nav a:hover {
+  background: color-mix(in oklab, var(--accent) 12%, transparent);
+}
+nav a:active { transform: translateY(1px); }
+
+/* Typography */
+h1 {
+  margin: 32px auto 12px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  font-size: clamp(1.75rem, 2vw + 1rem, 3rem);
+}
+
+p {
+  margin: 0 auto 24px;
+  color: var(--muted);
+  font-size: clamp(1rem, 0.4vw + 0.9rem, 1.125rem);
+}
+
+/* Prompt container with subtle dashed border */
+.prompt-container {
+  border-bottom: 1px dashed var(--border);
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+/* Utilities */
+.container {
+  max-width: 1100px;
+  padding-left: 24px;
+  padding-right: 24px;
+  padding-top: 24px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.section { padding: 0; }
+
+/* Nice focus styles */
+:where(a, button, [tabindex]) {
+  outline: none;
+}
+:where(a, button, [tabindex]):focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 40%, transparent);
+  border-radius: 10px;
+}
+
+
+/* Sketch */
+.sketch { padding-top: 0; }
+.toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 0;
+}
+.toolbar label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+}
+.toolbar input[type="color"] {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+}
+.toolbar input[type="range"] { width: 140px; }
+
+/* Small screens */
+@media (max-width: 640px) {
+  nav ul { flex-wrap: wrap; gap: 12px; }
+  nav a { padding: 6px 10px; }
+  h1 { margin-top: 24px; }
+  
+  /* Add mobile padding to body content */
+  body > * {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+  
+  /* Reduce header and content spacing on mobile to maximize canvas space */
+  header {
+    padding: 4px 20px;
+    min-height: auto;
+  }
+  
+  .header-left {
+    flex-direction: row;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: nowrap;
+  }
+  
+  .header-right {
+    align-items: center;
+  }
+  
+  .prompt-controls {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  #prompt-mode {
+    min-width: 100px;
+    font-size: 0.7rem;
+    padding: 3px 6px;
+  }
+  
+  #new-prompt-btn {
+    font-size: 0.7rem;
+    padding: 3px 6px;
+    min-width: auto;
+  }
+  
+  .header-right button {
+    font-size: 0.7rem;
+    padding: 3px 6px;
+  }
+  
+  .logo {
+    font-size: 0.9rem;
+    margin-right: 4px;
+  }
+  
+  
+  .section {
+    padding: 16px 0;
+  }
+  
+  /* Optimize footer for mobile */
+  footer {
+    padding: 12px 16px;
+  }
+  
+  /* Reduce prompt text size on mobile to save space */
+  .prompt {
+    font-size: 18px;
+  }
+}
+
+/* Sketch */
+.sketch { 
+  padding-top: 0; 
+  padding-bottom: 80px; /* Space for floating toolbar */
+}
+
+/* Floating Toolbar */
+.toolbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  z-index: 1000;
+  padding: 12px 20px;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  min-height: 60px;
+}
+
+.toolbar label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.toolbar input[type="color"] {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  cursor: pointer;
+}
+
+.toolbar input[type="range"] { 
+  width: 120px; 
+  min-width: 80px;
+}
+
+/* Color Picker Container */
+.color-picker-container {
+  position: relative;
+  display: inline-block;
+}
+
+/* Color Picker Button */
+.color-picker-btn {
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 160ms ease;
+  padding: 0;
+  position: relative;
+  flex-shrink: 0;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.color-picker-btn:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.color-picker-btn:active {
+  transform: translateY(0);
+}
+
+.current-color {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+  max-width: 24px;
+  max-height: 24px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  transition: all 160ms ease;
+  flex-shrink: 0;
+  display: block;
+  aspect-ratio: 1;
+}
+
+/* Color Popup */
+.color-popup {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 8px;
+  z-index: 1001;
+  animation: fadeInUp 200ms ease;
+  pointer-events: auto;
+}
+
+.color-popup-content {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.zen-color-palette {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  min-width: 60px;
+}
+
+.zen-color {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 160ms ease;
+  position: relative;
+}
+
+.zen-color:hover {
+  transform: scale(1.1);
+  border-color: var(--accent);
+}
+
+.zen-color.active {
+  border-color: var(--accent);
+  border-width: 3px;
+  transform: scale(1.15);
+}
+
+.zen-color.active::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+/* Popup Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Tool Button */
+.tool-btn {
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--border);
+  background: var(--background);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tool-btn:hover {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.tool-btn:active {
+  transform: scale(0.95);
+}
+
+.tool-btn.eraser {
+  background: var(--error-light);
+  border-color: var(--error);
+}
+
+/* Size Picker */
+.size-picker-container {
+  position: relative;
+  display: inline-block;
+}
+
+.size-picker-btn {
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--border);
+  background: var(--background);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.size-picker-btn:hover {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.size-picker-btn:active {
+  transform: scale(0.95);
+}
+
+.size-popup {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 8px;
+  z-index: 1001;
+  animation: fadeInUp 200ms ease;
+  pointer-events: auto;
+}
+
+.size-popup-content {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.size-options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  min-width: 50px;
+}
+
+.size-option {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  max-width: 32px;
+  max-height: 32px;
+  border: 2px solid var(--border);
+  background: var(--background);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  aspect-ratio: 1;
+  flex-shrink: 0;
+}
+
+.size-option:hover {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.size-option.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+.toolbar button {
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 160ms ease;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.toolbar button:hover {
+  background: color-mix(in oklab, var(--accent) 8%, transparent);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+.toolbar button:active {
+  transform: translateY(0);
+}
+.canvas-wrap {
+  position: relative;
+  margin-top: 8px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #d2d2d2;
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+}
+
+/* Make the drawing area full-bleed across the viewport (in-page, not background) */
+.sketch .canvas-wrap {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  border-left: 0;
+  border-right: 0;
+  border-radius: 0;
+}
+
+#canvas {
+  display: block;
+  width: 100% !important;
+  height: 70vh !important;
+  min-height: 400px;
+  touch-action: none;
+  cursor: none;
+  background: linear-gradient(0deg, #d2d2d2, #f3f3f3)
+}
+
+/* Mobile-specific canvas sizing for better drawing experience */
+@media (max-width: 768px) {
+  #canvas {
+    height: 85vh !important;
+    min-height: 500px;
+  }
+  
+  /* Ensure canvas container takes full width on mobile */
+  .sketch .canvas-wrap {
+    margin-top: 4px; /* Reduce top margin to save space */
+  }
+  
+  /* Optimize body spacing on mobile */
+  body > * {
+    margin-bottom: 8px; /* Reduce spacing between elements */
+  }
+}
+
+/* Extra large mobile screens (tablets in portrait) */
+@media (max-width: 1024px) and (min-width: 769px) {
+  #background-canvas {
+    height: 80vh !important;
+    min-height: 450px;
+  }
+  
+  #canvas {
+    height: 80vh !important;
+    min-height: 450px;
+  }
+}
+
+/* Very small mobile screens (older phones) - maximize drawing space */
+@media (max-width: 480px) {
+  #background-canvas {
+    height: 90vh !important;
+    min-height: 400px;
+  }
+  
+  #canvas {
+    height: 90vh !important;
+    min-height: 400px;
+  }
+  
+  /* Further reduce spacing on very small screens */
+  .section {
+    padding: 8px 0;
+  }
+  
+  header {
+    padding: 6px 0;
+  }
+  
+  footer {
+    padding: 16px 12px;
+    margin-top: 24px;
+  }
+}
+
+.brush-cursor {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  transform: translate(-50%, -50%);
+  z-index: 100;
+  transition: width 0.1s ease, height 0.1s ease;
+}
+
+/* Canvas stability improvements */
+#canvas {
+  /* Prevent canvas from being stretched by CSS */
+  max-width: 100%;
+  max-height: 100%;
+  /* Ensure smooth resizing */
+  transition: none;
+  /* Prevent image smoothing that can cause blur */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 640px) {
+  /* Prevent scrolling and zooming only on main drawing page */
+  body:not(.gallery-page) {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* Ensure canvas takes available space */
+  .sketch {
+    height: calc(100vh - 140px); /* Account for header, prompt, and toolbar */
+    height: calc(100dvh - 140px);
+    padding-bottom: 0;
+  }
+  
+  .canvas-wrap {
+    height: 100%;
+    width: 100%;
+  }
+  
+  #canvas {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain;
+  }
+  
+  /* Toolbar adjustments */
+  .toolbar {
+    padding: 8px 16px;
+    gap: 8px;
+    min-height: 56px;
+  }
+  
+  .toolbar label {
+    font-size: 0.8rem;
+  }
+  
+  .toolbar input[type="range"] {
+    width: 100px;
+    min-width: 60px;
+  }
+  
+  .toolbar button {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    min-height: 36px;
+  }
+  
+  /* Hide labels on very small screens */
+  @media (max-width: 480px) {
+    .toolbar .label {
+      display: none;
+    }
+    
+    .toolbar {
+      gap: 6px;
+      padding: 6px 12px;
+    }
+    
+    /* Color picker adjustments for small screens */
+    .color-picker-btn {
+      width: 36px;
+      height: 36px;
+    }
+    
+    .current-color {
+      width: 20px;
+      height: 20px;
+      min-width: 20px;
+      min-height: 20px;
+      max-width: 20px;
+      max-height: 20px;
+    }
+    
+    .color-popup {
+      margin-bottom: 4px;
+    }
+    
+    .color-popup-content {
+      padding: 8px;
+    }
+    
+  .zen-color {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .zen-color-palette {
+    min-width: 50px;
+    gap: 6px;
+  }
+  
+  .tool-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+  
+  .size-picker-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+  
+  .size-options {
+    min-width: 40px;
+    gap: 4px;
+  }
+  
+  .size-option {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    min-height: 24px;
+    max-width: 24px;
+    max-height: 24px;
+    font-size: 10px;
+    aspect-ratio: 1;
+    flex-shrink: 0;
+  }
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .toolbar {
+    padding: 10px 24px;
+    gap: 16px;
+  }
+  
+  .toolbar input[type="range"] {
+    width: 140px;
+  }
+}
+
+/* Large desktop adjustments */
+@media (min-width: 1025px) {
+  .toolbar {
+    padding: 12px 32px;
+    gap: 20px;
+  }
+  
+  .toolbar input[type="range"] {
+    width: 160px;
+  }
+}
+
+
+
+.prompt {
+  font-style: italic;
+  font-weight: 400;
+  font-size: 24px;
+  color: var(--muted);
+  opacity: 0;
+  filter: blur(12px);
+  animation: promptReveal 5s ease forwards;
+}
+
+@keyframes promptReveal {
+  0% { opacity: 0; filter: blur(12px); }
+  100% { opacity: 1; filter: blur(0); }
+}
+
+/* Footer */
+footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: color-mix(in oklab, var(--bg) 95%, transparent);
+  backdrop-filter: saturate(1.2) blur(8px);
+  border-top: 1px solid var(--border);
+  padding: 16px 24px;
+  z-index: 20;
+  text-align: center;
+}
+
+footer .toolbar {
+  justify-content: center;
+  margin-bottom: 8px;
+  position: sticky;
+  bottom: 0;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  z-index: 10;
+  gap: 16px;
+  padding: 12px 20px;
+}
+
+/* Remove labels from toolbar */
+footer .toolbar .label {
+  display: none;
+}
+
+/* Style toolbar buttons like gallery button */
+footer .toolbar button {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 160ms ease;
+}
+
+footer .toolbar button:hover {
+  background: color-mix(in oklab, var(--accent) 8%, transparent);
+  border-color: var(--accent);
+}
+
+/* Zen-style range slider */
+footer .toolbar input[type="range"] {
+  width: 120px;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+footer .toolbar input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid var(--bg);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+footer .toolbar input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid var(--bg);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+footer p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+/* Feedback System */
+.feedback-link {
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: inline-block;
+}
+
+/* Onboarding Modal Styles */
+.onboarding-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    min-width: 100vw;
+    min-height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1001;
+    margin: 0;
+}
+
+.onboarding-content {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.onboarding-content p {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  color: var(--text);
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+.onboarding-content p:last-of-type {
+  margin-bottom: 32px;
+  font-style: italic;
+  color: var(--accent);
+}
+
+.caption {
+  font-size: 12px !important;
+  color: var(--muted) !important;
+  font-style: normal !important;
+  margin: 16px 0 8px 0 !important;
+  opacity: 0.7;
+}
+
+.modal-divider {
+  border: none;
+  height: 1px;
+  background: var(--border);
+  margin: 20px 0;
+  opacity: 0.3;
+}
+
+.support-text {
+  font-size: 12px;
+  color: var(--muted);
+  font-style: italic;
+  margin: 20px 0 24px 0;
+  line-height: 1.5;
+  opacity: 0.8;
+}
+
+.support-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.support-link:hover {
+  color: var(--text);
+  text-decoration: underline;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: nowrap;
+  margin-bottom: 16px;
+}
+
+.coffee-button-modal {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #FFDD00; /* Buy Me a Coffee official yellow */
+  color: #000;
+  text-decoration: none;
+  padding: 10px 20px; /* Smaller than Begin button */
+  border-radius: 6px; /* Slightly smaller radius */
+  font-weight: 500;
+  font-size: 14px; /* Smaller than Begin button */
+  box-shadow: 0 2px 8px rgba(255, 221, 0, 0.3);
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.coffee-button-modal:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 221, 0, 0.4);
+  background: #FFE600;
+}
+
+.coffee-button-modal span {
+  font-size: 14px; /* Match smaller button text size */
+}
+
+.feedback-button-modal {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--accent);
+  color: var(--bg);
+  text-decoration: none;
+  padding: 10px 20px; /* Smaller than Begin button */
+  border-radius: 6px; /* Slightly smaller radius */
+  font-weight: 500;
+  font-size: 14px; /* Smaller than Begin button */
+  font-family: 'Averia Sans Libre', cursive;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.feedback-button-modal:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: var(--text);
+}
+
+/* Modal floating animation - works with flexbox centering */
+@keyframes modalFloat {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-3px) rotate(0.5deg);
+  }
+  50% {
+    transform: translateY(-1px) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-2px) rotate(-0.3deg);
+  }
+}
+
+
+.onboarding-close {
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  padding: 14px 32px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  font-family: 'Averia Sans Libre', cursive;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all 0.2s ease;
+}
+
+.onboarding-close:hover {
+  background: color-mix(in oklab, var(--accent) 90%, black);
+  transform: translateY(-1px);
+}
+
+/* Mobile adjustments for onboarding */
+@media (max-width: 768px) {
+  .onboarding-content {
+    padding: 24px;
+    margin: 20px;
+  }
+  
+  .onboarding-content h2 {
+    font-size: 24px;
+  }
+  
+  .mode-item {
+    padding: 10px;
+  }
+  
+  .mode-icon {
+    font-size: 20px;
+    margin-right: 12px;
+  }
+}
+
+/* Simple Feedback Modal */
+.feedback-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    min-width: 100vw;
+    min-height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    margin: 0;
+    padding: 0;
+}
+
+.feedback-content {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.feedback-content h2 {
+    margin: 0 0 20px 0;
+    color: var(--text);
+    font-size: 1.2rem;
+}
+
+.feedback-type {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.feedback-type label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
+
+.feedback-type label:hover {
+    background: var(--muted);
+}
+
+.feedback-type input[type="radio"] {
+    margin: 0;
+}
+
+.feedback-content textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: inherit;
+    resize: vertical;
+    margin-bottom: 16px;
+}
+
+.feedback-content input[type="email"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: inherit;
+    margin-bottom: 20px;
+}
+
+.feedback-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.feedback-actions button {
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+
+.feedback-actions button[type="submit"] {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+}
+
+.feedback-actions button:hover {
+    background: var(--muted);
+}
+
+.feedback-actions button[type="submit"]:hover {
+    background: var(--accent);
+    opacity: 0.9;
+}
+
+
+/* Zen-like animations */
+@keyframes fadeIn {
+  0% { 
+    opacity: 0; 
+  }
+  100% { 
+    opacity: 1; 
+  }
+}
+
+@keyframes fadeOut {
+  0% { 
+    opacity: 1; 
+  }
+  100% { 
+    opacity: 0; 
+  }
+}
+
+@keyframes floatDrift {
+  0%, 100% {
+    transform: translateX(-50%) translateY(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateX(-50%) translateY(-3px) rotate(0.5deg);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-1px) rotate(0deg);
+  }
+  75% {
+    transform: translateX(-50%) translateY(-2px) rotate(-0.3deg);
+  }
+}
+
+@keyframes cursorDrift {
+  0% {
+    transform: translateX(-50%) translateY(0px) rotate(0deg);
+  }
+  100% {
+    transform: translateX(-50%) translateY(0px) rotate(0deg);
+  }
+}
+
+.toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-size: 0.9rem;
+  color: var(--text);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  animation: fadeIn 0.6s ease-out, floatDrift 3s ease-in-out infinite;
+  transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+  backdrop-filter: blur(10px);
+  background: color-mix(in oklab, var(--bg) 95%, transparent);
+}
+
+.toast.fade-out {
+  animation: fadeOut 0.6s ease-out forwards;
+}
+
+/* Mobile toast styling */
+@media (max-width: 640px) {
+  .toast {
+    min-width: 80vw;
+    max-width: 90vw;
+    padding: 16px 24px;
+    font-size: 1rem;
+    text-align: center;
+  }
+}
+
+/* Footer styling */
+footer {
+  padding: 24px 12px;
+  margin-top: 48px;
+  text-align: center;
+  position: relative;
+  z-index: 5;
+}
+
+.coffee-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+  color: white;
+  text-decoration: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.coffee-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+  background: linear-gradient(135deg, #ff5252, #ff7043);
+}
+
+.coffee-button span {
+  font-size: 1.1rem;
+  animation: coffeePulse 2s ease-in-out infinite;
+}
+
+@keyframes coffeePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* Mobile coffee button */
+@media (max-width: 640px) {
+  .coffee-button {
+    padding: 14px 28px;
+    font-size: 1rem;
+  }
+}
+
+/* Remove jarring hover effects */
+.drawing-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.drawing-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
