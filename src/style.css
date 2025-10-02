@@ -47,11 +47,13 @@ body > * {
 
 /* Header & nav */
 header {
-  position: sticky;
-  top: 20;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   backdrop-filter: saturate(1.2) blur(8px);
   background: color-mix(in oklab, var(--bg) 88%, transparent);
-  z-index: 20;
+  z-index: 100;
   /* Override content width constraints */
   max-width: none !important;
   padding-left: 20 !important;
@@ -233,6 +235,10 @@ p {
   border-bottom: 1px dashed var(--border);
   padding-bottom: 0;
   margin-bottom: 0;
+  padding-top: 20px; /* Space from header */
+  background: var(--bg);
+  position: relative;
+  z-index: 10;
 }
 
 /* Utilities */
@@ -297,6 +303,17 @@ p {
   header {
     padding: 4px 20px;
     min-height: auto;
+  }
+  
+  /* Adjust canvas positioning for mobile header and prompt */
+  .sketch .canvas-wrap {
+    top: 120px; /* Start below mobile header + prompt area */
+  }
+  
+  /* Adjust prompt container for mobile */
+  .prompt-container {
+    padding-top: 10px; /* Less space on mobile */
+    z-index: 20; /* Ensure it stays above canvas */
   }
   
   .header-left {
@@ -698,13 +715,17 @@ p {
   border-left: 0;
   border-right: 0;
   border-radius: 0;
+  position: fixed;
+  top: 80px; /* Start below the header */
+  left: 0;
+  z-index: 1;
 }
 
 #canvas {
   display: block;
   width: 100% !important;
-  height: 70vh !important;
-  min-height: 400px;
+  height: calc(100vh - 80px) !important;
+  min-height: calc(100vh - 80px);
   touch-action: none;
   cursor: none;
   background: linear-gradient(0deg, #d2d2d2, #f3f3f3)
@@ -713,8 +734,8 @@ p {
 /* Mobile-specific canvas sizing for better drawing experience */
 @media (max-width: 768px) {
   #canvas {
-    height: 85vh !important;
-    min-height: 500px;
+    height: calc(100vh - 120px) !important;
+    min-height: calc(100vh - 120px);
   }
   
   /* Ensure canvas container takes full width on mobile */
@@ -731,30 +752,37 @@ p {
 /* Extra large mobile screens (tablets in portrait) */
 @media (max-width: 1024px) and (min-width: 769px) {
   #background-canvas {
-    height: 80vh !important;
-    min-height: 450px;
+    height: calc(100vh - 80px) !important;
+    min-height: calc(100vh - 80px);
   }
   
   #canvas {
-    height: 80vh !important;
-    min-height: 450px;
+    height: calc(100vh - 80px) !important;
+    min-height: calc(100vh - 80px);
   }
 }
 
 /* Very small mobile screens (older phones) - maximize drawing space */
 @media (max-width: 480px) {
   #background-canvas {
-    height: 90vh !important;
-    min-height: 400px;
+    height: calc(100vh - 120px) !important;
+    min-height: calc(100vh - 120px);
   }
   
   #canvas {
-    height: 90vh !important;
-    min-height: 400px;
+    height: calc(100vh - 120px) !important;
+    min-height: calc(100vh - 120px);
   }
   
   /* Further reduce spacing on very small screens */
   .section {
+    padding: 8px 0;
+  }
+  
+  /* Ensure prompt is visible on very small screens */
+  .prompt-container {
+    z-index: 25;
+    background: var(--bg);
     padding: 8px 0;
   }
   

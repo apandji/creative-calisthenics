@@ -304,10 +304,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const canvasRect = canvas.getBoundingClientRect();
     const containerRect = canvas.parentElement.getBoundingClientRect();
     
-    // Calculate position relative to the canvas container
-    const x = e.clientX - containerRect.left;
-    const y = e.clientY - containerRect.top;
+    // Calculate position relative to the canvas (same as getPos function)
+    const x = e.clientX - canvasRect.left;
+    const y = e.clientY - canvasRect.top;
     
+    // Position cursor relative to the container, but use canvas coordinates
     cursor.style.left = x + 'px';
     cursor.style.top = y + 'px';
   }
