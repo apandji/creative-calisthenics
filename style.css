@@ -690,6 +690,18 @@ p {
   min-height: 400px;
 }
 
+/* Add gradient effect below the canvas */
+.canvas-wrap::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background: linear-gradient(0deg, #d2d2d2, #f3f3f3);
+  pointer-events: none;
+}
+
 /* Make the drawing area full-bleed across the viewport (in-page, not background) */
 .sketch .canvas-wrap {
   width: 100vw;
@@ -707,7 +719,7 @@ p {
   min-height: 400px;
   touch-action: none;
   cursor: none;
-  background: linear-gradient(0deg, #d2d2d2, #f3f3f3)
+  background: #f3f3f3;
 }
 
 /* Mobile-specific canvas sizing for better drawing experience */
