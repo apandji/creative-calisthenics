@@ -369,7 +369,7 @@ p {
   border-top: 1px solid var(--border);
   z-index: 1000;
   padding: 12px 20px;
-  box-shadow: none;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   display: flex;
