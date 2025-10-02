@@ -136,28 +136,17 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function getPos(evt) {
-    const containerRect = canvas.parentElement.getBoundingClientRect();
     const canvasRect = canvas.getBoundingClientRect();
     
-    // Calculate position relative to the container (same as cursor)
-    const containerX = (evt.clientX ?? (evt.touches && evt.touches[0].clientX)) - containerRect.left;
-    const containerY = (evt.clientY ?? (evt.touches && evt.touches[0].clientY)) - containerRect.top;
-    
-    // Convert to canvas coordinates by subtracting the canvas offset within container
-    const canvasOffsetX = canvasRect.left - containerRect.left;
-    const canvasOffsetY = canvasRect.top - containerRect.top;
-    
-    const x = containerX - canvasOffsetX;
-    const y = containerY - canvasOffsetY;
+    // Simple canvas-relative coordinates
+    const x = (evt.clientX ?? (evt.touches && evt.touches[0].clientX)) - canvasRect.left;
+    const y = (evt.clientY ?? (evt.touches && evt.touches[0].clientY)) - canvasRect.top;
     
     // Debug logging
     console.log('Touch event:', {
       clientX: evt.clientX ?? (evt.touches && evt.touches[0].clientX),
       clientY: evt.clientY ?? (evt.touches && evt.touches[0].clientY),
-      containerRect: { left: containerRect.left, top: containerRect.top },
       canvasRect: { left: canvasRect.left, top: canvasRect.top },
-      containerCoords: { x: containerX, y: containerY },
-      canvasOffset: { x: canvasOffsetX, y: canvasOffsetY },
       finalCoords: { x, y }
     });
     
@@ -323,22 +312,24 @@ document.addEventListener('DOMContentLoaded', function() {
   // Mouse tracking for cursor
   function updateCursorPosition(e) {
     if (!cursor) return;
-    const containerRect = canvas.parentElement.getBoundingClientRect();
+    const canvasRect = canvas.getBoundingClientRect();
     
-    // Calculate position relative to the container (same as drawing base)
-    const x = e.clientX - containerRect.left;
-    const y = e.clientY - containerRect.top;
+    // Calculate position relative to the canvas (same as drawing)
+    const x = e.clientX - canvasRect.left;
+    const y = e.clientY - canvasRect.top;
     
-    // Position cursor with container coordinates
-    cursor.style.left = x + 'px';
-    cursor.style.top = y + 'px';
+    // Position cursor absolutely relative to viewport, but using canvas coordinates
+    cursor.style.position = 'fixed';
+    cursor.style.left = (canvasRect.left + x) + 'px';
+    cursor.style.top = (canvasRect.top + y) + 'px';
     
     // Debug logging
     console.log('Cursor position:', {
       clientX: e.clientX,
       clientY: e.clientY,
-      containerRect: { left: containerRect.left, top: containerRect.top },
-      containerCoords: { x, y }
+      canvasRect: { left: canvasRect.left, top: canvasRect.top },
+      canvasCoords: { x, y },
+      finalPosition: { left: canvasRect.left + x, top: canvasRect.top + y }
     });
   }
 

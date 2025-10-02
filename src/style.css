@@ -805,6 +805,8 @@ p {
   transform: translate(-50%, -50%);
   z-index: 100;
   transition: width 0.1s ease, height 0.1s ease;
+  left: 0;
+  top: 0;
 }
 
 /* Canvas stability improvements */
