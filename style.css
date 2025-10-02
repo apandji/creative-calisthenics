@@ -29,6 +29,7 @@ body {
   height: 100vh;
   height: 100dvh; /* Dynamic viewport height for mobile */
   position: relative;
+  box-shadow: none;
 }
 
 /* Content width and rhythm */
@@ -720,6 +721,7 @@ p {
   touch-action: none;
   cursor: none;
   background: #f3f3f3;
+  box-shadow: none;
 }
 
 /* Mobile-specific canvas sizing for better drawing experience */
