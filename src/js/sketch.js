@@ -313,23 +313,33 @@ document.addEventListener('DOMContentLoaded', function() {
   function updateCursorPosition(e) {
     if (!cursor) return;
     const canvasRect = canvas.getBoundingClientRect();
+    const containerRect = canvas.parentElement.getBoundingClientRect();
     
     // Calculate position relative to the canvas (same as drawing)
     const x = e.clientX - canvasRect.left;
     const y = e.clientY - canvasRect.top;
     
-    // Position cursor absolutely relative to viewport, but using canvas coordinates
-    cursor.style.position = 'fixed';
-    cursor.style.left = (canvasRect.left + x) + 'px';
-    cursor.style.top = (canvasRect.top + y) + 'px';
+    // Convert to container coordinates for cursor positioning
+    const containerOffsetX = canvasRect.left - containerRect.left;
+    const containerOffsetY = canvasRect.top - containerRect.top;
+    
+    const cursorX = x + containerOffsetX;
+    const cursorY = y + containerOffsetY;
+    
+    // Position cursor relative to container
+    cursor.style.position = 'absolute';
+    cursor.style.left = cursorX + 'px';
+    cursor.style.top = cursorY + 'px';
     
     // Debug logging
     console.log('Cursor position:', {
       clientX: e.clientX,
       clientY: e.clientY,
       canvasRect: { left: canvasRect.left, top: canvasRect.top },
+      containerRect: { left: containerRect.left, top: containerRect.top },
       canvasCoords: { x, y },
-      finalPosition: { left: canvasRect.left + x, top: canvasRect.top + y }
+      containerOffset: { x: containerOffsetX, y: containerOffsetY },
+      finalCursor: { x: cursorX, y: cursorY }
     });
   }
 
