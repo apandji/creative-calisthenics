@@ -80,48 +80,7 @@ class FeedbackCollector {
     }
   }
 
-  // Micro-survey system - now using toasts
-  showMicroSurvey(question, options, type, metadata = {}) {
-    console.log(`showMicroSurvey called: ${question}`);
-    
-    // Only show surveys 80% of the time for testing (was 30%)
-    const shouldShow = Math.random() <= 0.8;
-    console.log(`Should show survey: ${shouldShow}`);
-    
-    if (!shouldShow) return;
-
-    // Show the question as a toast
-    if (typeof window.showToast === 'function') {
-      console.log('Showing toast:', question);
-      window.showToast(question);
-    } else {
-      console.log('showToast function not available');
-    }
-    
-    // Simulate a response after a short delay
-    // In a real implementation, you could show interactive toasts with buttons
-    setTimeout(() => {
-      if (options) {
-        console.log(`Micro-Survey: ${question}`);
-        console.log('Options:', options.join(', '));
-        // Simulate a random response for testing
-        const simulatedResponse = options[Math.floor(Math.random() * options.length)];
-        this.submitFeedback('micro_survey', simulatedResponse, {
-          question: question,
-          type: type,
-          ...metadata
-        });
-      } else {
-        // Simulate a text response
-        const simulatedResponse = "User provided feedback.";
-        this.submitFeedback('micro_survey', simulatedResponse, {
-          question: question,
-          type: type,
-          ...metadata
-        });
-      }
-    }, 2000); // Wait 2 seconds to simulate user interaction
-  }
+  // Micro-survey system removed
 
   // Track drawing completion
   trackDrawingCompleted(mode, duration, strokeCount) {
@@ -131,18 +90,7 @@ class FeedbackCollector {
 
     console.log(`Drawing completed! Count: ${this.drawingCount}, Mode: ${mode}`);
 
-    // Show micro-survey after first drawing
-    if (this.drawingCount === 1) {
-      console.log('Triggering first drawing survey...');
-      setTimeout(() => {
-        this.showMicroSurvey(
-          "How did that feel?",
-          ["Amazing", "Good", "Okay", "Meh"],
-          "first_drawing_feeling",
-          { mode, duration, strokeCount }
-        );
-      }, 2000);
-    }
+    // Micro surveys disabled
 
     // Track in analytics
     if (typeof umami !== 'undefined') {
@@ -167,17 +115,7 @@ class FeedbackCollector {
     this.modeSwitches++;
     this.sessionData.modes_used.add(to);
 
-    // Show micro-survey occasionally
-    if (this.modeSwitches % 3 === 0) {
-      setTimeout(() => {
-        this.showMicroSurvey(
-          "Which mode do you prefer?",
-          ["Normal", "Complete", "Drift"],
-          "mode_preference",
-          { from, to, total_switches: this.modeSwitches }
-        );
-      }, 1000);
-    }
+    // Micro surveys disabled
 
     // Track in analytics
     if (typeof umami !== 'undefined') {
