@@ -230,37 +230,11 @@ class LocalStreakManager {
   }
 
   showStreakUpdate() {
-    if (this.currentStreak === 1) {
-      if (typeof window.showToast === 'function') {
-        window.showToast('Your creative journey begins');
-      }
-    } else if (this.currentStreak > 1) {
-      const messages = [
-        `Day ${this.currentStreak} of your creative flow`,
-        `Your ${this.currentStreak}-day streak grows stronger`,
-        `Each day deepens your artistic practice`
-      ];
-      const message = messages[Math.floor(Math.random() * messages.length)];
-      if (typeof window.showToast === 'function') {
-        window.showToast(message);
-      }
-    }
+    // Toast messages removed - streak updates silently
   }
 
   showMilestoneCelebration(milestone) {
-    const messages = {
-      3: '3 days of mindful creation - you\'re finding your rhythm',
-      7: '7 days of daily practice - your creativity flows naturally',
-      14: '14 days of artistic journey - you\'ve discovered your flow',
-      30: '30 days of creative practice - you\'ve built a beautiful habit',
-      60: '60 days of daily creation - your artistic voice is strong',
-      100: '100 days of mindful practice - you\'ve mastered the art of daily creation'
-    };
-
-    const message = messages[milestone];
-    if (message) {
-      window.showToast(message);
-    }
+    // Toast messages removed - milestones celebrated silently
   }
 
   getStreakStats() {
