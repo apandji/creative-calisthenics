@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   
-  // Prevent double-tap zoom ONLY on the canvas, not the whole document
+  // Prevent double-tap zoom and improve mobile touch handling
   let lastCanvasTouchEnd = 0;
   canvas.addEventListener('touchend', function(e) {
     const now = Date.now();
@@ -13,6 +13,21 @@ document.addEventListener('DOMContentLoaded', function() {
       e.preventDefault();
     }
     lastCanvasTouchEnd = now;
+  }, { passive: false });
+
+  // Additional mobile touch improvements
+  canvas.addEventListener('touchstart', function(e) {
+    // Prevent default touch behaviors that might interfere
+    if (e.touches.length === 1) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  canvas.addEventListener('touchmove', function(e) {
+    // Prevent scrolling while drawing
+    if (e.touches.length === 1) {
+      e.preventDefault();
+    }
   }, { passive: false });
 
   // Elements
@@ -148,23 +163,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function getPos(evt) {
     const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
     
     let clientX, clientY;
     
     if (evt.touches && evt.touches.length > 0) {
-      // Touch event
+      // Touch event - use the first touch point
       clientX = evt.touches[0].clientX;
       clientY = evt.touches[0].clientY;
+    } else if (evt.changedTouches && evt.changedTouches.length > 0) {
+      // Handle touchend events
+      clientX = evt.changedTouches[0].clientX;
+      clientY = evt.changedTouches[0].clientY;
     } else {
       // Mouse event
       clientX = evt.clientX;
       clientY = evt.clientY;
     }
     
-    const x = (clientX - rect.left) * scaleX;
-    const y = (clientY - rect.top) * scaleY;
+    // Simple coordinate calculation - no scaling
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
     
     return { x, y };
   }
@@ -308,10 +326,10 @@ document.addEventListener('DOMContentLoaded', function() {
   canvas.addEventListener('mouseup', handleEnd);
   canvas.addEventListener('mouseleave', handleEnd);
 
-  // Touch fallback
-  canvas.addEventListener('touchstart', handleStart);
-  canvas.addEventListener('touchmove', handleMove);
-  canvas.addEventListener('touchend', handleEnd);
+  // Touch fallback with improved mobile handling
+  canvas.addEventListener('touchstart', handleStart, { passive: false });
+  canvas.addEventListener('touchmove', handleMove, { passive: false });
+  canvas.addEventListener('touchend', handleEnd, { passive: false });
 
   // Prevent context menu and scrolling
   canvas.addEventListener('contextmenu', (e) => e.preventDefault());
@@ -338,13 +356,17 @@ document.addEventListener('DOMContentLoaded', function() {
       // Touch event
       clientX = e.touches[0].clientX;
       clientY = e.touches[0].clientY;
+    } else if (e.changedTouches && e.changedTouches.length > 0) {
+      // Handle touchend events
+      clientX = e.changedTouches[0].clientX;
+      clientY = e.changedTouches[0].clientY;
     } else {
       // Mouse event
       clientX = e.clientX;
       clientY = e.clientY;
     }
     
-    // Calculate position relative to the canvas (same as drawing coordinates)
+    // Simple position calculation - no scaling
     const x = clientX - canvasRect.left;
     const y = clientY - canvasRect.top;
     
@@ -472,8 +494,9 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Touch tracking events for mobile cursor
-  canvas.addEventListener('touchstart', updateCursorPosition);
-  canvas.addEventListener('touchmove', updateCursorPosition);
+  canvas.addEventListener('touchstart', updateCursorPosition, { passive: true });
+  canvas.addEventListener('touchmove', updateCursorPosition, { passive: true });
+  canvas.addEventListener('touchend', updateCursorPosition, { passive: true });
 
   // Initialize zen color palette
   function initZenColorPalette() {

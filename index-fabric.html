@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>driftpad</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <logo class="logo" id="logo">driftpad</logo>
+            <div id="streak-indicator" class="streak-indicator">🌊 0</div>
+        </div>
+        <div class="header-right">
+            <button id="feedback-btn">feedback</button>
+            <button id="gallery-btn">gallery</button>
+        </div>
+    </header>
+
+    <div class="prompt-container">
+        <div class="mode-controls">
+            <div class="mode-selector-row">
+                <select id="prompt-mode" aria-label="Select prompt mode">
+                    <option value="prompt">Prompt</option>
+                    <option value="complete_drawing">Complete Drawing</option>
+                    <option value="freehand">Freehand</option>
+                </select>
+                <button id="new-prompt-btn">refresh</button>
+            </div>
+            <h2 class="prompt" style="font-size: 20px;">text</h2>
+        </div>
+    </div>
+
+    <section class="sketch-section">
+        <div class="container sketch">
+            <div class="canvas-wrap">
+                <canvas id="canvas" aria-label="drawing canvas" width="800" height="600"></canvas>
+                <div id="cursor" class="brush-cursor"></div>
+            </div>
+        </div>
+    </section>
+
+    <div class="controls">
+        <div class="control-group">
+            <label for="color">Color:</label>
+            <input type="color" id="color" value="#000000">
+        </div>
+        <div class="control-group">
+            <label for="size">Size:</label>
+            <input type="range" id="size" min="1" max="50" value="15">
+            <span id="size-value">15</span>
+        </div>
+        <div class="control-group">
+            <button id="clear">Clear</button>
+            <button id="save">Save</button>
+        </div>
+    </div>
+
+    <!-- Zen color palette -->
+    <div id="zen-colors" class="zen-colors"></div>
+
+    <!-- Color picker popup -->
+    <div id="color-popup" class="color-popup">
+        <div class="color-picker">
+            <input type="color" id="color-picker-input" value="#000000">
+            <button id="color-picker-close">Done</button>
+        </div>
+    </div>
+
+    <!-- Size picker popup -->
+    <div id="size-popup" class="size-popup">
+        <div class="size-picker">
+            <div id="size-options" class="size-options">
+                <button class="size-option" data-size="5">Small</button>
+                <button class="size-option" data-size="15">Medium</button>
+                <button class="size-option" data-size="25">Large</button>
+                <button class="size-option" data-size="35">Extra Large</button>
+            </div>
+            <button id="size-picker-close">Done</button>
+        </div>
+    </div>
+
+    <!-- Gallery modal -->
+    <div id="gallery-modal" class="gallery-modal">
+        <div class="gallery-content">
+            <h2>Gallery</h2>
+            <div id="gallery-grid" class="gallery-grid"></div>
+            <button id="gallery-close">Close</button>
+        </div>
+    </div>
+
+    <!-- Feedback modal -->
+    <div id="feedback-modal" class="feedback-modal">
+        <div class="feedback-content">
+            <h2>Feedback</h2>
+            <textarea id="feedback-text" placeholder="Share your thoughts about driftpad..."></textarea>
+            <button id="feedback-submit">Submit</button>
+            <button id="feedback-close">Close</button>
+        </div>
+    </div>
+
+    <script src="js/fabric-driftpad.js"></script>
+    <script src="js/prompts.js"></script>
+    <script src="js/pull-to-refresh.js"></script>
+    <script src="js/feedback-collector.js"></script>
+    <script src="js/local-streak.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Fabric.js drawing system
+            const canvas = document.getElementById('canvas');
+            const fabricDriftpad = new FabricDriftpad(canvas);
+            
+            // Get Fabric.js canvas for external access
+            const fabricCanvas = fabricDriftpad.getCanvas();
+            
+            // Elements
+            const colorInput = document.getElementById('color');
+            const sizeInput = document.getElementById('size');
+            const sizeValue = document.getElementById('size-value');
+            const clearBtn = document.getElementById('clear');
+            const saveBtn = document.getElementById('save');
+            const cursor = document.getElementById('cursor');
+            const promptElement = document.querySelector('.prompt');
+            const modeSelect = document.getElementById('prompt-mode');
+            const newPromptBtn = document.getElementById('new-prompt-btn');
+            
+            // State
+            let currentMode = 'prompt';
+            let drawingStartTime = 0;
+            
+            // Initialize prompts
+            if (typeof PromptManager !== 'undefined') {
+                const promptManager = new PromptManager();
+                promptManager.updatePrompt();
+            }
+            
+            // Initialize streak system
+            if (typeof LocalStreakManager !== 'undefined') {
+                const localStreakManager = new LocalStreakManager();
+                localStreakManager.updateStreak();
+            }
+            
+            // Initialize feedback collector
+            if (typeof FeedbackCollector !== 'undefined') {
+                const feedbackCollector = new FeedbackCollector();
+            }
+            
+            // Feedback modal functionality
+            const feedbackBtn = document.getElementById('feedback-btn');
+            const feedbackModal = document.getElementById('feedback-modal');
+            const feedbackClose = document.getElementById('feedback-close');
+            const feedbackSubmit = document.getElementById('feedback-submit');
+            const feedbackText = document.getElementById('feedback-text');
+            
+            if (feedbackBtn && feedbackModal) {
+                feedbackBtn.addEventListener('click', () => {
+                    feedbackModal.style.display = 'flex';
+                });
+                
+                feedbackClose.addEventListener('click', () => {
+                    feedbackModal.style.display = 'none';
+                });
+                
+                feedbackSubmit.addEventListener('click', () => {
+                    const feedback = feedbackText.value.trim();
+                    if (feedback) {
+                        // Store feedback locally
+                        const feedbacks = JSON.parse(localStorage.getItem('driftpad_feedback') || '[]');
+                        feedbacks.push({
+                            text: feedback,
+                            timestamp: new Date().toISOString(),
+                            userAgent: navigator.userAgent
+                        });
+                        localStorage.setItem('driftpad_feedback', JSON.stringify(feedbacks));
+                        
+                        // Clear form and close modal
+                        feedbackText.value = '';
+                        feedbackModal.style.display = 'none';
+                        
+                        // Show confirmation
+                        if (typeof window.showToast === 'function') {
+                            window.showToast('Thank you for your feedback!');
+                        }
+                    }
+                });
+                
+                // Close modal when clicking outside
+                feedbackModal.addEventListener('click', (e) => {
+                    if (e.target === feedbackModal) {
+                        feedbackModal.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Gallery modal functionality
+            const galleryBtn = document.getElementById('gallery-btn');
+            const galleryModal = document.getElementById('gallery-modal');
+            const galleryClose = document.getElementById('gallery-close');
+            const galleryGrid = document.getElementById('gallery-grid');
+            
+            if (galleryBtn && galleryModal) {
+                galleryBtn.addEventListener('click', () => {
+                    // Load saved drawings
+                    const savedDrawings = JSON.parse(localStorage.getItem('driftpad_gallery') || '[]');
+                    galleryGrid.innerHTML = '';
+                    
+                    if (savedDrawings.length === 0) {
+                        galleryGrid.innerHTML = '<p>No drawings saved yet. Create some art!</p>';
+                    } else {
+                        savedDrawings.forEach((drawing, index) => {
+                            const img = document.createElement('img');
+                            img.src = drawing.dataURL;
+                            img.alt = `Drawing ${index + 1}`;
+                            img.style.width = '100px';
+                            img.style.height = '100px';
+                            img.style.objectFit = 'cover';
+                            img.style.borderRadius = '8px';
+                            img.style.cursor = 'pointer';
+                            
+                            img.addEventListener('click', () => {
+                                // Load drawing into canvas
+                                fabricCanvas.loadFromJSON(drawing.fabricData, () => {
+                                    fabricCanvas.renderAll();
+                                    galleryModal.style.display = 'none';
+                                });
+                            });
+                            
+                            galleryGrid.appendChild(img);
+                        });
+                    }
+                    
+                    galleryModal.style.display = 'flex';
+                });
+                
+                galleryClose.addEventListener('click', () => {
+                    galleryModal.style.display = 'none';
+                });
+                
+                // Close modal when clicking outside
+                galleryModal.addEventListener('click', (e) => {
+                    if (e.target === galleryModal) {
+                        galleryModal.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Color and size controls
+            if (colorInput) {
+                colorInput.addEventListener('input', (e) => {
+                    fabricDriftpad.setColor(e.target.value);
+                });
+            }
+            
+            if (sizeInput) {
+                sizeInput.addEventListener('input', (e) => {
+                    const size = parseInt(e.target.value);
+                    sizeValue.textContent = size;
+                    fabricDriftpad.setSize(size);
+                });
+            }
+            
+            // Clear canvas
+            if (clearBtn) {
+                clearBtn.addEventListener('click', () => {
+                    fabricDriftpad.clear();
+                });
+            }
+            
+            // Save/Export
+            if (saveBtn) {
+                saveBtn.addEventListener('click', () => {
+                    const dataURL = fabricDriftpad.exportImage();
+                    const fabricData = JSON.stringify(fabricCanvas.toJSON());
+                    
+                    // Save to gallery
+                    const savedDrawings = JSON.parse(localStorage.getItem('driftpad_gallery') || '[]');
+                    savedDrawings.push({
+                        dataURL: dataURL,
+                        fabricData: fabricData,
+                        timestamp: new Date().toISOString()
+                    });
+                    localStorage.setItem('driftpad_gallery', JSON.stringify(savedDrawings));
+                    
+                    // Download file
+                    const link = document.createElement('a');
+                    link.download = 'driftpad-drawing.png';
+                    link.href = dataURL;
+                    link.click();
+                    
+                    // Show confirmation
+                    if (typeof window.showToast === 'function') {
+                        window.showToast('Drawing saved to gallery!');
+                    }
+                });
+            }
+            
+            // Mode selection
+            if (modeSelect) {
+                modeSelect.addEventListener('change', (e) => {
+                    currentMode = e.target.value;
+                });
+            }
+            
+            // New prompt
+            if (newPromptBtn) {
+                newPromptBtn.addEventListener('click', () => {
+                    if (typeof PromptManager !== 'undefined') {
+                        const promptManager = new PromptManager();
+                        promptManager.updatePrompt();
+                    }
+                });
+            }
+            
+            // Drawing completion handler
+            fabricDriftpad.onDrawingComplete = function() {
+                const duration = Date.now() - drawingStartTime;
+                const strokeCount = 1; // Fabric.js handles stroke counting internally
+                
+                // Track with feedback collector
+                if (typeof FeedbackCollector !== 'undefined') {
+                    const feedbackCollector = new FeedbackCollector();
+                    feedbackCollector.trackDrawingCompleted(currentMode, duration, strokeCount);
+                }
+                
+                // Update streak (if using page-visit based)
+                if (typeof LocalStreakManager !== 'undefined') {
+                    const localStreakManager = new LocalStreakManager();
+                    // Streak updates on page load, not drawing completion
+                }
+            };
+            
+            // Cursor tracking (simplified for Fabric.js)
+            if (cursor) {
+                fabricCanvas.on('mouse:move', (e) => {
+                    const pointer = fabricCanvas.getPointer(e.e);
+                    cursor.style.left = pointer.x + 'px';
+                    cursor.style.top = pointer.y + 'px';
+                    cursor.style.display = 'block';
+                });
+                
+                fabricCanvas.on('mouse:leave', () => {
+                    cursor.style.display = 'none';
+                });
+            }
+            
+            // Update cursor size
+            function updateCursorSize() {
+                if (cursor) {
+                    const size = parseInt(sizeInput.value);
+                    cursor.style.width = size + 'px';
+                    cursor.style.height = size + 'px';
+                }
+            }
+            
+            sizeInput.addEventListener('input', updateCursorSize);
+            updateCursorSize();
+            
+            // Initialize zen color palette
+            function initZenColorPalette() {
+                const zenColorsContainer = document.getElementById('zen-colors');
+                if (!zenColorsContainer) return;
+                
+                const zenColors = [
+                    '#000000', '#2C2C2C', '#4A4A4A', '#6B6B6B',
+                    '#8B4513', '#A0522D', '#CD853F', '#DEB887',
+                    '#2F4F4F', '#4682B4', '#708090', '#B0C4DE'
+                ];
+                
+                zenColors.forEach(color => {
+                    const colorBtn = document.createElement('button');
+                    colorBtn.className = 'zen-color-btn';
+                    colorBtn.style.backgroundColor = color;
+                    colorBtn.title = color;
+                    colorBtn.addEventListener('click', () => {
+                        fabricDriftpad.setColor(color);
+                        colorInput.value = color;
+                    });
+                    zenColorsContainer.appendChild(colorBtn);
+                });
+            }
+            
+            initZenColorPalette();
+            
+            // Responsive canvas
+            function resizeCanvas() {
+                const container = document.querySelector('.canvas-wrap');
+                const containerWidth = container.offsetWidth;
+                const aspectRatio = 800 / 600;
+                
+                let newWidth = containerWidth;
+                let newHeight = containerWidth / aspectRatio;
+                
+                if (newHeight > 400) {
+                    newHeight = 400;
+                    newWidth = newHeight * aspectRatio;
+                }
+                
+                fabricDriftpad.resize(newWidth, newHeight);
+            }
+            
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+            
+            // Prevent scrolling and zooming on canvas
+            canvas.addEventListener('touchstart', (e) => {
+                if (e.touches.length > 1) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+            
+            canvas.addEventListener('touchend', (e) => {
+                if (e.touches.length > 1) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+            
+            // Initialize drawing start time
+            fabricCanvas.on('mouse:down', () => {
+                drawingStartTime = Date.now();
+            });
+            
+            console.log('Fabric.js Driftpad initialized successfully!');
+        });
+    </script>
+</body>
+</html>

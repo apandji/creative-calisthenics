@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fabric.js Prototype - Driftpad</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: "Averia Sans Libre", sans-serif;
+            background: #f3f3f3;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        button {
+            padding: 8px 16px;
+            border: 1px solid #cdcdcd;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+        
+        button:hover {
+            background: #f8f8f8;
+        }
+        
+        button.active {
+            background: #000;
+            color: white;
+        }
+        
+        input[type="range"] {
+            width: 100px;
+        }
+        
+        input[type="color"] {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        #canvas-container {
+            border: 1px solid #cdcdcd;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+        }
+        
+        canvas {
+            display: block;
+        }
+        
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f8f8f8;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Fabric.js Prototype</h1>
+        <p>Clean, simple drawing with perfect mobile support</p>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label>Tool:</label>
+                <button id="draw-btn" class="active">Draw</button>
+                <button id="select-btn">Select</button>
+                <button id="shape-btn">Shapes</button>
+            </div>
+            
+            <div class="control-group">
+                <label>Size:</label>
+                <input type="range" id="brush-size" min="1" max="50" value="10">
+                <span id="size-value">10</span>
+            </div>
+            
+            <div class="control-group">
+                <label>Color:</label>
+                <input type="color" id="brush-color" value="#000000">
+            </div>
+            
+            <div class="control-group">
+                <button id="clear-btn">Clear</button>
+                <button id="undo-btn">Undo</button>
+                <button id="export-btn">Export</button>
+            </div>
+        </div>
+        
+        <div id="canvas-container">
+            <canvas id="canvas" width="800" height="600"></canvas>
+        </div>
+        
+        <div class="status" id="status">
+            Ready to draw! Touch/click to start.
+        </div>
+    </div>
+
+    <script>
+        // Initialize Fabric.js canvas
+        const canvas = new fabric.Canvas('canvas', {
+            width: 800,
+            height: 600,
+            backgroundColor: 'white'
+        });
+
+        // State
+        let isDrawing = false;
+        let currentTool = 'draw';
+        let history = [];
+        let historyIndex = -1;
+
+        // Elements
+        const drawBtn = document.getElementById('draw-btn');
+        const selectBtn = document.getElementById('select-btn');
+        const shapeBtn = document.getElementById('shape-btn');
+        const brushSize = document.getElementById('brush-size');
+        const sizeValue = document.getElementById('size-value');
+        const brushColor = document.getElementById('brush-color');
+        const clearBtn = document.getElementById('clear-btn');
+        const undoBtn = document.getElementById('undo-btn');
+        const exportBtn = document.getElementById('export-btn');
+        const status = document.getElementById('status');
+
+        // Update size display
+        brushSize.addEventListener('input', (e) => {
+            sizeValue.textContent = e.target.value;
+            updateBrush();
+        });
+
+        // Update brush settings
+        function updateBrush() {
+            const size = parseInt(brushSize.value);
+            const color = brushColor.value;
+            
+            if (currentTool === 'draw') {
+                canvas.freeDrawingBrush.width = size;
+                canvas.freeDrawingBrush.color = color;
+                
+                // Add watercolor-like effect
+                canvas.freeDrawingBrush.shadow = new fabric.Shadow({
+                    color: color + '40', // Add transparency
+                    blur: size * 0.5,
+                    offsetX: 1,
+                    offsetY: 1
+                });
+            }
+        }
+
+        // Tool selection
+        drawBtn.addEventListener('click', () => {
+            currentTool = 'draw';
+            canvas.isDrawingMode = true;
+            canvas.selection = false;
+            updateButtons();
+            updateBrush();
+            status.textContent = 'Drawing mode - Touch/click to draw';
+        });
+
+        selectBtn.addEventListener('click', () => {
+            currentTool = 'select';
+            canvas.isDrawingMode = false;
+            canvas.selection = true;
+            updateButtons();
+            status.textContent = 'Selection mode - Click objects to select';
+        });
+
+        shapeBtn.addEventListener('click', () => {
+            currentTool = 'shape';
+            canvas.isDrawingMode = false;
+            canvas.selection = false;
+            updateButtons();
+            status.textContent = 'Shape mode - Click to add shapes';
+        });
+
+        function updateButtons() {
+            drawBtn.classList.toggle('active', currentTool === 'draw');
+            selectBtn.classList.toggle('active', currentTool === 'select');
+            shapeBtn.classList.toggle('active', currentTool === 'shape');
+        }
+
+        // Color change
+        brushColor.addEventListener('change', updateBrush);
+
+        // Clear canvas
+        clearBtn.addEventListener('click', () => {
+            canvas.clear();
+            saveState();
+            status.textContent = 'Canvas cleared';
+        });
+
+        // Undo functionality
+        function saveState() {
+            const state = JSON.stringify(canvas.toJSON());
+            history = history.slice(0, historyIndex + 1);
+            history.push(state);
+            historyIndex++;
+            undoBtn.disabled = historyIndex <= 0;
+        }
+
+        undoBtn.addEventListener('click', () => {
+            if (historyIndex > 0) {
+                historyIndex--;
+                canvas.loadFromJSON(history[historyIndex], () => {
+                    canvas.renderAll();
+                });
+                undoBtn.disabled = historyIndex <= 0;
+                status.textContent = 'Undone';
+            }
+        });
+
+        // Export functionality
+        exportBtn.addEventListener('click', () => {
+            const dataURL = canvas.toDataURL({
+                format: 'png',
+                quality: 1
+            });
+            
+            const link = document.createElement('a');
+            link.download = 'driftpad-drawing.png';
+            link.href = dataURL;
+            link.click();
+            
+            status.textContent = 'Drawing exported!';
+        });
+
+        // Shape tools
+        canvas.on('mouse:down', (e) => {
+            if (currentTool === 'shape') {
+                const pointer = canvas.getPointer(e.e);
+                const color = brushColor.value;
+                const size = parseInt(brushSize.value);
+                
+                // Add random organic shape
+                const shapes = ['circle', 'rect', 'triangle'];
+                const shapeType = shapes[Math.floor(Math.random() * shapes.length)];
+                
+                let shape;
+                switch (shapeType) {
+                    case 'circle':
+                        shape = new fabric.Circle({
+                            left: pointer.x - size/2,
+                            top: pointer.y - size/2,
+                            radius: size,
+                            fill: 'transparent',
+                            stroke: color,
+                            strokeWidth: 3
+                        });
+                        break;
+                    case 'rect':
+                        shape = new fabric.Rect({
+                            left: pointer.x - size/2,
+                            top: pointer.y - size/2,
+                            width: size,
+                            height: size,
+                            fill: 'transparent',
+                            stroke: color,
+                            strokeWidth: 3
+                        });
+                        break;
+                    case 'triangle':
+                        shape = new fabric.Triangle({
+                            left: pointer.x - size/2,
+                            top: pointer.y - size/2,
+                            width: size,
+                            height: size,
+                            fill: 'transparent',
+                            stroke: color,
+                            strokeWidth: 3
+                        });
+                        break;
+                }
+                
+                canvas.add(shape);
+                saveState();
+                status.textContent = `Added ${shapeType}`;
+            }
+        });
+
+        // Save state on drawing completion
+        canvas.on('path:created', () => {
+            saveState();
+            status.textContent = 'Stroke completed';
+        });
+
+        // Mobile touch support (Fabric.js handles this automatically!)
+        canvas.on('touch:gesture', (e) => {
+            // Fabric.js handles touch events perfectly
+            status.textContent = 'Touch gesture detected';
+        });
+
+        // Initialize
+        updateBrush();
+        saveState(); // Save initial empty state
+        
+        // Responsive canvas
+        function resizeCanvas() {
+            const container = document.getElementById('canvas-container');
+            const containerWidth = container.offsetWidth;
+            const aspectRatio = 800 / 600;
+            
+            let newWidth = containerWidth;
+            let newHeight = containerWidth / aspectRatio;
+            
+            if (newHeight > 400) {
+                newHeight = 400;
+                newWidth = newHeight * aspectRatio;
+            }
+            
+            canvas.setDimensions({
+                width: newWidth,
+                height: newHeight
+            });
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Status updates
+        canvas.on('mouse:down', () => {
+            if (currentTool === 'draw') {
+                status.textContent = 'Drawing...';
+            }
+        });
+
+        canvas.on('mouse:up', () => {
+            if (currentTool === 'draw') {
+                status.textContent = 'Drawing completed';
+            }
+        });
+
+        console.log('Fabric.js prototype loaded successfully!');
+        console.log('Canvas object:', canvas);
+        console.log('Available methods:', Object.getOwnPropertyNames(canvas));
+    </script>
+</body>
+</html>
