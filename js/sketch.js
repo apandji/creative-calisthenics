@@ -148,8 +148,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function getPos(evt) {
     const rect = canvas.getBoundingClientRect();
-    const x = (evt.clientX ?? (evt.touches && evt.touches[0].clientX)) - rect.left;
-    const y = (evt.clientY ?? (evt.touches && evt.touches[0].clientY)) - rect.top;
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
+    let clientX, clientY;
+    
+    if (evt.touches && evt.touches.length > 0) {
+      // Touch event
+      clientX = evt.touches[0].clientX;
+      clientY = evt.touches[0].clientY;
+    } else {
+      // Mouse event
+      clientX = evt.clientX;
+      clientY = evt.clientY;
+    }
+    
+    const x = (clientX - rect.left) * scaleX;
+    const y = (clientY - rect.top) * scaleY;
+    
     return { x, y };
   }
 
@@ -311,15 +327,26 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // Mouse tracking for cursor
+  // Mouse/touch tracking for cursor
   function updateCursorPosition(e) {
     if (!cursor) return;
     const canvasRect = canvas.getBoundingClientRect();
-    const containerRect = canvas.parentElement.getBoundingClientRect();
     
-    // Calculate position relative to the canvas container
-    const x = e.clientX - containerRect.left;
-    const y = e.clientY - containerRect.top;
+    let clientX, clientY;
+    
+    if (e.touches && e.touches.length > 0) {
+      // Touch event
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      // Mouse event
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+    
+    // Calculate position relative to the canvas (same as drawing coordinates)
+    const x = clientX - canvasRect.left;
+    const y = clientY - canvasRect.top;
     
     cursor.style.left = x + 'px';
     cursor.style.top = y + 'px';
@@ -443,6 +470,10 @@ document.addEventListener('DOMContentLoaded', function() {
   canvas.addEventListener('mouseleave', () => {
     if (cursor) cursor.style.display = 'none';
   });
+
+  // Touch tracking events for mobile cursor
+  canvas.addEventListener('touchstart', updateCursorPosition);
+  canvas.addEventListener('touchmove', updateCursorPosition);
 
   // Initialize zen color palette
   function initZenColorPalette() {

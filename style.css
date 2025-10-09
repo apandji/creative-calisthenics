@@ -161,6 +161,8 @@ header button[title] {
   cursor: pointer;
   user-select: none;
   margin-left: 8px;
+  margin-right: 8px;
+  flex-shrink: 0; /* Prevent shrinking on mobile */
 }
 
 .streak-indicator.active {
@@ -181,6 +183,88 @@ header button[title] {
 
 .streak-indicator:hover {
   transform: scale(1.05);
+}
+
+/* Mode controls in prompt area */
+.mode-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 12px 0;
+  max-width: 100%;
+}
+
+.mode-selector-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+}
+
+.mode-controls select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.mode-controls button {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-family: inherit;
+  font-size: 18px;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mode-selector-row button {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: auto;
+  height: auto;
+  display: inline-block;
+}
+
+.mode-controls button:hover {
+  background: color-mix(in oklab, var(--accent) 8%, transparent);
+  transform: translateY(-1px);
+}
+
+.mode-controls button:active {
+  transform: translateY(0);
+}
+
+.mode-controls .prompt {
+  text-align: center;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.4;
+  max-width: 100%;
+  word-wrap: break-word;
+  hyphens: auto;
 }
 
 /* Prompt controls - keeping for backward compatibility */
@@ -339,10 +423,42 @@ p {
     gap: 6px;
     align-items: center;
     flex-wrap: nowrap;
+    overflow-x: auto; /* Allow horizontal scrolling if needed */
   }
   
   .header-right {
     align-items: center;
+  }
+  
+  .mode-controls {
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding: 8px 0;
+    align-items: center;
+  }
+  
+  .mode-selector-row {
+    gap: 8px;
+  }
+  
+  .mode-controls select {
+    font-size: 14px;
+    padding: 6px 8px;
+    min-width: 80px;
+  }
+  
+  .mode-controls button {
+    font-size: 14px;
+    padding: 6px 12px;
+    min-width: auto;
+    height: auto;
+  }
+  
+  .mode-controls .prompt {
+    font-size: 16px;
+    line-height: 1.3;
+    padding: 0 16px;
   }
   
   .prompt-controls {
@@ -370,6 +486,10 @@ p {
   .streak-indicator {
     font-size: 12px;
     padding: 3px 6px;
+    margin-left: 4px;
+    margin-right: 4px;
+    min-width: 40px; /* Ensure minimum width for readability */
+    text-align: center;
   }
   
   .logo {

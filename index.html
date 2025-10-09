@@ -20,21 +20,25 @@
     <header>
         <div class="header-left">
             <logo class="logo" id="logo">driftpad</logo>
-            <select id="prompt-mode" aria-label="Select prompt mode">
-                <option value="prompt">Prompt</option>
-                <option value="complete_drawing">Complete Drawing</option>
-                <option value="freehand">Freehand</option>
-            </select>
-            <button id="new-prompt-btn">refresh</button>
+            <div id="streak-indicator" class="streak-indicator">🌊 0</div>
         </div>
         <div class="header-right">
             <button id="feedback-btn">feedback</button>
             <button id="gallery-btn">gallery</button>
-            <div id="streak-indicator" class="streak-indicator">🌊 0</div>
         </div>
     </header>
     <div class="prompt-container">
-        <h2 class="prompt" style="font-size: 20px;">text</h2>
+        <div class="mode-controls">
+            <div class="mode-selector-row">
+                <select id="prompt-mode" aria-label="Select prompt mode">
+                    <option value="prompt">Prompt</option>
+                    <option value="complete_drawing">Complete Drawing</option>
+                    <option value="freehand">Freehand</option>
+                </select>
+                <button id="new-prompt-btn">refresh</button>
+            </div>
+            <h2 class="prompt" style="font-size: 20px;">text</h2>
+        </div>
     </div>
     <section id="sketch" class="section">
         <div class="container sketch">
