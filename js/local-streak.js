@@ -136,9 +136,6 @@ class LocalStreakManager {
     // Check for milestones
     this.checkMilestones();
     
-    // Show celebration
-    this.showStreakUpdate();
-    
     this.updateUI();
   }
 
@@ -184,7 +181,6 @@ class LocalStreakManager {
     
     if (achievedMilestone) {
       this.recordMilestone(achievedMilestone);
-      this.showMilestoneCelebration(achievedMilestone);
     }
   }
 
@@ -229,13 +225,6 @@ class LocalStreakManager {
     }
   }
 
-  showStreakUpdate() {
-    // Toast messages removed - streak updates silently
-  }
-
-  showMilestoneCelebration(milestone) {
-    // Toast messages removed - milestones celebrated silently
-  }
 
   getStreakStats() {
     return {
