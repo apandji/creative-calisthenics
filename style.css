@@ -149,6 +149,40 @@ header button[title] {
   gap: 12px;
 }
 
+/* Streak indicator */
+.streak-indicator {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  user-select: none;
+  margin-left: 8px;
+}
+
+.streak-indicator.active {
+  background: rgba(255, 107, 53, 0.1);
+  color: #FF6B35;
+  animation: gentle-pulse 2s ease-in-out infinite;
+}
+
+.streak-indicator.inactive {
+  background: rgba(108, 123, 149, 0.1);
+  color: #6C7B95;
+}
+
+@keyframes gentle-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+.streak-indicator:hover {
+  transform: scale(1.05);
+}
+
 /* Prompt controls - keeping for backward compatibility */
 .prompt-controls {
   display: flex;
@@ -330,6 +364,11 @@ p {
   
   .header-right button {
     font-size: 0.7rem;
+    padding: 3px 6px;
+  }
+  
+  .streak-indicator {
+    font-size: 12px;
     padding: 3px 6px;
   }
   

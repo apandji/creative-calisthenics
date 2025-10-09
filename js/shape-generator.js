@@ -8,15 +8,18 @@ class ShapeGenerator {
         this.canvas = canvas;
         this.ctx = ctx;
         this.shapes = [
-            'm_shape',
-            'v_shape', 
-            'disconnected_lines',
-            'touching_circles',
-            'spiral',
-            'diamond',
-            's_curve',
-            'zigzag',
-            'caret'
+            'organic_circle',
+            'organic_rectangle',
+            'swirl',
+            'wave_curve',
+            'branching_lines',
+            'organic_spiral',
+            'flowing_s',
+            'natural_zigzag',
+            'cloud_shape',
+            'leaf_shape',
+            'organic_diamond',
+            'breathing_circle'
         ];
         this.generatedShapeImageData = null; // Store the generated shape
     }
@@ -125,80 +128,39 @@ class ShapeGenerator {
         }
     }
 
-    drawMShape(centerX, centerY, size, visibleWidth, visibleHeight) {
+    // Organic Circle - using sine wave perturbations with transformations
+    drawOrganicCircle(centerX, centerY, size, visibleWidth, visibleHeight) {
+        this.ctx.save();
+        
+        // Random transformations
+        const scaleX = 0.7 + Math.random() * 0.6; // 0.7 to 1.3
+        const scaleY = 0.7 + Math.random() * 0.6; // 0.7 to 1.3
+        const rotation = Math.random() * Math.PI * 2; // 0 to 2π
+        const offsetX = (Math.random() - 0.5) * size * 0.2;
+        const offsetY = (Math.random() - 0.5) * size * 0.2;
+        
+        // Apply transformations
+        this.ctx.translate(centerX + offsetX, centerY + offsetY);
+        this.ctx.rotate(rotation);
+        this.ctx.scale(scaleX, scaleY);
+        
         this.ctx.beginPath();
-        const width = size * 0.8;
-        const height = size * 0.6;
-        const x = centerX - width/2;
-        const y = centerY - height/2;
+        const radius = size * 0.3;
+        const points = 64;
         
-        // M shape with slight tilt and asymmetry
-        this.ctx.moveTo(x, y + height);
-        this.ctx.lineTo(x + width * 0.15, y);
-        this.ctx.lineTo(x + width * 0.4, y + height * 0.6);
-        this.ctx.lineTo(x + width * 0.65, y);
-        this.ctx.lineTo(x + width, y + height);
-        
-        this.ctx.stroke();
-    }
-
-    drawVShape(centerX, centerY, size, visibleWidth, visibleHeight) {
-        this.ctx.beginPath();
-        const width = size * 0.6;
-        const height = size * 0.6;
-        const x = centerX - width/2;
-        const y = centerY - height/2;
-        
-        // V shape with slight asymmetry
-        this.ctx.moveTo(x, y);
-        this.ctx.lineTo(x + width * 0.4, y + height);
-        this.ctx.moveTo(x + width * 0.4, y + height);
-        this.ctx.lineTo(x + width, y);
-        
-        this.ctx.stroke();
-    }
-
-    drawDisconnectedLines(centerX, centerY, size, visibleWidth, visibleHeight) {
-        this.ctx.beginPath();
-        const width = size * 0.6;
-        const height = size * 0.4;
-        const x = centerX - width/2;
-        const y = centerY - height/2;
-        
-        // Two disconnected lines
-        this.ctx.moveTo(x, y);
-        this.ctx.lineTo(x + width * 0.3, y + height);
-        
-        this.ctx.moveTo(x + width * 0.7, y + height * 0.2);
-        this.ctx.lineTo(x + width, y + height * 0.8);
-        
-        this.ctx.stroke();
-    }
-
-    drawTouchingCircles(centerX, centerY, size, visibleWidth, visibleHeight) {
-        const radius = size * 0.15;
-        const offset = radius * 0.8; // Slightly overlapping
-        
-        // First circle
-        this.ctx.beginPath();
-        this.ctx.arc(centerX - offset, centerY, radius, 0, Math.PI * 2);
-        this.ctx.stroke();
-        
-        // Second circle
-        this.ctx.beginPath();
-        this.ctx.arc(centerX + offset, centerY, radius, 0, Math.PI * 2);
-        this.ctx.stroke();
-    }
-
-    drawSpiral(centerX, centerY, size, visibleWidth, visibleHeight) {
-        this.ctx.beginPath();
-        const turns = 1.5 + Math.random() * 0.5;
-        const maxRadius = size * 0.3;
-        
-        for (let i = 0; i < turns * Math.PI * 2; i += 0.1) {
-            const radius = (i / (turns * Math.PI * 2)) * maxRadius;
-            const x = centerX + Math.cos(i) * radius;
-            const y = centerY + Math.sin(i) * radius;
+        for (let i = 0; i <= points; i++) {
+            const angle = (i / points) * Math.PI * 2;
+            const baseRadius = radius;
+            
+            // Add organic perturbations using multiple sine waves
+            const perturbation1 = Math.sin(angle * 3) * radius * 0.1;
+            const perturbation2 = Math.sin(angle * 5 + Math.PI/4) * radius * 0.05;
+            const perturbation3 = Math.sin(angle * 7 + Math.PI/2) * radius * 0.03;
+            
+            const organicRadius = baseRadius + perturbation1 + perturbation2 + perturbation3;
+            
+            const x = Math.cos(angle) * organicRadius;
+            const y = Math.sin(angle) * organicRadius;
             
             if (i === 0) {
                 this.ctx.moveTo(x, y);
@@ -206,72 +168,385 @@ class ShapeGenerator {
                 this.ctx.lineTo(x, y);
             }
         }
+        
+        this.ctx.closePath();
         this.ctx.stroke();
+        this.ctx.restore();
     }
 
-    drawDiamond(centerX, centerY, size, visibleWidth, visibleHeight) {
+    // Organic Rectangle - curved edges with natural variation
+    drawOrganicRectangle(centerX, centerY, size, visibleWidth, visibleHeight) {
         this.ctx.beginPath();
         const width = size * 0.6;
         const height = size * 0.4;
         const x = centerX - width/2;
         const y = centerY - height/2;
         
-        // Diamond shape
-        this.ctx.moveTo(centerX, y);
-        this.ctx.lineTo(x + width, centerY);
-        this.ctx.lineTo(centerX, y + height);
-        this.ctx.lineTo(x, centerY);
+        // Create organic rectangle with curved edges
+        const points = 32;
+        const segments = 4;
+        
+        for (let side = 0; side < segments; side++) {
+            for (let i = 0; i <= points / segments; i++) {
+                let px, py;
+                const t = i / (points / segments);
+                
+                switch (side) {
+                    case 0: // Top edge
+                        px = x + t * width;
+                        py = y + Math.sin(t * Math.PI) * height * 0.1;
+                        break;
+                    case 1: // Right edge
+                        px = x + width + Math.sin(t * Math.PI) * width * 0.1;
+                        py = y + t * height;
+                        break;
+                    case 2: // Bottom edge
+                        px = x + (1 - t) * width;
+                        py = y + height + Math.sin(t * Math.PI) * height * 0.1;
+                        break;
+                    case 3: // Left edge
+                        px = x + Math.sin(t * Math.PI) * width * 0.1;
+                        py = y + (1 - t) * height;
+                        break;
+                }
+                
+                if (side === 0 && i === 0) {
+                    this.ctx.moveTo(px, py);
+                } else {
+                    this.ctx.lineTo(px, py);
+                }
+            }
+        }
+        
         this.ctx.closePath();
+        this.ctx.stroke();
+    }
+
+    // Swirl - organic spiral with natural flow and transformations
+    drawSwirl(centerX, centerY, size, visibleWidth, visibleHeight) {
+        this.ctx.save();
+        
+        // Random transformations
+        const scaleX = 0.6 + Math.random() * 0.8; // 0.6 to 1.4
+        const scaleY = 0.6 + Math.random() * 0.8; // 0.6 to 1.4
+        const rotation = Math.random() * Math.PI * 2; // 0 to 2π
+        const offsetX = (Math.random() - 0.5) * size * 0.3;
+        const offsetY = (Math.random() - 0.5) * size * 0.3;
+        
+        // Apply transformations
+        this.ctx.translate(centerX + offsetX, centerY + offsetY);
+        this.ctx.rotate(rotation);
+        this.ctx.scale(scaleX, scaleY);
+        
+        this.ctx.beginPath();
+        const maxRadius = size * 0.4;
+        const turns = 2 + Math.random() * 2;
+        const points = 100;
+        
+        for (let i = 0; i <= points; i++) {
+            const t = i / points;
+            const angle = t * turns * Math.PI * 2;
+            const radius = t * maxRadius;
+            
+            // Add organic variation
+            const variation = Math.sin(angle * 3) * radius * 0.1;
+            const organicRadius = radius + variation;
+            
+            const x = Math.cos(angle) * organicRadius;
+            const y = Math.sin(angle) * organicRadius;
+            
+            if (i === 0) {
+                this.ctx.moveTo(x, y);
+            } else {
+                this.ctx.lineTo(x, y);
+            }
+        }
+        
+        this.ctx.stroke();
+        this.ctx.restore();
+    }
+
+    // Wave Curve - flowing wave pattern with transformations
+    drawWaveCurve(centerX, centerY, size, visibleWidth, visibleHeight) {
+        this.ctx.save();
+        
+        // Random transformations
+        const scaleX = 0.5 + Math.random() * 1.0; // 0.5 to 1.5
+        const scaleY = 0.5 + Math.random() * 1.0; // 0.5 to 1.5
+        const rotation = Math.random() * Math.PI * 2; // 0 to 2π
+        const offsetX = (Math.random() - 0.5) * size * 0.4;
+        const offsetY = (Math.random() - 0.5) * size * 0.4;
+        
+        // Apply transformations
+        this.ctx.translate(centerX + offsetX, centerY + offsetY);
+        this.ctx.rotate(rotation);
+        this.ctx.scale(scaleX, scaleY);
+        
+        this.ctx.beginPath();
+        const width = size * 0.8;
+        const height = size * 0.4;
+        const x = -width/2;
+        const y = 0;
+        const points = 50;
+        
+        for (let i = 0; i <= points; i++) {
+            const t = i / points;
+            const px = x + t * width;
+            const py = y + Math.sin(t * Math.PI * 3) * height * 0.5 + 
+                      Math.sin(t * Math.PI * 7) * height * 0.2;
+            
+            if (i === 0) {
+                this.ctx.moveTo(px, py);
+            } else {
+                this.ctx.lineTo(px, py);
+            }
+        }
+        
+        this.ctx.stroke();
+        this.ctx.restore();
+    }
+
+    // Branching Lines - tree-like organic growth
+    drawBranchingLines(centerX, centerY, size, visibleWidth, visibleHeight) {
+        this.ctx.beginPath();
+        const trunkLength = size * 0.4;
+        const branchLength = size * 0.2;
+        
+        // Main trunk
+        this.ctx.moveTo(centerX, centerY + trunkLength);
+        this.ctx.lineTo(centerX, centerY - trunkLength * 0.3);
+        
+        // Branches
+        const branchAngle1 = -Math.PI/4 + (Math.random() - 0.5) * 0.5;
+        const branchAngle2 = Math.PI/4 + (Math.random() - 0.5) * 0.5;
+        
+        const branchStartX = centerX;
+        const branchStartY = centerY - trunkLength * 0.3;
+        
+        // Left branch
+        this.ctx.moveTo(branchStartX, branchStartY);
+        this.ctx.lineTo(
+            branchStartX + Math.cos(branchAngle1) * branchLength,
+            branchStartY + Math.sin(branchAngle1) * branchLength
+        );
+        
+        // Right branch
+        this.ctx.moveTo(branchStartX, branchStartY);
+        this.ctx.lineTo(
+            branchStartX + Math.cos(branchAngle2) * branchLength,
+            branchStartY + Math.sin(branchAngle2) * branchLength
+        );
         
         this.ctx.stroke();
     }
 
-    drawSCurve(centerX, centerY, size, visibleWidth, visibleHeight) {
+    // Organic Spiral - natural spiral with variation
+    drawOrganicSpiral(centerX, centerY, size, visibleWidth, visibleHeight) {
+        this.ctx.beginPath();
+        const turns = 2 + Math.random() * 1;
+        const maxRadius = size * 0.4;
+        const points = 80;
+        
+        for (let i = 0; i <= points; i++) {
+            const t = i / points;
+            const angle = t * turns * Math.PI * 2;
+            const radius = t * maxRadius;
+            
+            // Add organic variation
+            const variation = Math.sin(angle * 2) * radius * 0.15;
+            const organicRadius = radius + variation;
+            
+            const x = centerX + Math.cos(angle) * organicRadius;
+            const y = centerY + Math.sin(angle) * organicRadius;
+            
+            if (i === 0) {
+                this.ctx.moveTo(x, y);
+            } else {
+                this.ctx.lineTo(x, y);
+            }
+        }
+        
+        this.ctx.stroke();
+    }
+
+    // Flowing S - organic S curve with natural flow
+    drawFlowingS(centerX, centerY, size, visibleWidth, visibleHeight) {
         this.ctx.beginPath();
         const width = size * 0.8;
         const height = size * 0.6;
         const x = centerX - width/2;
         const y = centerY - height/2;
+        const points = 50;
         
-        // S-shaped curve
-        this.ctx.moveTo(x, y);
-        this.ctx.quadraticCurveTo(x + width * 0.3, y + height * 0.3, x + width * 0.5, y + height * 0.5);
-        this.ctx.quadraticCurveTo(x + width * 0.7, y + height * 0.7, x + width, y + height);
+        for (let i = 0; i <= points; i++) {
+            const t = i / points;
+            const px = x + t * width;
+            
+            // Create flowing S curve with organic variation
+            const sCurve = Math.sin(t * Math.PI) * height * 0.5;
+            const variation = Math.sin(t * Math.PI * 3) * height * 0.1;
+            const py = y + height/2 + sCurve + variation;
+            
+            if (i === 0) {
+                this.ctx.moveTo(px, py);
+            } else {
+                this.ctx.lineTo(px, py);
+            }
+        }
         
         this.ctx.stroke();
     }
 
-    drawZigzag(centerX, centerY, size, visibleWidth, visibleHeight) {
+    // Natural Zigzag - organic zigzag with flowing transitions
+    drawNaturalZigzag(centerX, centerY, size, visibleWidth, visibleHeight) {
         this.ctx.beginPath();
         const width = size * 0.8;
         const height = size * 0.6;
         const x = centerX - width/2;
         const y = centerY - height/2;
+        const points = 40;
         
-        // Zigzag pattern
-        this.ctx.moveTo(x, y);
-        this.ctx.lineTo(x + width * 0.2, y + height);
-        this.ctx.lineTo(x + width * 0.4, y);
-        this.ctx.lineTo(x + width * 0.6, y + height);
-        this.ctx.lineTo(x + width * 0.8, y);
-        this.ctx.lineTo(x + width, y + height);
+        for (let i = 0; i <= points; i++) {
+            const t = i / points;
+            const px = x + t * width;
+            
+            // Create organic zigzag with smooth transitions
+            const zigzag = Math.sin(t * Math.PI * 4) * height * 0.4;
+            const variation = Math.sin(t * Math.PI * 8) * height * 0.1;
+            const py = y + height/2 + zigzag + variation;
+            
+            if (i === 0) {
+                this.ctx.moveTo(px, py);
+            } else {
+                this.ctx.lineTo(px, py);
+            }
+        }
         
         this.ctx.stroke();
     }
 
-    drawCaret(centerX, centerY, size, visibleWidth, visibleHeight) {
+    // Cloud Shape - organic cloud-like formation
+    drawCloudShape(centerX, centerY, size, visibleWidth, visibleHeight) {
+        this.ctx.beginPath();
+        const radius = size * 0.3;
+        const points = 32;
+        
+        for (let i = 0; i <= points; i++) {
+            const angle = (i / points) * Math.PI * 2;
+            const baseRadius = radius;
+            
+            // Create cloud-like organic variation
+            const variation1 = Math.sin(angle * 2) * radius * 0.2;
+            const variation2 = Math.sin(angle * 3 + Math.PI/3) * radius * 0.1;
+            const variation3 = Math.sin(angle * 5 + Math.PI/6) * radius * 0.05;
+            
+            const organicRadius = baseRadius + variation1 + variation2 + variation3;
+            
+            const x = centerX + Math.cos(angle) * organicRadius;
+            const y = centerY + Math.sin(angle) * organicRadius;
+            
+            if (i === 0) {
+                this.ctx.moveTo(x, y);
+            } else {
+                this.ctx.lineTo(x, y);
+            }
+        }
+        
+        this.ctx.closePath();
+        this.ctx.stroke();
+    }
+
+    // Leaf Shape - organic leaf-like form
+    drawLeafShape(centerX, centerY, size, visibleWidth, visibleHeight) {
         this.ctx.beginPath();
         const width = size * 0.6;
-        const height = size * 0.6;
+        const height = size * 0.8;
         const x = centerX - width/2;
         const y = centerY - height/2;
+        const points = 40;
         
-        // Caret (^) shape with asymmetry
-        this.ctx.moveTo(x, y + height);
-        this.ctx.lineTo(x + width * 0.4, y);
-        this.ctx.moveTo(x + width * 0.4, y);
-        this.ctx.lineTo(x + width, y + height);
+        for (let i = 0; i <= points; i++) {
+            const t = i / points;
+            const px = x + t * width;
+            
+            // Create leaf shape with organic variation
+            const leafCurve = Math.sin(t * Math.PI) * height * 0.5;
+            const variation = Math.sin(t * Math.PI * 2) * height * 0.1;
+            const py = y + height/2 + leafCurve + variation;
+            
+            if (i === 0) {
+                this.ctx.moveTo(px, py);
+            } else {
+                this.ctx.lineTo(px, py);
+            }
+        }
         
+        this.ctx.stroke();
+    }
+
+    // Organic Diamond - natural diamond with curved edges
+    drawOrganicDiamond(centerX, centerY, size, visibleWidth, visibleHeight) {
+        this.ctx.beginPath();
+        const width = size * 0.6;
+        const height = size * 0.4;
+        const x = centerX - width/2;
+        const y = centerY - height/2;
+        const points = 32;
+        
+        for (let i = 0; i <= points; i++) {
+            const t = i / points;
+            let px, py;
+            
+            if (t < 0.25) { // Top edge
+                px = x + t * 4 * width;
+                py = y + Math.sin(t * Math.PI * 4) * height * 0.1;
+            } else if (t < 0.5) { // Right edge
+                px = x + width + Math.sin((t - 0.25) * Math.PI * 4) * width * 0.1;
+                py = y + (t - 0.25) * 4 * height;
+            } else if (t < 0.75) { // Bottom edge
+                px = x + (1 - (t - 0.5) * 4) * width;
+                py = y + height + Math.sin((t - 0.5) * Math.PI * 4) * height * 0.1;
+            } else { // Left edge
+                px = x + Math.sin((t - 0.75) * Math.PI * 4) * width * 0.1;
+                py = y + (1 - (t - 0.75) * 4) * height;
+            }
+            
+            if (i === 0) {
+                this.ctx.moveTo(px, py);
+            } else {
+                this.ctx.lineTo(px, py);
+            }
+        }
+        
+        this.ctx.closePath();
+        this.ctx.stroke();
+    }
+
+    // Breathing Circle - circle with gentle breathing variation
+    drawBreathingCircle(centerX, centerY, size, visibleWidth, visibleHeight) {
+        this.ctx.beginPath();
+        const radius = size * 0.3;
+        const points = 64;
+        
+        for (let i = 0; i <= points; i++) {
+            const angle = (i / points) * Math.PI * 2;
+            const baseRadius = radius;
+            
+            // Add gentle breathing variation
+            const breathing = Math.sin(angle * 2) * radius * 0.05;
+            const organicRadius = baseRadius + breathing;
+            
+            const x = centerX + Math.cos(angle) * organicRadius;
+            const y = centerY + Math.sin(angle) * organicRadius;
+            
+            if (i === 0) {
+                this.ctx.moveTo(x, y);
+            } else {
+                this.ctx.lineTo(x, y);
+            }
+        }
+        
+        this.ctx.closePath();
         this.ctx.stroke();
     }
 
@@ -280,32 +555,41 @@ class ShapeGenerator {
      */
     drawShape(shapeType, centerX, centerY, size, visibleWidth, visibleHeight) {
         switch (shapeType) {
-            case 'm_shape':
-                this.drawMShape(centerX, centerY, size, visibleWidth, visibleHeight);
+            case 'organic_circle':
+                this.drawOrganicCircle(centerX, centerY, size, visibleWidth, visibleHeight);
                 break;
-            case 'v_shape':
-                this.drawVShape(centerX, centerY, size, visibleWidth, visibleHeight);
+            case 'organic_rectangle':
+                this.drawOrganicRectangle(centerX, centerY, size, visibleWidth, visibleHeight);
                 break;
-            case 'disconnected_lines':
-                this.drawDisconnectedLines(centerX, centerY, size, visibleWidth, visibleHeight);
+            case 'swirl':
+                this.drawSwirl(centerX, centerY, size, visibleWidth, visibleHeight);
                 break;
-            case 'touching_circles':
-                this.drawTouchingCircles(centerX, centerY, size, visibleWidth, visibleHeight);
+            case 'wave_curve':
+                this.drawWaveCurve(centerX, centerY, size, visibleWidth, visibleHeight);
                 break;
-            case 'spiral':
-                this.drawSpiral(centerX, centerY, size, visibleWidth, visibleHeight);
+            case 'branching_lines':
+                this.drawBranchingLines(centerX, centerY, size, visibleWidth, visibleHeight);
                 break;
-            case 'diamond':
-                this.drawDiamond(centerX, centerY, size, visibleWidth, visibleHeight);
+            case 'organic_spiral':
+                this.drawOrganicSpiral(centerX, centerY, size, visibleWidth, visibleHeight);
                 break;
-            case 's_curve':
-                this.drawSCurve(centerX, centerY, size, visibleWidth, visibleHeight);
+            case 'flowing_s':
+                this.drawFlowingS(centerX, centerY, size, visibleWidth, visibleHeight);
                 break;
-            case 'zigzag':
-                this.drawZigzag(centerX, centerY, size, visibleWidth, visibleHeight);
+            case 'natural_zigzag':
+                this.drawNaturalZigzag(centerX, centerY, size, visibleWidth, visibleHeight);
                 break;
-            case 'caret':
-                this.drawCaret(centerX, centerY, size, visibleWidth, visibleHeight);
+            case 'cloud_shape':
+                this.drawCloudShape(centerX, centerY, size, visibleWidth, visibleHeight);
+                break;
+            case 'leaf_shape':
+                this.drawLeafShape(centerX, centerY, size, visibleWidth, visibleHeight);
+                break;
+            case 'organic_diamond':
+                this.drawOrganicDiamond(centerX, centerY, size, visibleWidth, visibleHeight);
+                break;
+            case 'breathing_circle':
+                this.drawBreathingCircle(centerX, centerY, size, visibleWidth, visibleHeight);
                 break;
         }
     }

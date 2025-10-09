@@ -44,6 +44,8 @@ document.addEventListener('DOMContentLoaded', function() {
   let isDrawing = false;
   let lastX = 0;
   let lastY = 0;
+  let drawingStartTime = 0;
+  let currentMode = 'prompt';
   let strokeColor = colorInput ? colorInput.value : '#000000';
   let strokeWidth = sizeInput ? Number(sizeInput.value) : 15; // Default to 37.5% (15/40) for better mobile finger drawing
   let lastCssWidth = 0;
@@ -60,6 +62,15 @@ document.addEventListener('DOMContentLoaded', function() {
   // Size mappings
   const brushSizes = { S: 2, M: 6, L: 12, XL: 20 };
   const eraserSizes = { S: 4, M: 12, L: 24, XL: 40 };
+  
+  // Update currentMode when mode changes
+  const modeSelect = document.getElementById('prompt-mode');
+  if (modeSelect) {
+    currentMode = modeSelect.value; // Initialize with current value
+    modeSelect.addEventListener('change', () => {
+      currentMode = modeSelect.value;
+    });
+  }
 
   // Resize handling that preserves drawing content without any scaling
   function resizeCanvas() {
@@ -148,6 +159,7 @@ document.addEventListener('DOMContentLoaded', function() {
     lastY = y;
     lastTime = t;
     lastSpeed = 0;
+    drawingStartTime = Date.now();
     currentWidth = computeWidth(pressure, 0);
     
     // Keep cursor visible during drawing
@@ -231,6 +243,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const strokeCount = watercolorBrush.getStrokeCount ? watercolorBrush.getStrokeCount() : 1;
       window.feedbackCollector.trackDrawingCompleted(currentMode, drawingDuration, strokeCount);
     }
+    
     
     // Start fade timer if not already active
     if (!fadeTimer.isTimerActive()) {
@@ -346,8 +359,6 @@ document.addEventListener('DOMContentLoaded', function() {
   if (clearBtn) {
     clearBtn.addEventListener('click', () => {
       // Check if we're in Complete Drawing mode
-      const modeSelect = document.getElementById('prompt-mode');
-      const currentMode = modeSelect ? modeSelect.value : 'prompt';
       
       if (currentMode === 'complete_drawing') {
         // Check if there are user-created strokes

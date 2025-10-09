@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organic Shapes Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: #f8f9fa;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .control-group {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .control-group h3 {
+            margin-top: 0;
+            color: #555;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            margin: 5px 0;
+            border: none;
+            border-radius: 6px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .shape-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        .shape-btn {
+            background: #28a745;
+            font-size: 12px;
+            padding: 8px;
+        }
+        .shape-btn:hover {
+            background: #1e7e34;
+        }
+        .utility-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .utility-btn {
+            background: #6c757d;
+            flex: 1;
+            min-width: 120px;
+        }
+        .utility-btn:hover {
+            background: #545b62;
+        }
+        .info {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        .info h3 {
+            margin-top: 0;
+            color: #555;
+        }
+        .info p {
+            color: #666;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌿 Organic Shapes Test</h1>
+        
+        <div class="canvas-container">
+            <canvas id="testCanvas" width="600" height="400"></canvas>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <h3>🎨 Organic Shapes</h3>
+                <div class="shape-buttons">
+                    <button class="shape-btn" onclick="drawShape('organic_circle')">Organic Circle</button>
+                    <button class="shape-btn" onclick="drawShape('organic_rectangle')">Organic Rectangle</button>
+                    <button class="shape-btn" onclick="drawShape('swirl')">Swirl</button>
+                    <button class="shape-btn" onclick="drawShape('wave_curve')">Wave Curve</button>
+                    <button class="shape-btn" onclick="drawShape('branching_lines')">Branching Lines</button>
+                    <button class="shape-btn" onclick="drawShape('organic_spiral')">Organic Spiral</button>
+                    <button class="shape-btn" onclick="drawShape('flowing_s')">Flowing S</button>
+                    <button class="shape-btn" onclick="drawShape('natural_zigzag')">Natural Zigzag</button>
+                    <button class="shape-btn" onclick="drawShape('cloud_shape')">Cloud Shape</button>
+                    <button class="shape-btn" onclick="drawShape('leaf_shape')">Leaf Shape</button>
+                    <button class="shape-btn" onclick="drawShape('organic_diamond')">Organic Diamond</button>
+                    <button class="shape-btn" onclick="drawShape('breathing_circle')">Breathing Circle</button>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h3>🛠️ Utilities</h3>
+                <div class="utility-buttons">
+                    <button class="utility-btn" onclick="clearCanvas()">Clear Canvas</button>
+                    <button class="utility-btn" onclick="testBasicDrawing()">Test Basic Drawing</button>
+                    <button class="utility-btn" onclick="testDirectDrawing()">Test Direct Drawing</button>
+                    <button class="utility-btn" onclick="testShapeGeneratorMethod()">Test Shape Method</button>
+                    <button class="utility-btn" onclick="testTransformations()">Test Transformations</button>
+                    <button class="utility-btn" onclick="randomShape()">Random Shape</button>
+                    <button class="utility-btn" onclick="generateAll()">Generate All</button>
+                    <button class="utility-btn" onclick="exportCanvas()">Export Image</button>
+                    <button class="utility-btn" onclick="alert('Simple test button works!')">Simple Test</button>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h3>🎛️ Settings</h3>
+                <label for="brushSize">Brush Size:</label>
+                <input type="range" id="brushSize" min="1" max="20" value="8" onchange="updateBrushSize()">
+                <span id="brushSizeValue">8</span>
+                <br><br>
+                <label for="brushColor">Brush Color:</label>
+                <input type="color" id="brushColor" value="#333333" onchange="updateBrushColor()">
+            </div>
+        </div>
+        
+        <div class="info">
+            <h3>🌿 About Organic Shapes</h3>
+            <p>These shapes use mathematical algorithms to create natural, flowing forms that feel organic and alive. Each shape incorporates:</p>
+            <ul>
+                <li><strong>Sine wave perturbations</strong> for natural variation</li>
+                <li><strong>Multiple frequency harmonics</strong> for complex organic edges</li>
+                <li><strong>Randomized parameters</strong> for unique variations</li>
+                <li><strong>Smooth transitions</strong> that feel natural to draw</li>
+            </ul>
+            <p>Perfect for inspiring creative flow and meditative drawing experiences!</p>
+        </div>
+    </div>
+
+    <script src="js/shape-generator.js?v=3"></script>
+    <script>
+        // Initialize canvas and shape generator
+        const canvas = document.getElementById('testCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        console.log('Creating shape generator...');
+        console.log('ShapeGenerator class exists:', typeof ShapeGenerator);
+        console.log('ShapeGenerator is function:', typeof ShapeGenerator === 'function');
+        console.log('ShapeGenerator constructor:', ShapeGenerator);
+        console.log('ShapeGenerator prototype:', ShapeGenerator ? ShapeGenerator.prototype : 'undefined');
+        console.log('ShapeGenerator prototype methods:', ShapeGenerator ? Object.getOwnPropertyNames(ShapeGenerator.prototype) : 'undefined');
+        
+        let shapeGenerator;
+        if (typeof ShapeGenerator !== 'function') {
+            console.error('ShapeGenerator class not found! Check if shape-generator.js is loading properly.');
+            shapeGenerator = null;
+        } else {
+            shapeGenerator = new ShapeGenerator(canvas, ctx);
+            console.log('Shape generator created:', shapeGenerator);
+            console.log('Shape generator constructor:', shapeGenerator.constructor.name);
+            console.log('Shape generator prototype:', Object.getPrototypeOf(shapeGenerator));
+        }
+        
+        // Set initial brush settings
+        ctx.strokeStyle = '#333333';
+        ctx.lineWidth = 8;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        
+        // Draw a specific shape
+        window.drawShape = function(shapeType) {
+            console.log('Drawing shape:', shapeType);
+            clearCanvas();
+            
+            if (!shapeGenerator) {
+                console.error('Shape generator not available!');
+                return;
+            }
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const size = Math.min(canvas.width, canvas.height) * 0.4;
+            
+            console.log('Canvas dimensions:', canvas.width, 'x', canvas.height);
+            console.log('Center:', centerX, centerY);
+            console.log('Size:', size);
+            
+            // Update brush settings
+            updateBrushSettings();
+            
+            // Set the brush settings on the shape generator's context
+            shapeGenerator.ctx.strokeStyle = ctx.strokeStyle;
+            shapeGenerator.ctx.lineWidth = ctx.lineWidth;
+            shapeGenerator.ctx.lineCap = ctx.lineCap;
+            shapeGenerator.ctx.lineJoin = ctx.lineJoin;
+            
+            console.log('Brush settings:', {
+                strokeStyle: shapeGenerator.ctx.strokeStyle,
+                lineWidth: shapeGenerator.ctx.lineWidth,
+                lineCap: shapeGenerator.ctx.lineCap,
+                lineJoin: shapeGenerator.ctx.lineJoin
+            });
+            
+            // Test if shapeGenerator has the method
+            console.log('Shape generator methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(shapeGenerator)));
+            console.log('Has drawShape method:', typeof shapeGenerator.drawShape);
+            
+            // Draw the shape
+            shapeGenerator.drawShape(shapeType, centerX, centerY, size, canvas.width, canvas.height);
+            
+            // Check if anything was drawn
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const hasContent = imageData.data.some(pixel => pixel !== 0);
+            console.log('Canvas has content after drawing:', hasContent);
+            
+            console.log('Shape drawing completed');
+        };
+        
+        // Clear the canvas
+        window.clearCanvas = function() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        };
+        
+        // Draw a random shape
+        window.randomShape = function() {
+            const shapes = [
+                'organic_circle', 'organic_rectangle', 'swirl', 'wave_curve',
+                'branching_lines', 'organic_spiral', 'flowing_s', 'natural_zigzag',
+                'cloud_shape', 'leaf_shape', 'organic_diamond', 'breathing_circle'
+            ];
+            const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
+            drawShape(randomShape);
+        };
+        
+        // Generate all shapes in a grid
+        window.generateAll = function() {
+            clearCanvas();
+            
+            if (!shapeGenerator) {
+                console.error('Shape generator not available!');
+                return;
+            }
+            
+            const shapes = [
+                'organic_circle', 'organic_rectangle', 'swirl', 'wave_curve',
+                'branching_lines', 'organic_spiral', 'flowing_s', 'natural_zigzag',
+                'cloud_shape', 'leaf_shape', 'organic_diamond', 'breathing_circle'
+            ];
+            
+            // Update brush settings
+            updateBrushSettings();
+            
+            // Set the brush settings on the shape generator's context
+            shapeGenerator.ctx.strokeStyle = ctx.strokeStyle;
+            shapeGenerator.ctx.lineWidth = ctx.lineWidth;
+            shapeGenerator.ctx.lineCap = ctx.lineCap;
+            shapeGenerator.ctx.lineJoin = ctx.lineJoin;
+            
+            const cols = 4;
+            const rows = 3;
+            const cellWidth = canvas.width / cols;
+            const cellHeight = canvas.height / rows;
+            const shapeSize = Math.min(cellWidth, cellHeight) * 0.3;
+            
+            shapes.forEach((shape, index) => {
+                const col = index % cols;
+                const row = Math.floor(index / cols);
+                const centerX = col * cellWidth + cellWidth / 2;
+                const centerY = row * cellHeight + cellHeight / 2;
+                
+                shapeGenerator.drawShape(shape, centerX, centerY, shapeSize, canvas.width, canvas.height);
+            });
+        };
+        
+        // Update brush settings
+        window.updateBrushSettings = function() {
+            const brushSize = document.getElementById('brushSize').value;
+            const brushColor = document.getElementById('brushColor').value;
+            
+            ctx.lineWidth = parseInt(brushSize);
+            ctx.strokeStyle = brushColor;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+        };
+        
+        // Update brush size display
+        function updateBrushSize() {
+            const brushSize = document.getElementById('brushSize').value;
+            document.getElementById('brushSizeValue').textContent = brushSize;
+            updateBrushSettings();
+        }
+        
+        // Update brush color
+        function updateBrushColor() {
+            updateBrushSettings();
+        }
+        
+        // Export canvas as image
+        window.exportCanvas = function() {
+            const link = document.createElement('a');
+            link.download = 'organic-shapes-' + new Date().getTime() + '.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        };
+        
+        // Test basic drawing
+        window.testBasicDrawing = function() {
+            console.log('=== TESTING BASIC DRAWING ===');
+            console.log('Canvas element:', canvas);
+            console.log('Canvas context:', ctx);
+            console.log('Canvas dimensions:', canvas.width, 'x', canvas.height);
+            
+            try {
+                ctx.beginPath();
+                ctx.moveTo(50, 50);
+                ctx.lineTo(100, 100);
+                ctx.stroke();
+                console.log('Basic drawing test completed successfully');
+                
+                // Check if anything was drawn
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const hasContent = imageData.data.some(pixel => pixel !== 0);
+                console.log('Canvas has content after basic drawing:', hasContent);
+            } catch (error) {
+                console.error('Error in basic drawing:', error);
+            }
+        };
+        
+        // Test direct canvas drawing
+        window.testDirectDrawing = function() {
+            console.log('Testing direct canvas drawing...');
+            clearCanvas();
+            
+            // Draw a simple circle directly on the canvas
+            ctx.beginPath();
+            ctx.arc(300, 200, 50, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // Draw a rectangle
+            ctx.beginPath();
+            ctx.rect(200, 150, 100, 100);
+            ctx.stroke();
+            
+            console.log('Direct drawing test completed');
+        };
+        
+        // Test shape generator method directly
+        window.testShapeGeneratorMethod = function() {
+            console.log('=== TESTING SHAPE GENERATOR METHOD ===');
+            console.log('Shape generator object:', shapeGenerator);
+            console.log('Shape generator type:', typeof shapeGenerator);
+            
+            clearCanvas();
+            
+            if (!shapeGenerator) {
+                console.error('Shape generator not available!');
+                console.log('This means the ShapeGenerator class failed to load or instantiate');
+                return;
+            }
+            
+            console.log('Shape generator is available, checking methods...');
+            
+            // Debug: Check what methods are available
+            console.log('Shape generator prototype methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(shapeGenerator)));
+            console.log('Shape generator instance methods:', Object.getOwnPropertyNames(shapeGenerator));
+            console.log('Has drawOrganicCircle:', 'drawOrganicCircle' in shapeGenerator);
+            console.log('Type of drawOrganicCircle:', typeof shapeGenerator.drawOrganicCircle);
+            
+            // Set brush settings
+            console.log('Setting brush settings...');
+            updateBrushSettings();
+            shapeGenerator.ctx.strokeStyle = ctx.strokeStyle;
+            shapeGenerator.ctx.lineWidth = ctx.lineWidth;
+            shapeGenerator.ctx.lineCap = ctx.lineCap;
+            shapeGenerator.ctx.lineJoin = ctx.lineJoin;
+            
+            console.log('Brush settings applied:', {
+                strokeStyle: shapeGenerator.ctx.strokeStyle,
+                lineWidth: shapeGenerator.ctx.lineWidth,
+                lineCap: shapeGenerator.ctx.lineCap,
+                lineJoin: shapeGenerator.ctx.lineJoin
+            });
+            
+            // Call the organic circle method directly
+            console.log('Calling drawOrganicCircle directly...');
+            try {
+                if (typeof shapeGenerator.drawOrganicCircle === 'function') {
+                    console.log('drawOrganicCircle is a function, calling it...');
+                    shapeGenerator.drawOrganicCircle(300, 200, 200, 600, 400);
+                    console.log('drawOrganicCircle called successfully');
+                    
+                    // Check if anything was drawn
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const hasContent = imageData.data.some(pixel => pixel !== 0);
+                    console.log('Canvas has content after drawOrganicCircle:', hasContent);
+                } else {
+                    console.error('drawOrganicCircle is not a function!');
+                    console.log('Available methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(shapeGenerator)));
+                }
+            } catch (error) {
+                console.error('Error calling drawOrganicCircle:', error);
+            }
+            
+            console.log('Shape generator method test completed');
+        };
+        
+        // Test transformations on organic shapes
+        window.testTransformations = function() {
+            console.log('=== TESTING TRANSFORMATIONS ===');
+            clearCanvas();
+            
+            if (!shapeGenerator) {
+                console.error('Shape generator not available!');
+                return;
+            }
+            
+            // Set brush settings
+            updateBrushSettings();
+            shapeGenerator.ctx.strokeStyle = ctx.strokeStyle;
+            shapeGenerator.ctx.lineWidth = ctx.lineWidth;
+            shapeGenerator.ctx.lineCap = ctx.lineCap;
+            shapeGenerator.ctx.lineJoin = ctx.lineJoin;
+            
+            // Test multiple shapes with transformations
+            const shapes = ['organic_circle', 'swirl', 'wave_curve'];
+            const positions = [
+                {x: 150, y: 150},
+                {x: 450, y: 150},
+                {x: 300, y: 300}
+            ];
+            
+            shapes.forEach((shape, index) => {
+                const pos = positions[index];
+                console.log(`Drawing ${shape} at position ${pos.x}, ${pos.y}`);
+                shapeGenerator.drawShape(shape, pos.x, pos.y, 100, canvas.width, canvas.height);
+            });
+            
+            console.log('Transformations test completed - each shape should be different!');
+        };
+        
+        // Initialize with a random shape
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('=== PAGE LOADED ===');
+            console.log('Canvas:', canvas);
+            console.log('Context:', ctx);
+            console.log('Shape generator:', shapeGenerator);
+            console.log('Shape generator canvas:', shapeGenerator.canvas);
+            console.log('Shape generator context:', shapeGenerator.ctx);
+            
+            // Test if functions are available
+            console.log('testBasicDrawing available:', typeof window.testBasicDrawing);
+            console.log('testDirectDrawing available:', typeof window.testDirectDrawing);
+            console.log('testShapeGeneratorMethod available:', typeof window.testShapeGeneratorMethod);
+            console.log('drawShape available:', typeof window.drawShape);
+            console.log('clearCanvas available:', typeof window.clearCanvas);
+            
+            // Test basic drawing first
+            try {
+                console.log('Calling testBasicDrawing...');
+                window.testBasicDrawing();
+                console.log('testBasicDrawing completed successfully');
+            } catch (error) {
+                console.error('Error in testBasicDrawing:', error);
+            }
+            
+            // Then try a random shape
+            setTimeout(() => {
+                try {
+                    console.log('Calling randomShape...');
+                    if (shapeGenerator) {
+                        window.randomShape();
+                        console.log('randomShape completed successfully');
+                    } else {
+                        console.log('Skipping randomShape - shape generator not available');
+                    }
+                } catch (error) {
+                    console.error('Error in randomShape:', error);
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

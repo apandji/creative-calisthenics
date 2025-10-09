@@ -30,6 +30,7 @@
         <div class="header-right">
             <button id="feedback-btn">feedback</button>
             <button id="gallery-btn">gallery</button>
+            <div id="streak-indicator" class="streak-indicator">🌊 0</div>
         </div>
     </header>
     <div class="prompt-container">
@@ -51,6 +52,7 @@
     <script src="js/sketch.js" defer></script>
     <script src="js/pull-to-refresh.js" defer></script>
     <script src="js/feedback-collector.js" defer></script>
+    <script src="js/local-streak.js" defer></script>
     
     <!-- Simple Feedback Modal -->
     <div id="feedback-modal" class="feedback-modal" style="display: none;">
@@ -334,7 +336,13 @@
                 });
             }
             
+            // Update streak on page visit
+            if (window.localStreakManager) {
+                window.localStreakManager.updateStreak();
+            }
+            
         });
+        
     </script>
      <div class="toolbar" role="toolbar" aria-label="drawing controls">
         <div class="color-picker-container">
