@@ -135,6 +135,7 @@ let loadingIndicator = null;
     console.log('Driftpad v2 Prompt System initializing...');
     console.log('DOM elements found:', { target, newPromptBtn });
     
+    
     if (!target || !newPromptBtn) {
       console.error('Required DOM elements not found for v2 prompt system');
       return;
@@ -198,29 +199,176 @@ let loadingIndicator = null;
     
     console.log('🌍 No URL override, checking geolocation...');
     
-    // Check if geolocation is available and user has granted permission
+    // Check if geolocation is available
     if (navigator.geolocation) {
-      console.log('✅ Geolocation API available, requesting permission...');
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          console.log('🎯 User location detected:', { latitude, longitude });
-          findNearbyLocation(latitude, longitude);
-        },
-        (error) => {
-          console.log('❌ Geolocation error:', error.message, error.code);
-          console.log('📍 Continuing with generic prompts...');
-          // Continue with generic prompts
-        },
-        {
-          enableHighAccuracy: false,
-          timeout: 5000, // Increased timeout to 5 seconds
-          maximumAge: 600000 // 10 minutes (increased cache time)
+      console.log('✅ Geolocation API available');
+      
+      // Check if we already have permission
+      if (navigator.permissions) {
+        try {
+          const permission = await navigator.permissions.query({ name: 'geolocation' });
+          if (permission.state === 'granted') {
+            console.log('✅ Location permission already granted');
+            requestLocationDirectly();
+            return;
+          } else if (permission.state === 'denied') {
+            console.log('❌ Location permission denied');
+            showLocationDeniedMessage();
+            return;
+          }
+        } catch (err) {
+          console.log('⚠️ Permission API not supported, proceeding with request');
         }
-      );
+      }
+      
+      // Show pre-permission context
+      showLocationPermissionContext();
     } else {
       console.log('❌ Geolocation not available in this browser');
     }
+  }
+
+  // Show friendly location permission context as toast
+  function showLocationPermissionContext() {
+    console.log('🌍 Showing location permission context...');
+    
+    const toastDiv = document.createElement('div');
+    toastDiv.className = 'location-permission-toast';
+    toastDiv.innerHTML = `
+      <div class="location-toast-content">
+        <div class="location-toast-icon">🌍</div>
+        <div class="location-toast-text">
+          <div class="location-toast-title">Where in the world are you?</div>
+          <div class="location-toast-description">Let's paint with your place's colors</div>
+        </div>
+        <div class="location-toast-buttons">
+          <button class="location-allow-btn" onclick="requestLocationPermission()">Yes!</button>
+          <button class="location-skip-btn" onclick="skipLocationPermission()">Nah</button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(toastDiv);
+    
+    // Fade in
+    setTimeout(() => {
+      toastDiv.classList.add('visible');
+    }, 10);
+  }
+
+  // Request location permission after user clicks "Allow"
+  function requestLocationPermission() {
+    console.log('🌍 User clicked Allow Location');
+    
+    // Hide the toast
+    const toastDiv = document.querySelector('.location-permission-toast');
+    if (toastDiv) {
+      toastDiv.classList.add('fade-out');
+      setTimeout(() => toastDiv.remove(), 300);
+    }
+    
+    // Now request location
+    requestLocationDirectly();
+  }
+
+  // Skip location permission
+  function skipLocationPermission() {
+    console.log('🌍 User skipped location permission');
+    
+    // Hide the toast
+    const toastDiv = document.querySelector('.location-permission-toast');
+    if (toastDiv) {
+      toastDiv.classList.add('fade-out');
+      setTimeout(() => toastDiv.remove(), 300);
+    }
+    
+    // Show generic message
+    showLocationDeniedMessage();
+  }
+
+  // Add subtle coordinate color hint to logo
+  function addCoordinateColorHint(accentColor) {
+    console.log('🎨 Adding coordinate color to logo:', accentColor);
+    
+    // Convert HSL to RGB for CSS
+    const rgbColor = hslToRgbString(accentColor);
+    console.log('🎨 RGB color for logo:', rgbColor);
+    
+    // Simply change the logo color
+    const logo = document.getElementById('logo');
+    if (logo) {
+      logo.style.color = rgbColor;
+      console.log('🎨 Logo color changed to:', rgbColor);
+    } else {
+      console.log('❌ Logo element not found!');
+    }
+  }
+
+  // Convert HSL string to RGB string for CSS
+  function hslToRgbString(hslString) {
+    const match = hslString.match(/hsl\(([^,]+),\s*([^%]+)%,\s*([^%]+)%\)/);
+    if (!match) return '#000000';
+    
+    const h = parseFloat(match[1]);
+    const s = parseFloat(match[2]);
+    const l = parseFloat(match[3]);
+    
+    const rgb = hslToRgb(h, s, l);
+    return `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+  }
+
+  // Make functions globally accessible
+  window.requestLocationPermission = requestLocationPermission;
+  window.skipLocationPermission = skipLocationPermission;
+  
+
+  // Request location directly (after user consent)
+  function requestLocationDirectly() {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        console.log('🎯 User location detected:', { latitude, longitude });
+        findNearbyLocation(latitude, longitude);
+      },
+      (error) => {
+        console.log('❌ Geolocation error:', error.message, error.code);
+        showLocationDeniedMessage();
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 5000,
+        maximumAge: 600000
+      }
+    );
+  }
+
+  // Show message when location is denied or unavailable
+  function showLocationDeniedMessage() {
+    console.log('📍 Showing location denied message');
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'location-denied-message';
+    messageDiv.innerHTML = `
+      <div class="location-denied-content">
+        <div class="location-denied-icon">🎨</div>
+        <div class="location-denied-text">
+          <p>No worries! We'll paint with zen colors instead</p>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(messageDiv);
+    
+    // Fade in
+    setTimeout(() => {
+      messageDiv.classList.add('visible');
+    }, 10);
+    
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+      messageDiv.classList.add('fade-out');
+      setTimeout(() => messageDiv.remove(), 300);
+    }, 3000);
   }
 
   // Load location by slug (for URL override)
@@ -638,18 +786,18 @@ let loadingIndicator = null;
         parseHslToHex(colors.background), // Light coordinate color (Color 4)
         parseHslToHex(colors.text)        // Dark coordinate color (Color 5)
       ];
-      console.log('🎨 Using hybrid zen + coordinate colors');
-    } else {
-      // For real locations, use full location-based palette
-      inkPalette = [
-        parseHslToHex(colors.primary),
-        parseHslToHex(colors.secondary), 
-        parseHslToHex(colors.accent),
-        parseHslToHex(colors.background),
-        parseHslToHex(colors.text)
-      ];
-      console.log('🎨 Using full location-based colors');
-    }
+        console.log('🎨 Using hybrid zen + coordinate colors');
+      } else {
+        // For real locations, use full location-based palette
+        inkPalette = [
+          parseHslToHex(colors.primary),
+          parseHslToHex(colors.secondary), 
+          parseHslToHex(colors.accent),
+          parseHslToHex(colors.background),
+          parseHslToHex(colors.text)
+        ];
+        console.log('🎨 Using full location-based colors');
+      }
     
     console.log('Ink palette created (hex):', inkPalette);
     
@@ -686,22 +834,12 @@ let loadingIndicator = null;
         window.watercolorBrush.currentColorIndex = 0;
         window.watercolorBrush.currentColor = inkPalette[0];
         
-        // Add automatic color cycling on each stroke
-        const originalEndStroke = window.watercolorBrush.endStroke;
-        window.watercolorBrush.endStroke = function() {
-          // Call the original endStroke method
-          originalEndStroke.call(this);
-          
-          // Cycle to next color
-          this.currentColorIndex = (this.currentColorIndex + 1) % this.zenColors.length;
-          this.currentColor = this.zenColors[this.currentColorIndex];
-          console.log('Cycled to color:', this.currentColor, 'index:', this.currentColorIndex);
-        };
+        // Color cycling disabled - colors stay static until manually changed
         
         console.log('Location ink colors applied directly to zenColors:', inkPalette);
         console.log('Updated zenColors:', window.watercolorBrush.zenColors);
         console.log('Current color set to:', window.watercolorBrush.currentColor);
-        console.log('Color cycling enabled on stroke end');
+        console.log('Shuffle functionality available (disabled by default)');
         
         // Update the color preview UI
         updateColorPreview(inkPalette);

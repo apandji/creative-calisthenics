@@ -1866,6 +1866,176 @@ body.location-themed .zen-dot {
   background: var(--location-primary, #000000);
 }
 
+/* Coordinate color for logo */
+#logo {
+  transition: color 0.3s ease;
+}
+
+/* Shuffle button */
+.shuffle-btn {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+  width: 100%;
+}
+
+.shuffle-btn:hover {
+  background: var(--accent);
+  color: white;
+  transform: scale(1.05);
+}
+
+.shuffle-btn.active {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 0 10px var(--accent);
+}
+
+/* Location permission toast */
+.location-permission-toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  z-index: 99999;
+  opacity: 0;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  max-width: 500px;
+  width: 90%;
+}
+
+.location-permission-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.location-permission-toast.fade-out {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-10px);
+}
+
+.location-toast-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.location-toast-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.location-toast-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.location-toast-title {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 0.9rem;
+  margin-bottom: 2px;
+}
+
+.location-toast-description {
+  color: var(--text);
+  opacity: 0.8;
+  font-size: 0.8rem;
+  line-height: 1.3;
+}
+
+.location-toast-buttons {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.location-allow-btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.location-allow-btn:hover {
+  background: var(--accent);
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.location-skip-btn {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.location-skip-btn:hover {
+  background: var(--bg);
+  border-color: var(--accent);
+}
+
+/* Location denied message */
+.location-denied-message {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 24px;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.location-denied-message.visible {
+  opacity: 1;
+}
+
+.location-denied-message.fade-out {
+  opacity: 0;
+}
+
+.location-denied-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.location-denied-icon {
+  font-size: 20px;
+}
+
+.location-denied-text p {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
 /* Remove jarring hover effects */
 .drawing-card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
