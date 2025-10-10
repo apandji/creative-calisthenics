@@ -1,4 +1,7 @@
+console.log('Sketch.js script starting...');
+
 document.addEventListener('DOMContentLoaded', function() {
+  console.log('Sketch.js DOMContentLoaded event fired');
   // Prevent scrolling and zooming only within the canvas (scoped below)
   
   const canvas = document.getElementById('canvas');
@@ -51,6 +54,17 @@ document.addEventListener('DOMContentLoaded', function() {
   // Initialize watercolor brush and fade timer
   const watercolorBrush = new WatercolorBrush(canvas, ctx);
   const fadeTimer = new FadeTimer(canvas, ctx);
+  
+  // Make watercolor brush available globally for location colors
+  try {
+    window.watercolorBrush = watercolorBrush;
+    window.sketchLoaded = true;
+    console.log('Sketch.js loaded and watercolor brush created');
+    console.log('Watercolor brush object:', watercolorBrush);
+    console.log('setLocationPalette method:', typeof watercolorBrush.setLocationPalette);
+  } catch (error) {
+    console.error('Error setting up watercolor brush globally:', error);
+  }
   
   // Connect fade timer to watercolor brush
   watercolorBrush.setFadeTimer(fadeTimer);

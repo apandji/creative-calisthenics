@@ -683,24 +683,50 @@ class ShapeGenerator {
         // Draw the shape
         this.drawShape(shapeType, centerX, centerY, size, visibleWidth, visibleHeight);
 
-        // Animate fade-in
+        // Animate fade-in with smooth drift effect
         let opacity = 0;
-        const fadeInInterval = setInterval(() => {
-            opacity += 0.02; // Fade in over ~2.5 seconds (50 steps * 50ms)
+        let driftX = 0;
+        let driftY = 0;
+        let targetDriftX = 0;
+        let targetDriftY = 0;
+        let driftCounter = 0;
+        const maxDrift = 8; // Increased to 8px for more noticeable drift
+        this.fadeInInterval = setInterval(() => {
+            opacity += 0.025; // Fade in over 2 seconds (80 steps * 25ms)
             
-            // Clear and redraw with new opacity
+            // Smooth drift effect - gradually move towards new target
+            driftCounter++;
+            if (driftCounter % 15 === 0) { // Change target every 15 frames
+                targetDriftX = (Math.random() - 0.5) * maxDrift;
+                targetDriftY = (Math.random() - 0.5) * maxDrift;
+            }
+            
+            // Smooth interpolation towards target
+            driftX += (targetDriftX - driftX) * 0.1;
+            driftY += (targetDriftY - driftY) * 0.1;
+            
+            // Clear and redraw with new opacity and drift
             this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
             this.ctx.globalAlpha = opacity;
+            this.ctx.save();
+            this.ctx.translate(driftX, driftY);
             this.drawShape(shapeType, centerX, centerY, size, visibleWidth, visibleHeight);
+            this.ctx.restore();
             
             if (opacity >= 1) {
-                clearInterval(fadeInInterval);
+                clearInterval(this.fadeInInterval);
+                this.fadeInInterval = null;
                 this.ctx.globalAlpha = 1;
                 this.ctx.restore();
                 
                 // Store the generated shape data for redrawing
                 this.generatedShapeImageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Notify prompts-v2 that animation is complete
+                if (window.DriftpadV2 && window.DriftpadV2.onShapeAnimationComplete) {
+                    window.DriftpadV2.onShapeAnimationComplete();
+                }
             }
-        }, 50); // ~20fps for smooth animation
+        }, 25); // ~40fps for smooth animation
     }
 }

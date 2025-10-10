@@ -41,6 +41,17 @@ class WatercolorBrush {
     }
   }
 
+  // Set location-based color palette
+  setLocationPalette(colors) {
+    if (colors && colors.length > 0) {
+      this.zenColors = colors;
+      // Reset to first color in the new palette
+      this.currentColorIndex = 0;
+      this.currentColor = this.zenColors[0];
+      console.log('Location palette set:', colors);
+    }
+  }
+
   // Set brush size
   setSize(size) {
     this.brushSize = Math.max(1, Math.min(40, size));

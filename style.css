@@ -25,11 +25,18 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
   height: 100vh;
   height: 100dvh; /* Dynamic viewport height for mobile */
   position: relative;
   box-shadow: none;
+}
+
+/* Prevent scrolling on main drawing page only */
+body:not(.gallery-page) {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
 }
 
 /* Content width and rhythm */
@@ -44,6 +51,25 @@ body > * {
   background: var(--bg);
   border-radius: 8px;
   margin-bottom: 16px;
+}
+
+/* Prevent overflow on desktop (except gallery) */
+@media (min-width: 769px) {
+  body:not(.gallery-page) {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100vh;
+  }
+  
+  body:not(.gallery-page) .sketch {
+    overflow: hidden;
+    height: calc(100vh - 140px);
+  }
+  
+  body:not(.gallery-page) .canvas-wrap {
+    overflow: hidden;
+  }
 }
 
 /* Header & nav */
@@ -199,8 +225,21 @@ header button[title] {
 .mode-selector-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  justify-content: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 600px;
+}
+
+.mode-selector-row .prompt {
+  flex: 1;
+  margin: 0;
+  text-align: left;
+  margin-right: 20px;
+}
+
+.mode-selector-row button {
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .mode-controls select {
@@ -844,24 +883,14 @@ p {
   margin-top: 8px;
   border-radius: 12px;
   overflow: hidden;
-  background: #d2d2d2;
+  background: #f3f3f3;
   width: 100%;
   height: 100%;
   min-height: 400px;
   box-shadow: none;
 }
 
-/* Add gradient effect below the canvas */
-.canvas-wrap::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 20px;
-  background: linear-gradient(0deg, #d2d2d2, #f3f3f3);
-  pointer-events: none;
-}
+/* Removed gradient effect for flat design */
 
 /* Make the drawing area full-bleed across the viewport (in-page, not background) */
 .sketch .canvas-wrap {
@@ -1674,6 +1703,167 @@ footer {
     padding: 14px 28px;
     font-size: 1rem;
   }
+}
+
+/* Location theming */
+body.location-themed {
+  background: var(--location-background, var(--bg));
+  transition: background-color 0.3s ease;
+}
+
+body.location-themed .header {
+  background: var(--location-primary, var(--accent));
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+body.location-themed .header h1 {
+  color: white;
+}
+
+body.location-themed .location-display {
+  color: var(--location-accent, white);
+  opacity: 0.9;
+}
+
+body.location-themed .mode-selector-row button {
+  background: var(--location-secondary, var(--accent));
+  color: white;
+  border: 1px solid var(--location-accent, var(--accent));
+  transition: all 0.3s ease;
+}
+
+body.location-themed .mode-selector-row button:hover {
+  background: var(--location-accent, var(--accent));
+  transform: translateY(-1px);
+}
+
+body.location-themed .mode-selector-row button:disabled {
+  background: var(--location-secondary, var(--accent));
+  opacity: 0.5;
+}
+
+body.location-themed #canvas {
+  border: 2px solid var(--location-primary, var(--accent));
+  transition: border-color 0.3s ease;
+}
+
+body.location-themed .prompt {
+  color: var(--location-text, var(--text));
+  transition: color 0.3s ease;
+}
+
+/* Zen loading toast */
+.zen-loading-toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-size: 0.9rem;
+  color: var(--text);
+  z-index: 1000;
+  opacity: 0;
+  transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+  backdrop-filter: blur(10px);
+  background: color-mix(in oklab, var(--bg) 95%, transparent);
+  max-width: 300px;
+  min-width: 200px;
+}
+
+.zen-loading-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.zen-loading-toast.fade-out {
+  animation: fadeOut 0.6s ease-out forwards;
+}
+
+.zen-loading-content {
+  text-align: center;
+  color: var(--text, #1a1a1a);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+}
+
+.zen-loading-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.zen-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent, #000000);
+  animation: zenPulse 1.4s ease-in-out infinite both;
+}
+
+.zen-dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.zen-dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+.zen-dot:nth-child(3) {
+  animation-delay: 0s;
+}
+
+@keyframes zenPulse {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+.zen-loading-text {
+  font-family: 'Averia Sans Libre', sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  opacity: 0.8;
+  letter-spacing: 0.5px;
+}
+
+/* Mobile zen loading toast styling */
+@media (max-width: 640px) {
+  .zen-loading-toast {
+    min-width: 80vw;
+    max-width: 90vw;
+    padding: 16px 24px;
+    font-size: 1rem;
+    text-align: center;
+  }
+}
+
+/* Location-themed loading toast */
+body.location-themed .zen-loading-toast {
+  background: var(--location-background, var(--bg));
+  border-color: var(--location-primary, var(--border));
+  color: var(--location-text, var(--text));
+}
+
+body.location-themed .zen-loading-content {
+  color: var(--location-text, var(--text));
+}
+
+body.location-themed .zen-dot {
+  background: var(--location-primary, #000000);
 }
 
 /* Remove jarring hover effects */
