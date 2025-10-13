@@ -12,7 +12,7 @@
     <meta name="twitter:title" content="Driftpad. Meditative digital drawing experience">
     <meta name="twitter:description" content="A meditative digital drawing experience inspired by sumi ink painting">
     <title>driftpad</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=10">
         <!-- Umami Analytics -->
         <script defer src="https://cloud.umami.is/script.js" data-website-id="8ae5578c-320f-4d25-860a-f93ed10e541e"></script>
 </head>
@@ -31,7 +31,6 @@
         <div class="mode-controls">
             <div class="mode-selector-row">
                 <h2 class="prompt" style="font-size: 20px;">text</h2>
-                <button id="new-prompt-btn">refresh</button>
             </div>
         </div>
     </div>
@@ -44,10 +43,10 @@
         </div>
     </section>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/watercolor-brush.js" defer></script>
+    <script src="js/watercolor-brush.js?v=2" defer></script>
     <script src="js/fade-timer.js" defer></script>
     <script src="js/shape-generator.js"></script>
-    <script src="js/prompts-v2.js?v=2" defer></script>
+    <script src="js/prompts-v2.js?v=19" defer></script>
     <script src="js/sketch.js?v=2" defer></script>
     <script src="js/pull-to-refresh.js" defer></script>
     <script src="js/feedback-collector.js" defer></script>
@@ -344,27 +343,17 @@
         
     </script>
      <div class="toolbar" role="toolbar" aria-label="drawing controls">
-        <div class="color-picker-container">
-            <button id="color-picker-btn" class="color-picker-btn" aria-label="Select color">
-                <div class="current-color" id="current-color"></div>
-            </button>
-            <div id="color-popup" class="color-popup" style="display: none;">
-                <div class="color-popup-content">
-                    <div id="zen-colors" class="zen-color-palette"></div>
-                </div>
+        <div class="color-palette-bar">
+            <div id="zen-colors" class="zen-color-palette"></div>
+            <div class="eraser-swatch" id="eraser-swatch" title="Eraser">
+                🧹
             </div>
         </div>
-        <button id="tool-btn" class="tool-btn" aria-label="Select tool">🖌️</button>
-        <div class="size-picker-container">
-            <button id="size-picker-btn" class="size-picker-btn" aria-label="Select size">M</button>
-            <div id="size-popup" class="size-popup" style="display: none;">
-                <div class="size-popup-content">
-                    <div id="size-options" class="size-options"></div>
-                </div>
-            </div>
+        <div class="action-buttons">
+            <button id="new-prompt-btn" type="button">refresh</button>
+            <button id="clear" type="button">clear</button>
+            <button id="submit" type="button">submit</button>
         </div>
-        <button id="clear" type="button">clear</button>
-        <button id="submit" type="button">submit</button>
     </div>
 
     <!-- Onboarding Modal -->

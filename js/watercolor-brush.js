@@ -31,6 +31,7 @@ class WatercolorBrush {
     
     this.currentColorIndex = 0;
     this.currentColor = this.zenColors[0];
+    this.isErasing = false;
   }
 
   // Set brush color from zen palette
@@ -199,6 +200,13 @@ class WatercolorBrush {
     
     this.ctx.save();
     
+    // Set composite operation for erasing
+    if (this.isErasing) {
+      this.ctx.globalCompositeOperation = 'destination-out';
+    } else {
+      this.ctx.globalCompositeOperation = 'source-over';
+    }
+    
     // Apply fade opacity to the entire stroke
     const fadeOpacity = this.getFadeOpacity();
     this.ctx.globalAlpha = fadeOpacity;
@@ -338,6 +346,13 @@ class WatercolorBrush {
     // Sumi ink: Single strong stroke with subtle variation
     this.ctx.save();
     
+    // Set composite operation for erasing
+    if (this.isErasing) {
+      this.ctx.globalCompositeOperation = 'destination-out';
+    } else {
+      this.ctx.globalCompositeOperation = 'source-over';
+    }
+    
     // Create ink gradient
     // Validate parameters for createRadialGradient
     if (!isFinite(x) || !isFinite(y) || !isFinite(size) || size <= 0) {
@@ -395,6 +410,15 @@ class WatercolorBrush {
   renderWeightedPaintDrop(paintDrop) {
     const { x, y, color, size, opacity, pressure } = paintDrop;
     
+    this.ctx.save();
+    
+    // Set composite operation for erasing
+    if (this.isErasing) {
+      this.ctx.globalCompositeOperation = 'destination-out';
+    } else {
+      this.ctx.globalCompositeOperation = 'source-over';
+    }
+    
     // Optimized: Use fewer layers but with better distribution
     const layers = Math.max(1, Math.floor(pressure * 2) + 1); // Reduced from 4 to 2
     
@@ -416,6 +440,8 @@ class WatercolorBrush {
     if (pressure > 0.5) {
       this.renderPaintCore(x, y, color, size * 0.25, opacity * 1.1);
     }
+    
+    this.ctx.restore();
   }
 
   // Render a single paint layer
@@ -478,6 +504,15 @@ class WatercolorBrush {
       return;
     }
     
+    this.ctx.save();
+    
+    // Set composite operation for erasing
+    if (this.isErasing) {
+      this.ctx.globalCompositeOperation = 'destination-out';
+    } else {
+      this.ctx.globalCompositeOperation = 'source-over';
+    }
+    
     // Create gradient for watercolor effect
     const gradient = this.ctx.createRadialGradient(x, y, 0, x, y, size);
     gradient.addColorStop(0, this.hexToRgba(color, opacity));
@@ -491,6 +526,8 @@ class WatercolorBrush {
     
     // Add texture variation
     this.addTextureVariation(x, y, size, color, opacity * 0.3);
+    
+    this.ctx.restore();
   }
 
   // Blend wet paint with existing wet areas (enhanced for layering)
@@ -624,6 +661,12 @@ class WatercolorBrush {
   // Clear only user strokes (for eraser functionality)
   clearUserStrokes() {
     this.paintLayers = [];
+  }
+
+  // Toggle erasing mode
+  setErasingMode(isErasing) {
+    this.isErasing = isErasing;
+    console.log('🧹 Erasing mode:', isErasing ? 'ON' : 'OFF');
   }
 
   // Get current zen colors for UI

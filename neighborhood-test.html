@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neighborhood Color Test - Driftpad</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .test-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .test-header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .test-header p {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .control-group {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .control-group h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 18px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #1e7e34;
+        }
+        
+        .results {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            margin-bottom: 20px;
+        }
+        
+        .results h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+        }
+        
+        .color-palette {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .color-swatch {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 500;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        .debug-info {
+            background: #fff;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #e9ecef;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            overflow-x: auto;
+        }
+        
+        .neighborhood-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .neighborhood-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .neighborhood-card:hover {
+            border-color: #007bff;
+            box-shadow: 0 2px 8px rgba(0,123,255,0.15);
+        }
+        
+        .neighborhood-card h4 {
+            margin: 0 0 8px 0;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .neighborhood-card p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .neighborhood-card .coordinates {
+            font-family: monospace;
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <a href="index.html" class="back-link">← Back to Driftpad</a>
+        
+        <div class="test-header">
+            <h1>🏘️ Neighborhood Color Test</h1>
+            <p>Test different neighborhoods around St. Louis to see how colors vary</p>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <h3>📍 Manual Coordinates</h3>
+                <div class="input-group">
+                    <label for="test-lat">Latitude</label>
+                    <input type="number" id="test-lat" step="0.000001" value="38.64" placeholder="38.64">
+                </div>
+                <div class="input-group">
+                    <label for="test-lng">Longitude</label>
+                    <input type="number" id="test-lng" step="0.000001" value="-90.22" placeholder="-90.22">
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="testCoordinates()">Test Coordinates</button>
+                    <button class="btn btn-secondary" onclick="randomNearby()">Random Nearby</button>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h3>🎲 Quick Tests</h3>
+                <div class="button-group">
+                    <button class="btn btn-success" onclick="testBentonPark()">Benton Park</button>
+                    <button class="btn btn-success" onclick="testWashU()">WashU</button>
+                    <button class="btn btn-success" onclick="testDowntown()">Downtown</button>
+                    <button class="btn btn-success" onclick="testForestPark()">Forest Park</button>
+                </div>
+                <div class="button-group" style="margin-top: 10px;">
+                    <button class="btn btn-secondary" onclick="walkSimulator()">Walk Simulator</button>
+                    <button class="btn btn-secondary" onclick="clearResults()">Clear</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="results" id="results" style="display: none;">
+            <h3>🎨 Generated Colors</h3>
+            <div class="color-palette" id="color-palette"></div>
+            <div class="debug-info" id="debug-info"></div>
+        </div>
+        
+        <div class="neighborhood-list">
+            <div class="neighborhood-card" onclick="testNeighborhood('Benton Park', 38.64, -90.22)">
+                <h4>Benton Park</h4>
+                <p>Historic neighborhood with Victorian homes</p>
+                <div class="coordinates">38.64, -90.22</div>
+            </div>
+            
+            <div class="neighborhood-card" onclick="testNeighborhood('WashU', 38.65, -90.31)">
+                <h4>Washington University</h4>
+                <p>University campus in University City</p>
+                <div class="coordinates">38.65, -90.31</div>
+            </div>
+            
+            <div class="neighborhood-card" onclick="testNeighborhood('Downtown', 38.63, -90.19)">
+                <h4>Downtown St. Louis</h4>
+                <p>Central business district</p>
+                <div class="coordinates">38.63, -90.19</div>
+            </div>
+            
+            <div class="neighborhood-card" onclick="testNeighborhood('Forest Park', 38.64, -90.29)">
+                <h4>Forest Park</h4>
+                <p>Large urban park with museums</p>
+                <div class="coordinates">38.64, -90.29</div>
+            </div>
+            
+            <div class="neighborhood-card" onclick="testNeighborhood('Soulard', 38.61, -90.20)">
+                <h4>Soulard</h4>
+                <p>Historic French neighborhood</p>
+                <div class="coordinates">38.61, -90.20</div>
+            </div>
+            
+            <div class="neighborhood-card" onclick="testNeighborhood('The Hill', 38.61, -90.25)">
+                <h4>The Hill</h4>
+                <p>Italian neighborhood</p>
+                <div class="coordinates">38.61, -90.25</div>
+            </div>
+            
+            <div class="neighborhood-card" onclick="testNeighborhood('Central West End', 38.64, -90.26)">
+                <h4>Central West End</h4>
+                <p>Upscale neighborhood near Forest Park</p>
+                <div class="coordinates">38.64, -90.26</div>
+            </div>
+            
+            <div class="neighborhood-card" onclick="testNeighborhood('Tower Grove', 38.61, -90.24)">
+                <h4>Tower Grove</h4>
+                <p>Diverse neighborhood with Tower Grove Park</p>
+                <div class="coordinates">38.61, -90.24</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Neighborhood test data
+        const neighborhoods = {
+            'Benton Park': { lat: 38.64, lng: -90.22 },
+            'WashU': { lat: 38.65, lng: -90.31 },
+            'Downtown': { lat: 38.63, lng: -90.19 },
+            'Forest Park': { lat: 38.64, lng: -90.29 },
+            'Soulard': { lat: 38.61, lng: -90.20 },
+            'The Hill': { lat: 38.61, lng: -90.25 },
+            'Central West End': { lat: 38.64, lng: -90.26 },
+            'Tower Grove': { lat: 38.61, lng: -90.24 }
+        };
+
+        // Geohash encoding function (same as in prompts-v2.js)
+        function encodeGeohash(lat, lng, precision = 6) {
+            const base32 = '0123456789bcdefghjkmnpqrstuvwxyz';
+            let bits = 0;
+            let bit = 0;
+            let ch = 0;
+            let even = true;
+            let geohash = '';
+            
+            let latMin = -90, latMax = 90;
+            let lngMin = -180, lngMax = 180;
+            
+            while (geohash.length < precision) {
+                if (even) {
+                    const lngMid = (lngMin + lngMax) / 2;
+                    if (lng >= lngMid) {
+                        ch |= (1 << (4 - bit));
+                        lngMin = lngMid;
+                    } else {
+                        lngMax = lngMid;
+                    }
+                } else {
+                    const latMid = (latMin + latMax) / 2;
+                    if (lat >= latMid) {
+                        ch |= (1 << (4 - bit));
+                        latMin = latMid;
+                    } else {
+                        latMax = latMid;
+                    }
+                }
+                
+                even = !even;
+                
+                if (bit < 4) {
+                    bit++;
+                } else {
+                    geohash += base32[ch];
+                    bit = 0;
+                    ch = 0;
+                }
+            }
+            
+            return geohash;
+        }
+
+        // Generate colors using the same logic as prompts-v2.js
+        function generateNeighborhoodColors(lat, lng) {
+            // Base coordinate hash
+            const coordHash = Math.abs(lat * 1000 + lng * 1000) % 360;
+            
+            // Neighborhood grid variation (300m grid cells)
+            const gridSize = 0.003; // ~300m
+            const gridLat = Math.round(lat / gridSize) * gridSize;
+            const gridLng = Math.round(lng / gridSize) * gridSize;
+            const neighborhoodHash = Math.abs(gridLat * 1000 + gridLng * 1000) % 360;
+            
+            // Geohash-based variation (6-character precision)
+            const geohash = encodeGeohash(lat, lng, 6);
+            const geohashHash = geohash.split('').reduce((a, b) => a + b.charCodeAt(0), 0) % 360;
+            
+            // Combine variations for more distinct neighborhood colors
+            const combinedHue = (coordHash + neighborhoodHash + geohashHash) % 360;
+            
+            const latVariation = Math.abs(lat) % 30;
+            const lngVariation = Math.abs(lng) % 30;
+            
+            const finalHue = combinedHue;
+            const finalSaturation = Math.max(30, Math.min(80, 50 + latVariation));
+            const finalLightness = Math.max(25, Math.min(70, 45 + lngVariation));
+            
+            // Generate color palette
+            const primaryHsl = `hsl(${finalHue}, ${finalSaturation}%, ${finalLightness}%)`;
+            const secondaryHsl = `hsl(${(finalHue + 30) % 360}, ${Math.max(30, finalSaturation - 20)}%, ${Math.min(70, finalLightness + 15)}%)`;
+            const accentHsl = `hsl(${(finalHue + 180) % 360}, ${Math.min(90, finalSaturation + 10)}%, ${Math.max(40, finalLightness - 10)}%)`;
+            const backgroundHsl = `hsl(${finalHue}, ${Math.max(10, finalSaturation - 40)}%, ${Math.min(95, finalLightness + 40)}%)`;
+            const textHsl = `hsl(${finalHue}, ${Math.max(20, finalSaturation - 30)}%, ${Math.max(15, finalLightness - 30)}%)`;
+            
+            return {
+                primary: primaryHsl,
+                secondary: secondaryHsl,
+                accent: accentHsl,
+                background: backgroundHsl,
+                text: textHsl,
+                debug: {
+                    lat, lng,
+                    gridLat: gridLat.toFixed(6),
+                    gridLng: gridLng.toFixed(6),
+                    geohash,
+                    coordHash: coordHash.toFixed(1),
+                    neighborhoodHash: neighborhoodHash.toFixed(1),
+                    geohashHash: geohashHash.toFixed(1),
+                    combinedHue: finalHue.toFixed(1),
+                    finalSaturation: finalSaturation.toFixed(1),
+                    finalLightness: finalLightness.toFixed(1)
+                }
+            };
+        }
+
+        // Display results
+        function displayResults(colors, location) {
+            const resultsDiv = document.getElementById('results');
+            const paletteDiv = document.getElementById('color-palette');
+            const debugDiv = document.getElementById('debug-info');
+            
+            // Show results
+            resultsDiv.style.display = 'block';
+            
+            // Create color swatches
+            paletteDiv.innerHTML = '';
+            const colorNames = ['Primary', 'Secondary', 'Accent', 'Background', 'Text'];
+            const colorValues = [colors.primary, colors.secondary, colors.accent, colors.background, colors.text];
+            
+            colorNames.forEach((name, index) => {
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch';
+                swatch.style.backgroundColor = colorValues[index];
+                swatch.textContent = name;
+                paletteDiv.appendChild(swatch);
+            });
+            
+            // Show debug info
+            debugDiv.innerHTML = `
+Location: ${location}
+Coordinates: ${colors.debug.lat}, ${colors.debug.lng}
+Grid: ${colors.debug.gridLat}, ${colors.debug.gridLng}
+Geohash: ${colors.debug.geohash}
+Hash Values:
+  Coord: ${colors.debug.coordHash}°
+  Neighborhood: ${colors.debug.neighborhoodHash}°
+  Geohash: ${colors.debug.geohashHash}°
+  Combined: ${colors.debug.combinedHue}°
+Final HSL: ${colors.debug.finalSaturation}% sat, ${colors.debug.finalLightness}% light
+            `;
+        }
+
+        // Test functions
+        function testCoordinates() {
+            const lat = parseFloat(document.getElementById('test-lat').value);
+            const lng = parseFloat(document.getElementById('test-lng').value);
+            const colors = generateNeighborhoodColors(lat, lng);
+            displayResults(colors, `Custom: ${lat}, ${lng}`);
+        }
+
+        function testNeighborhood(name, lat, lng) {
+            const colors = generateNeighborhoodColors(lat, lng);
+            displayResults(colors, name);
+        }
+
+        function testBentonPark() {
+            testNeighborhood('Benton Park', 38.64, -90.22);
+        }
+
+        function testWashU() {
+            testNeighborhood('WashU', 38.65, -90.31);
+        }
+
+        function testDowntown() {
+            testNeighborhood('Downtown', 38.63, -90.19);
+        }
+
+        function testForestPark() {
+            testNeighborhood('Forest Park', 38.64, -90.29);
+        }
+
+        function randomNearby() {
+            const baseLat = parseFloat(document.getElementById('test-lat').value);
+            const baseLng = parseFloat(document.getElementById('test-lng').value);
+            const jitter = 0.005; // ~500m variation
+            
+            const lat = baseLat + (Math.random() - 0.5) * jitter;
+            const lng = baseLng + (Math.random() - 0.5) * jitter;
+            
+            document.getElementById('test-lat').value = lat.toFixed(6);
+            document.getElementById('test-lng').value = lng.toFixed(6);
+            
+            testCoordinates();
+        }
+
+        function walkSimulator() {
+            const startLat = 38.64;
+            const startLng = -90.22;
+            const endLat = 38.65;
+            const endLng = -90.31;
+            const steps = 10;
+            
+            let currentStep = 0;
+            const interval = setInterval(() => {
+                const progress = currentStep / steps;
+                const lat = startLat + (endLat - startLat) * progress;
+                const lng = startLng + (endLng - startLng) * progress;
+                
+                const colors = generateNeighborhoodColors(lat, lng);
+                displayResults(colors, `Walk Step ${currentStep + 1}/${steps + 1}`);
+                
+                currentStep++;
+                if (currentStep > steps) {
+                    clearInterval(interval);
+                }
+            }, 1000);
+        }
+
+        function clearResults() {
+            document.getElementById('results').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

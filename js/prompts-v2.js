@@ -4,6 +4,51 @@
   
   console.log('🎨 Driftpad v2 script loaded!');
   
+  // Geohash encoding function for neighborhood variation
+  function encodeGeohash(lat, lng, precision = 6) {
+    const base32 = '0123456789bcdefghjkmnpqrstuvwxyz';
+    let bits = 0;
+    let bit = 0;
+    let ch = 0;
+    let even = true;
+    let geohash = '';
+    
+    let latMin = -90, latMax = 90;
+    let lngMin = -180, lngMax = 180;
+    
+    while (geohash.length < precision) {
+      if (even) {
+        const lngMid = (lngMin + lngMax) / 2;
+        if (lng >= lngMid) {
+          ch |= (1 << (4 - bit));
+          lngMin = lngMid;
+        } else {
+          lngMax = lngMid;
+        }
+      } else {
+        const latMid = (latMin + latMax) / 2;
+        if (lat >= latMid) {
+          ch |= (1 << (4 - bit));
+          latMin = latMid;
+        } else {
+          latMax = latMid;
+        }
+      }
+      
+      even = !even;
+      
+      if (bit < 4) {
+        bit++;
+      } else {
+        geohash += base32[ch];
+        bit = 0;
+        ch = 0;
+      }
+    }
+    
+    return geohash;
+  }
+  
 let currentPrompt = null;
 let currentLocation = null;
 let sessionId = null;
@@ -317,9 +362,195 @@ let loadingIndicator = null;
     return `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
   }
 
+  // Apply location-based theming to the interface
+  function applyLocationTheming(colors) {
+    console.log('🎨 Applying location theming:', colors);
+    
+    // Set CSS custom properties for location colors
+    document.documentElement.style.setProperty('--location-primary', colors.primary);
+    document.documentElement.style.setProperty('--location-secondary', colors.secondary);
+    document.documentElement.style.setProperty('--location-accent', colors.accent);
+    document.documentElement.style.setProperty('--location-background', colors.background);
+    document.documentElement.style.setProperty('--location-text', colors.text);
+    
+    // Add location-themed class to body
+    document.body.classList.add('location-themed');
+    
+    console.log('🎨 Location theming applied');
+  }
+
   // Make functions globally accessible
   window.requestLocationPermission = requestLocationPermission;
   window.skipLocationPermission = skipLocationPermission;
+
+  // Simple Toolbar Functionality
+  function initSimpleToolbar() {
+    console.log('🎨 Initializing simple toolbar');
+    
+    // Check if brush is available
+    if (!window.watercolorBrush) {
+      console.log('⏳ Watercolor brush not ready, retrying in 1 second...');
+      setTimeout(() => {
+        initSimpleToolbar();
+      }, 1000);
+      return;
+    }
+    
+    // Clean up existing color swatches and create new ones
+    const zenColorsContainer = document.getElementById('zen-colors');
+    
+    // Remove all existing color swatches
+    const existingSwatches = document.querySelectorAll('.zen-color-swatch');
+    existingSwatches.forEach(swatch => swatch.remove());
+    console.log('🎨 Removed', existingSwatches.length, 'existing color swatches');
+    
+    // Create new color swatches
+    console.log('🎨 Creating new color swatches');
+    // Get colors from brush or use defaults
+    const colors = window.watercolorBrush ? window.watercolorBrush.zenColors : ['#000000', '#333333', '#666666', '#999999', '#E6E6E6'];
+    
+    colors.forEach((color, index) => {
+      const swatch = document.createElement('div');
+      swatch.className = 'zen-color-swatch';
+      swatch.style.backgroundColor = color;
+      swatch.title = `Color ${index + 1}`;
+      zenColorsContainer.appendChild(swatch);
+    });
+    
+    // Get the new swatches
+    const colorSwatches = document.querySelectorAll('.zen-color-swatch');
+    console.log('🎨 Created', colorSwatches.length, 'new color swatches');
+    
+    // Setup color swatch listeners
+    colorSwatches.forEach((swatch, index) => {
+      console.log('🎨 Setting up listener for color', index);
+      swatch.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('🎨 Color', index, 'clicked');
+        selectColor(index);
+      });
+    });
+    
+    // Setup eraser listener
+    const eraserSwatch = document.getElementById('eraser-swatch');
+    if (eraserSwatch) {
+      console.log('🧹 Setting up eraser listener');
+      eraserSwatch.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('🧹 Eraser button clicked');
+        selectEraser();
+      });
+    } else {
+      console.log('❌ Eraser swatch not found');
+    }
+    
+    console.log('🎨 Simple toolbar initialized');
+  }
+
+  // Color selection (turns off eraser)
+  function selectColor(colorIndex) {
+    console.log('🎨 Selecting color:', colorIndex);
+    
+    // Check if color swatches exist
+    const colorSwatches = document.querySelectorAll('.zen-color-swatch');
+    if (colorSwatches.length === 0) {
+      console.log('❌ Color swatches not found, skipping color selection');
+      return;
+    }
+    
+    // ALWAYS turn off eraser when any color is selected
+    const eraserSwatch = document.getElementById('eraser-swatch');
+    if (eraserSwatch) {
+      eraserSwatch.classList.remove('active');
+      console.log('🧹 Eraser visual state turned OFF');
+    }
+    
+    // Update visual state - clear all color selections first
+    colorSwatches.forEach(swatch => {
+      swatch.classList.remove('active');
+    });
+    
+    // Select the chosen color
+    if (colorSwatches[colorIndex]) {
+      colorSwatches[colorIndex].classList.add('active');
+      console.log('🎨 Color', colorIndex, 'visual state turned ON');
+    }
+    
+    // Update brush to normal drawing mode (turn OFF eraser)
+    if (window.watercolorBrush) {
+      window.watercolorBrush.currentColorIndex = colorIndex;
+      window.watercolorBrush.currentColor = window.watercolorBrush.zenColors[colorIndex];
+      if (typeof window.watercolorBrush.setErasingMode === 'function') {
+        window.watercolorBrush.setErasingMode(false);
+      } else {
+        // Fallback: set properties directly
+        window.watercolorBrush.isErasing = false;
+      }
+      console.log('🎨 Eraser mode turned OFF, color', colorIndex, 'selected');
+    } else {
+      console.log('❌ Watercolor brush not available');
+    }
+  }
+
+  // Eraser selection (turns off colors, or toggles off if already selected)
+  function selectEraser() {
+    const eraserSwatch = document.getElementById('eraser-swatch');
+    const isCurrentlyActive = eraserSwatch.classList.contains('active');
+    
+    console.log('🧹 Eraser clicked, currently active:', isCurrentlyActive);
+    
+    if (isCurrentlyActive) {
+      // Turn off eraser - go back to first color
+      console.log('🧹 Turning off eraser');
+      eraserSwatch.classList.remove('active');
+      
+      // Try to select first color, but don't fail if colors aren't ready
+      const colorSwatches = document.querySelectorAll('.zen-color-swatch');
+      if (colorSwatches.length > 0) {
+        selectColor(0);
+      } else {
+        console.log('🧹 Color swatches not ready, just turning off eraser');
+        // Just turn off eraser mode without selecting a color
+        if (window.watercolorBrush) {
+          if (typeof window.watercolorBrush.setErasingMode === 'function') {
+            window.watercolorBrush.setErasingMode(false);
+          } else {
+            window.watercolorBrush.isErasing = false;
+          }
+        }
+      }
+    } else {
+      // Turn on eraser
+      console.log('🧹 Turning on eraser');
+      
+      // Update visual state - clear all color selections
+      document.querySelectorAll('.zen-color-swatch').forEach(swatch => {
+        swatch.classList.remove('active');
+      });
+      eraserSwatch.classList.add('active');
+      console.log('🧹 Eraser visual state turned ON, all colors turned OFF');
+      
+      // Update brush to eraser mode
+      if (window.watercolorBrush) {
+        if (typeof window.watercolorBrush.setErasingMode === 'function') {
+          window.watercolorBrush.setErasingMode(true);
+        } else {
+          // Fallback: set properties directly
+          window.watercolorBrush.isErasing = true;
+          console.log('🧹 Erasing mode set via fallback');
+        }
+      } else {
+        console.log('❌ Watercolor brush not available for eraser');
+      }
+    }
+  }
+
+  // Initialize toolbar when DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      initSimpleToolbar();
+    }, 2000); // Wait longer for other scripts to load
+  });
   
 
   // Request location directly (after user consent)
@@ -571,18 +802,40 @@ let loadingIndicator = null;
         const lat = parseFloat(location.latitude) || 0;
         const lng = parseFloat(location.longitude) || 0;
         
-        // Use coordinates to generate consistent colors
+        // Base coordinate hash
         const coordHash = Math.abs(lat * 1000 + lng * 1000) % 360;
+        
+        // Neighborhood grid variation (300m grid cells)
+        const gridSize = 0.003; // ~300m
+        const gridLat = Math.round(lat / gridSize) * gridSize;
+        const gridLng = Math.round(lng / gridSize) * gridSize;
+        const neighborhoodHash = Math.abs(gridLat * 1000 + gridLng * 1000) % 360;
+        
+        // Geohash-based variation (6-character precision)
+        const geohash = encodeGeohash(lat, lng, 6);
+        const geohashHash = geohash.split('').reduce((a, b) => a + b.charCodeAt(0), 0) % 360;
+        
+        // Combine variations for more distinct neighborhood colors
+        const combinedHue = (coordHash + neighborhoodHash + geohashHash) % 360;
+        
         const latVariation = Math.abs(lat) % 30;
         const lngVariation = Math.abs(lng) % 30;
         
-        finalHue = coordHash;
+        finalHue = combinedHue;
         finalSaturation = Math.max(30, Math.min(80, 50 + latVariation));
         finalLightness = Math.max(25, Math.min(70, 45 + lngVariation));
         
         console.log('🎨 Using coordinate-based colors:');
         console.log('📍 Coordinates:', { lat, lng });
-        console.log('🎯 Generated values:', { 
+        console.log('🏘️ Neighborhood grid:', { gridLat: gridLat.toFixed(6), gridLng: gridLng.toFixed(6) });
+        console.log('🗺️ Geohash:', geohash);
+        console.log('🎯 Hash values:', { 
+          coordHash: coordHash.toFixed(1), 
+          neighborhoodHash: neighborhoodHash.toFixed(1), 
+          geohashHash: geohashHash.toFixed(1),
+          combinedHue: finalHue.toFixed(1)
+        });
+        console.log('🎨 Final values:', { 
           hue: finalHue.toFixed(1), 
           saturation: finalSaturation.toFixed(1), 
           lightness: finalLightness.toFixed(1) 
@@ -778,12 +1031,12 @@ let loadingIndicator = null;
     
     // Check if this is a coordinate-based virtual location
     if (location.name === 'Your Location') {
-      // For coordinate-based colors, keep zen colors for 1&2, use coordinate color for 3
+      // For coordinate-based colors, keep zen colors for 1&2, use coordinate colors for 3&4
       inkPalette = [
         '#000000', // Zen black (Color 1)
         '#333333', // Zen dark gray (Color 2)
         parseHslToHex(colors.accent), // Coordinate-based accent (Color 3)
-        parseHslToHex(colors.background), // Light coordinate color (Color 4)
+        parseHslToHex(colors.secondary), // Coordinate-based secondary (Color 4)
         parseHslToHex(colors.text)        // Dark coordinate color (Color 5)
       ];
         console.log('🎨 Using hybrid zen + coordinate colors');
@@ -840,6 +1093,9 @@ let loadingIndicator = null;
         console.log('Updated zenColors:', window.watercolorBrush.zenColors);
         console.log('Current color set to:', window.watercolorBrush.currentColor);
         console.log('Shuffle functionality available (disabled by default)');
+        
+        // Apply location theming
+        applyLocationTheming(colors);
         
         // Update the color preview UI
         updateColorPreview(inkPalette);

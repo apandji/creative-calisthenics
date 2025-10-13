@@ -225,7 +225,7 @@ header button[title] {
 .mode-selector-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   width: 100%;
   max-width: 600px;
 }
@@ -233,8 +233,7 @@ header button[title] {
 .mode-selector-row .prompt {
   flex: 1;
   margin: 0;
-  text-align: left;
-  margin-right: 20px;
+  text-align: center;
 }
 
 .mode-selector-row button {
@@ -451,9 +450,9 @@ p {
     padding-right: 20px !important;
   }
   
-  /* Reduce header and content spacing on mobile to maximize canvas space */
+  /* Mobile header - more touch-friendly */
   header {
-    padding: 4px 20px;
+    padding: 8px 20px;
     min-height: auto;
   }
   
@@ -512,28 +511,28 @@ p {
   }
   
   #new-prompt-btn {
-    font-size: 0.7rem;
-    padding: 3px 6px;
+    font-size: 0.8rem;
+    padding: 6px 12px;
     min-width: auto;
   }
   
   .header-right button {
-    font-size: 0.7rem;
-    padding: 3px 6px;
+    font-size: 0.8rem;
+    padding: 6px 12px;
   }
   
   .streak-indicator {
-    font-size: 12px;
-    padding: 3px 6px;
+    font-size: 14px;
+    padding: 6px 10px;
     margin-left: 4px;
     margin-right: 4px;
-    min-width: 40px; /* Ensure minimum width for readability */
+    min-width: 50px; /* Ensure minimum width for readability */
     text-align: center;
   }
   
   .logo {
-    font-size: 0.9rem;
-    margin-right: 4px;
+    font-size: 1rem;
+    margin-right: 6px;
   }
   
   
@@ -565,7 +564,7 @@ p {
   left: 0;
   right: 0;
   background: var(--bg);
-  border-top: 1px solid var(--border);
+  /* border-top: 1px solid var(--border); */
   z-index: 1000;
   padding: 12px 20px;
   box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
@@ -675,47 +674,7 @@ p {
   -webkit-backdrop-filter: blur(10px);
 }
 
-.zen-color-palette {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: center;
-  min-width: 60px;
-}
 
-.zen-color {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  cursor: pointer;
-  border: 2px solid transparent;
-  transition: all 160ms ease;
-  position: relative;
-}
-
-.zen-color:hover {
-  transform: scale(1.1);
-  border-color: var(--accent);
-}
-
-.zen-color.active {
-  border-color: var(--accent);
-  border-width: 3px;
-  transform: scale(1.15);
-}
-
-.zen-color.active::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 8px;
-  height: 8px;
-  background: white;
-  border-radius: 50%;
-  box-shadow: 0 0 0 1px var(--accent);
-}
 
 /* Popup Animation */
 @keyframes fadeInUp {
@@ -1078,10 +1037,6 @@ p {
       padding: 8px;
     }
     
-  .zen-color {
-    width: 28px;
-    height: 28px;
-  }
   
   .zen-color-palette {
     min-width: 50px;
@@ -1168,7 +1123,7 @@ footer {
   right: 0;
   background: color-mix(in oklab, var(--bg) 95%, transparent);
   backdrop-filter: saturate(1.2) blur(8px);
-  border-top: 1px solid var(--border);
+  /* border-top: 1px solid var(--border); */
   padding: 16px 24px;
   z-index: 20;
   text-align: center;
@@ -1180,7 +1135,7 @@ footer .toolbar {
   position: sticky;
   bottom: 0;
   background: var(--bg);
-  border-top: 1px solid var(--border);
+  /* border-top: 1px solid var(--border); */
   z-index: 10;
   gap: 16px;
   padding: 12px 20px;
@@ -1743,10 +1698,7 @@ body.location-themed .mode-selector-row button:disabled {
   opacity: 0.5;
 }
 
-body.location-themed #canvas {
-  border: 2px solid var(--location-primary, var(--accent));
-  transition: border-color 0.3s ease;
-}
+/* Removed canvas border to keep clean look */
 
 body.location-themed .prompt {
   color: var(--location-text, var(--text));
@@ -1871,6 +1823,69 @@ body.location-themed .zen-dot {
   transition: color 0.3s ease;
 }
 
+/* Zen Location-Based Theming */
+:root {
+  --location-primary: #000000;
+  --location-secondary: #333333;
+  --location-accent: #666666;
+  --location-background: #f3f3f3;
+  --location-text: #000000;
+}
+
+/* Location-themed body */
+body.location-themed {
+  --location-primary: var(--location-primary);
+  --location-secondary: var(--location-secondary);
+  --location-accent: var(--location-accent);
+  --location-background: var(--location-background);
+  --location-text: var(--location-text);
+}
+
+/* Location-themed header - removed border to keep clean look */
+
+/* Location-themed canvas - removed border to keep clean look */
+
+/* Location-themed buttons */
+body.location-themed button {
+  transition: all 0.3s ease;
+}
+
+body.location-themed button:hover {
+  background: var(--location-primary);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+/* Location-themed toolbar - removed border to keep clean look */
+
+/* Location-themed color picker - removed borders to keep clean look */
+
+/* Location-themed popups */
+body.location-themed .color-popup,
+body.location-themed .size-popup {
+  border: 1px solid var(--location-accent);
+  box-shadow: 0 4px 20px color-mix(in oklab, var(--location-accent) 20%, transparent);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Location-themed location name */
+body.location-themed .location-name {
+  color: var(--location-primary);
+  opacity: 0.7;
+  transition: color 1s ease;
+}
+
+/* Location-themed logo */
+body.location-themed #logo {
+  color: var(--location-primary);
+  transition: color 1s ease;
+}
+
+body.location-themed #logo:hover {
+  color: var(--location-accent);
+  transition: color 0.3s ease;
+}
+
 /* Shuffle button */
 .shuffle-btn {
   background: var(--bg);
@@ -1886,13 +1901,13 @@ body.location-themed .zen-dot {
 
 .shuffle-btn:hover {
   background: var(--accent);
-  color: white;
+  color: var(--text);
   transform: scale(1.05);
 }
 
 .shuffle-btn.active {
   background: var(--accent);
-  color: white;
+  color: var(--text);
   box-shadow: 0 0 10px var(--accent);
 }
 
@@ -2044,4 +2059,220 @@ body.location-themed .zen-dot {
 .drawing-card:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-}/* Force deployment */
+}
+
+/* New Color Palette Bar Styles */
+.color-palette-bar {
+  display: flex;
+  flex-direction: row; /* Horizontal stacking */
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 0; /* Remove bottom margin to align with buttons */
+}
+
+.zen-color-palette {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.action-buttons button {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-buttons button:hover {
+  background: color-mix(in oklab, var(--accent) 8%, transparent);
+  transform: translateY(-1px);
+}
+
+.action-buttons button:active {
+  transform: translateY(0);
+}
+
+.zen-color-swatch {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.zen-color-swatch:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.zen-color-swatch.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.3);
+  animation: colorPulse 2s ease-in-out infinite;
+}
+
+.zen-color-swatch.active::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes colorPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* Eraser Swatch */
+.eraser-swatch {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  background: #f5f5f5;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.eraser-swatch:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.eraser-swatch.active {
+  border-color: #ff6b6b;
+  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.3);
+}
+
+.eraser-swatch.active::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Size adjustment slider (appears on long press) */
+.size-adjustment-slider {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 1001;
+  display: none;
+}
+
+.size-adjustment-slider.show {
+  display: block;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.size-slider {
+  width: 200px;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.size-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid var(--bg);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.size-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid var(--bg);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .zen-color-swatch,
+  .eraser-swatch {
+    width: 36px;
+    height: 36px;
+    font-size: 14px; /* Smaller emoji for eraser */
+  }
+  
+  .color-palette-bar {
+    gap: 4px;
+    margin-bottom: 12px;
+  }
+  
+  .zen-color-palette {
+    gap: 4px;
+  }
+  
+  .action-buttons {
+    gap: 8px;
+  }
+  
+  .action-buttons button {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+}
+
+/* Force deployment */
