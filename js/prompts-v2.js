@@ -252,14 +252,18 @@ let loadingIndicator = null;
       if (navigator.permissions) {
         try {
           const permission = await navigator.permissions.query({ name: 'geolocation' });
+          console.log('📍 Permission state:', permission.state);
+          
           if (permission.state === 'granted') {
             console.log('✅ Location permission already granted');
             requestLocationDirectly();
             return;
           } else if (permission.state === 'denied') {
-            console.log('❌ Location permission denied');
+            console.log('❌ Location permission denied - user previously denied');
             showLocationDeniedMessage();
             return;
+          } else if (permission.state === 'prompt') {
+            console.log('📍 Permission state is "prompt" - will show permission dialog');
           }
         } catch (err) {
           console.log('⚠️ Permission API not supported, proceeding with request');
@@ -312,8 +316,11 @@ let loadingIndicator = null;
       setTimeout(() => toastDiv.remove(), 300);
     }
     
-    // Now request location
-    requestLocationDirectly();
+    // Add a small delay to ensure toast is hidden before requesting location
+    setTimeout(() => {
+      console.log('🌍 Requesting location after user permission...');
+      requestLocationDirectly();
+    }, 100);
   }
 
   // Skip location permission
@@ -555,6 +562,23 @@ let loadingIndicator = null;
 
   // Request location directly (after user consent)
   function requestLocationDirectly() {
+    console.log('🌍 Starting geolocation request...');
+    
+    // Check if geolocation is available
+    if (!navigator.geolocation) {
+      console.log('📍 Geolocation not supported by this browser');
+      showLocationDeniedMessage();
+      return;
+    }
+    
+    // Check if we're on HTTPS (required for geolocation in many browsers)
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+      console.log('⚠️ Geolocation requires HTTPS in production. Current protocol:', location.protocol);
+      showLocationDeniedMessage();
+      return;
+    }
+    
+    console.log('📍 Calling navigator.geolocation.getCurrentPosition...');
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
@@ -563,6 +587,31 @@ let loadingIndicator = null;
       },
       (error) => {
         console.log('❌ Geolocation error:', error.message, error.code);
+        
+        // Provide more specific error information
+        let errorMessage = 'Location unavailable';
+        switch(error.code) {
+          case 1:
+            errorMessage = 'Location permission denied';
+            break;
+          case 2:
+            errorMessage = 'Location information unavailable';
+            break;
+          case 3:
+            errorMessage = 'Location request timeout';
+            break;
+          default:
+            errorMessage = 'Location error: ' + error.message;
+        }
+        
+        console.log('📍 Geolocation failed:', errorMessage);
+        
+        // Check if this is a security policy issue
+        if (error.code === 2 && error.message === '') {
+          console.log('🔒 Possible security policy blocking geolocation');
+          console.log('💡 Try: 1) Check browser location settings, 2) Ensure HTTPS, 3) Check browser security policies');
+        }
+        
         showLocationDeniedMessage();
       },
       {
@@ -600,6 +649,36 @@ let loadingIndicator = null;
       messageDiv.classList.add('fade-out');
       setTimeout(() => messageDiv.remove(), 300);
     }, 3000);
+    
+    // Ensure zen colors are available as fallback
+    ensureZenColorsFallback();
+  }
+  
+  // Ensure zen colors are available when geolocation fails
+  function ensureZenColorsFallback() {
+    console.log('🎨 Ensuring zen colors fallback is available');
+    
+    // Wait for watercolor brush to be available
+    const checkForBrush = () => {
+      if (window.watercolorBrush) {
+        console.log('✅ Watercolor brush available, using default zen colors');
+        
+        // Get default zen colors from brush
+        const defaultZenColors = window.watercolorBrush.getZenColors();
+        console.log('Default zen colors:', defaultZenColors);
+        
+        // Update color preview with default zen colors
+        setTimeout(() => {
+          updateColorPreview(defaultZenColors);
+        }, 100);
+        
+      } else {
+        console.log('⏳ Watercolor brush not ready, retrying...');
+        setTimeout(checkForBrush, 500);
+      }
+    };
+    
+    checkForBrush();
   }
 
   // Load location by slug (for URL override)
@@ -906,6 +985,7 @@ let loadingIndicator = null;
     // Update zen colors container
     const zenColorsContainer = document.getElementById('zen-colors');
     if (zenColorsContainer) {
+      console.log('Found zen colors container, clearing existing colors...');
       // Clear existing colors
       zenColorsContainer.innerHTML = '';
       
@@ -919,6 +999,14 @@ let loadingIndicator = null;
         
         // Add click handler
         colorElement.addEventListener('click', () => {
+          // Track color change
+          if (typeof umami !== 'undefined') {
+            umami.track('color_changed', { 
+              color: color, 
+              color_index: index 
+            });
+          }
+          
           // Remove active class from all colors
           document.querySelectorAll('.zen-color').forEach(el => el.classList.remove('active'));
           // Add active class to clicked color
@@ -928,6 +1016,16 @@ let loadingIndicator = null;
           if (window.watercolorBrush) {
             window.watercolorBrush.setColor(index);
           }
+          
+          // Update stroke color for compatibility
+          if (window.strokeColor !== undefined) {
+            window.strokeColor = color;
+          }
+          
+          // Dispatch custom event for color picker
+          document.dispatchEvent(new CustomEvent('colorSelected', {
+            detail: { color: color, index: index }
+          }));
         });
         
         zenColorsContainer.appendChild(colorElement);
@@ -940,7 +1038,17 @@ let loadingIndicator = null;
       
       console.log('Color preview updated with', colors.length, 'colors');
     } else {
-      console.log('Zen colors container not found');
+      console.log('Zen colors container not found - will retry');
+      // Retry after a short delay if container not found
+      setTimeout(() => {
+        const retryContainer = document.getElementById('zen-colors');
+        if (retryContainer) {
+          console.log('Zen colors container found on retry, updating...');
+          updateColorPreview(colors);
+        } else {
+          console.log('Zen colors container still not found after retry');
+        }
+      }, 500);
     }
     
     // Update current color display
@@ -1097,8 +1205,10 @@ let loadingIndicator = null;
         // Apply location theming
         applyLocationTheming(colors);
         
-        // Update the color preview UI
-        updateColorPreview(inkPalette);
+        // Update the color preview UI with a small delay to ensure DOM is ready
+        setTimeout(() => {
+          updateColorPreview(inkPalette);
+        }, 100);
       } catch (error) {
         console.error('Error setting colors directly:', error);
       }
