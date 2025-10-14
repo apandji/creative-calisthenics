@@ -12,7 +12,7 @@
     <meta name="twitter:title" content="Driftpad. Meditative digital drawing experience">
     <meta name="twitter:description" content="A meditative digital drawing experience inspired by sumi ink painting">
     <title>driftpad</title>
-    <link rel="stylesheet" href="style.css?v=10">
+    <link rel="stylesheet" href="style.css?v=14">
         <!-- Umami Analytics -->
         <script defer src="https://cloud.umami.is/script.js" data-website-id="8ae5578c-320f-4d25-860a-f93ed10e541e"></script>
 </head>
@@ -46,8 +46,8 @@
     <script src="js/watercolor-brush.js?v=2" defer></script>
     <script src="js/fade-timer.js" defer></script>
     <script src="js/shape-generator.js"></script>
-    <script src="js/prompts-v2.js?v=22" defer></script>
-    <script src="js/sketch.js?v=2" defer></script>
+    <script src="js/prompts-v2.js?v=33" defer></script>
+    <script src="js/sketch.js?v=5" defer></script>
     <script src="js/pull-to-refresh.js" defer></script>
     <script src="js/feedback-collector.js" defer></script>
     <script src="js/local-streak.js" defer></script>
@@ -342,6 +342,13 @@
         });
         
     </script>
+    
+    <!-- Loading indicator for toolbar -->
+    <div class="toolbar-loading" id="toolbar-loading">
+        <div class="toolbar-loading-spinner"></div>
+        <span>Loading colors...</span>
+    </div>
+    
      <div class="toolbar" role="toolbar" aria-label="drawing controls">
         <div class="color-palette-bar">
             <div id="zen-colors" class="zen-color-palette"></div>

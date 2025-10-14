@@ -18,20 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
     lastCanvasTouchEnd = now;
   }, { passive: false });
 
-  // Additional mobile touch improvements
-  canvas.addEventListener('touchstart', function(e) {
-    // Prevent default touch behaviors that might interfere
-    if (e.touches.length === 1) {
-      e.preventDefault();
-    }
-  }, { passive: false });
-
-  canvas.addEventListener('touchmove', function(e) {
-    // Prevent scrolling while drawing
-    if (e.touches.length === 1) {
-      e.preventDefault();
-    }
-  }, { passive: false });
+  // Mobile touch improvements are handled by the main touch event handlers below
 
   // Elements
   const colorInput = document.getElementById('color');
@@ -486,7 +473,11 @@ document.addEventListener('DOMContentLoaded', function() {
   let resizeTimeout;
   function handleResize() {
     clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(resizeCanvas, 150); // Increased delay for better stability
+    resizeTimeout = setTimeout(() => {
+      resizeCanvas();
+      // Don't reinitialize color palette on resize - preserve current colors
+      // initZenColorPalette(); // Removed to prevent color loss on resize
+    }, 150); // Increased delay for better stability
   }
   
   window.addEventListener('resize', handleResize);
@@ -521,7 +512,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     zenColors.forEach((color, index) => {
       const colorElement = document.createElement('div');
-      colorElement.className = 'zen-color';
+      colorElement.className = 'zen-color-swatch';
       colorElement.style.backgroundColor = color;
       colorElement.setAttribute('data-color', color);
       colorElement.setAttribute('data-index', index);
@@ -535,7 +526,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // Remove active class from all colors
-        document.querySelectorAll('.zen-color').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.zen-color-swatch').forEach(el => el.classList.remove('active'));
         // Add active class to clicked color
         colorElement.classList.add('active');
         

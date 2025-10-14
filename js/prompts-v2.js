@@ -232,6 +232,15 @@ let loadingIndicator = null;
   async function initLocationDetection() {
     console.log('🔍 Starting location detection...');
     
+    // Show loading indicator while colors are being loaded
+    showToolbarLoading();
+    
+    // Set a timeout to ensure colors load even if location detection fails
+    const colorLoadingTimeout = setTimeout(() => {
+      console.log('⏰ Color loading timeout - falling back to default colors');
+      ensureZenColorsFallback();
+    }, 5000); // 5 second timeout
+    
     // Check for URL override first
     const urlParams = new URLSearchParams(window.location.search);
     const locationOverride = urlParams.get('location');
@@ -239,6 +248,7 @@ let loadingIndicator = null;
     if (locationOverride) {
       console.log('📍 Location override detected:', locationOverride);
       await loadLocationBySlug(locationOverride);
+      clearTimeout(colorLoadingTimeout);
       return;
     }
     
@@ -274,12 +284,19 @@ let loadingIndicator = null;
       showLocationPermissionContext();
     } else {
       console.log('❌ Geolocation not available in this browser');
+      // Fallback to default colors immediately
+      setTimeout(() => {
+        ensureZenColorsFallback();
+      }, 1000);
     }
   }
 
   // Show friendly location permission context as toast
   function showLocationPermissionContext() {
     console.log('🌍 Showing location permission context...');
+    
+    // Check if we're on HTTPS or localhost
+    const isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname.includes('127.0.0.1');
     
     const toastDiv = document.createElement('div');
     toastDiv.className = 'location-permission-toast';
@@ -289,6 +306,7 @@ let loadingIndicator = null;
         <div class="location-toast-text">
           <div class="location-toast-title">Where in the world are you?</div>
           <div class="location-toast-description">Let's paint with your place's colors</div>
+          ${!isSecure ? '<div class="location-toast-warning">⚠️ Note: Location requires HTTPS in production</div>' : ''}
         </div>
         <div class="location-toast-buttons">
           <button class="location-allow-btn" onclick="requestLocationPermission()">Yes!</button>
@@ -393,6 +411,8 @@ let loadingIndicator = null;
   // Simple Toolbar Functionality
   function initSimpleToolbar() {
     console.log('🎨 Initializing simple toolbar');
+    console.log('🎨 Watercolor brush available:', !!window.watercolorBrush);
+    console.log('🎨 Sketch loaded:', !!window.sketchLoaded);
     
     // Check if brush is available
     if (!window.watercolorBrush) {
@@ -405,6 +425,13 @@ let loadingIndicator = null;
     
     // Clean up existing color swatches and create new ones
     const zenColorsContainer = document.getElementById('zen-colors');
+    
+    if (!zenColorsContainer) {
+      console.log('❌ zen-colors container not found!');
+      return;
+    }
+    
+    console.log('🎨 Found zen-colors container:', zenColorsContainer);
     
     // Remove all existing color swatches
     const existingSwatches = document.querySelectorAll('.zen-color-swatch');
@@ -552,9 +579,16 @@ let loadingIndicator = null;
     }
   }
 
+  // Make functions globally accessible
+  window.initSimpleToolbar = initSimpleToolbar;
+  window.selectColor = selectColor;
+  window.selectEraser = selectEraser;
+
   // Initialize toolbar when DOM is ready
   document.addEventListener('DOMContentLoaded', () => {
+    console.log('🎨 DOMContentLoaded fired, scheduling initSimpleToolbar');
     setTimeout(() => {
+      console.log('🎨 Calling initSimpleToolbar after 2 second delay');
       initSimpleToolbar();
     }, 2000); // Wait longer for other scripts to load
   });
@@ -572,11 +606,14 @@ let loadingIndicator = null;
     }
     
     // Check if we're on HTTPS (required for geolocation in many browsers)
-    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost' && !location.hostname.includes('127.0.0.1')) {
       console.log('⚠️ Geolocation requires HTTPS in production. Current protocol:', location.protocol);
+      console.log('💡 For development: Use localhost or enable HTTPS');
       showLocationDeniedMessage();
       return;
     }
+    
+    console.log('✅ Protocol check passed:', location.protocol, 'on', location.hostname);
     
     console.log('📍 Calling navigator.geolocation.getCurrentPosition...');
     navigator.geolocation.getCurrentPosition(
@@ -613,6 +650,7 @@ let loadingIndicator = null;
         }
         
         showLocationDeniedMessage();
+        clearTimeout(colorLoadingTimeout);
       },
       {
         enableHighAccuracy: false,
@@ -679,6 +717,52 @@ let loadingIndicator = null;
     };
     
     checkForBrush();
+  }
+  
+  // Show toolbar loading indicator
+  function showToolbarLoading() {
+    const loadingIndicator = document.getElementById('toolbar-loading');
+    if (loadingIndicator) {
+      loadingIndicator.classList.add('show');
+    }
+  }
+  
+  // Hide toolbar loading indicator
+  function hideToolbarLoading() {
+    const loadingIndicator = document.getElementById('toolbar-loading');
+    if (loadingIndicator) {
+      loadingIndicator.classList.remove('show');
+      // Also add fade-out class for smoother transition
+      loadingIndicator.classList.add('fade-out');
+    }
+  }
+  
+  // Show toolbar when colors are loaded
+  function showToolbar() {
+    const toolbar = document.querySelector('.toolbar');
+    if (toolbar) {
+      toolbar.classList.add('colors-loaded');
+    }
+  }
+  
+  // Check if colors are actually visible in the DOM
+  function areColorsVisible() {
+    const zenColorsContainer = document.getElementById('zen-colors');
+    if (!zenColorsContainer) return false;
+    
+    const colorElements = zenColorsContainer.querySelectorAll('.zen-color');
+    if (colorElements.length === 0) return false;
+    
+    // Check if at least one color element is actually visible (not just in DOM)
+    for (let i = 0; i < colorElements.length; i++) {
+      const element = colorElements[i];
+      const rect = element.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        return true;
+      }
+    }
+    
+    return false;
   }
 
   // Load location by slug (for URL override)
@@ -992,7 +1076,7 @@ let loadingIndicator = null;
       // Add new colors
       colors.forEach((color, index) => {
         const colorElement = document.createElement('div');
-        colorElement.className = 'zen-color';
+        colorElement.className = 'zen-color-swatch';
         colorElement.style.backgroundColor = color;
         colorElement.setAttribute('data-color', color);
         colorElement.setAttribute('data-index', index);
@@ -1008,7 +1092,7 @@ let loadingIndicator = null;
           }
           
           // Remove active class from all colors
-          document.querySelectorAll('.zen-color').forEach(el => el.classList.remove('active'));
+          document.querySelectorAll('.zen-color-swatch').forEach(el => el.classList.remove('active'));
           // Add active class to clicked color
           colorElement.classList.add('active');
           
@@ -1037,6 +1121,58 @@ let loadingIndicator = null;
       }
       
       console.log('Color preview updated with', colors.length, 'colors');
+      
+      // Wait for colors to be fully rendered and visible before showing toolbar
+      let checkCount = 0;
+      const maxChecks = 20; // Maximum 1 second of checking (20 * 50ms)
+      
+      const waitForColors = () => {
+        checkCount++;
+        const colorElements = zenColorsContainer.querySelectorAll('.zen-color-swatch');
+        
+        console.log(`Color check ${checkCount}: Found ${colorElements.length} color elements`);
+        
+        if (colorElements.length > 0) {
+          // Check if at least one color element is actually visible
+          let colorsVisible = false;
+          for (let i = 0; i < colorElements.length; i++) {
+            const element = colorElements[i];
+            const rect = element.getBoundingClientRect();
+            console.log(`Color ${i}: width=${rect.width}, height=${rect.height}`);
+            if (rect.width > 0 && rect.height > 0) {
+              colorsVisible = true;
+              break;
+            }
+          }
+          
+          if (colorsVisible) {
+            console.log('Colors are visible, showing toolbar');
+            // Colors are visible, now show toolbar and hide loading
+            showToolbar();
+            hideToolbarLoading();
+          } else if (checkCount < maxChecks) {
+            // Colors not visible yet, check again
+            setTimeout(waitForColors, 50);
+          } else {
+            // Timeout reached, show toolbar anyway
+            console.log('Timeout reached, showing toolbar with colors');
+            showToolbar();
+            hideToolbarLoading();
+          }
+        } else if (checkCount < maxChecks) {
+          // Colors not ready yet, check again
+          setTimeout(waitForColors, 50);
+        } else {
+          // Timeout reached, show toolbar anyway
+          console.log('Timeout reached, showing toolbar without colors');
+          showToolbar();
+          hideToolbarLoading();
+        }
+      };
+      
+      // Start checking for colors
+      setTimeout(waitForColors, 50);
+      
     } else {
       console.log('Zen colors container not found - will retry');
       // Retry after a short delay if container not found
